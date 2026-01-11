@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+    <PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
+        <Nullable>enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.0-rc.1.25451.107"/>
+        <PackageReference Include="Swashbuckle.AspNetCore" Version="10.1.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Controllers\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\CodeExecution.Presentation\CodeExecution.Presentation.csproj" />
+    <ProjectReference Include="..\CodeExecution.UseCases\CodeExecution.UseCases.csproj" />
+    <ProjectReference Include="..\CodeExecution.Infrastructure.Implementation.CodeExecution.Docker\CodeExecution.Infrastructure.Implementation.CodeExecution.Docker.csproj" />
+    <ProjectReference Include="..\CodeExecution.Infrastructure.Interfaces.CodeExecution\CodeExecution.Infrastructure.Interfaces.CodeExecution.csproj" />
+  </ItemGroup>
+
+</Project>  

@@ -1,0 +1,34 @@
+{
+  "Runtimes": [
+    {
+      "Id": "8052f875-5a99-4072-830b-0269be3e9c66",
+      "Code": "cpp",
+      "Name": "C++",
+      "Version": "12",
+      "IsActive": true,
+      "IsCompiled": true,
+      "DockerImage": "leontevma/cpp-with-time:12",
+      "RunCommandTemplate": "{output}",
+      "CompileCommandTemplate": "g++ {input} -o {output}",
+      "DefaultFileName": "main.cpp",
+      "DefaultTimeoutSeconds": 15,
+      "MaxMemoryMb": 512,
+      "MaxCpuCores": 2
+    },
+    {
+      "Id": "ea934c4e-3e58-4daa-804f-2bbe317bc974",
+      "Code": "python",
+      "Name": "Python 3.9",
+      "Version": "3.9",
+      "IsActive": true,
+      "IsCompiled": false,
+      "DockerImage": "leontevma/python-with-time:3.9",
+      "RunCommandTemplate": "python3 {file_path}",
+      "CompileCommandTemplate": "",
+      "DefaultFileName": "main.py",
+      "DefaultTimeoutSeconds": 10,
+      "MaxMemoryMb": 256,
+      "MaxCpuCores": 1
+    }
+  ]
+}
