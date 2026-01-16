@@ -1,11 +1,10 @@
 using CodeExecution.Domain.Entities;
 using CodeExecution.Infrastructure.Interfaces.DataAccess;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Design;
 
 namespace CodeExecution.Infrastructure.Implementation.DataAccess;
 
-internal class AppDbContext : DbContext, IDbContext
+public class AppDbContext : DbContext, IDbContext
 {
     public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
     {

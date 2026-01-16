@@ -1,6 +1,5 @@
 using Microsoft.Extensions.Configuration;
 
-
 namespace CodeExecution.Infrastructure.Implementation.CodeExecution;
 
 internal class RuntimeConfig
@@ -11,7 +10,7 @@ internal class RuntimeConfig
     {
         var runtimes = configuration
             .GetSection("Runtimes")
-            .Get<List<LanguageInfo>>() ?? new List<LanguageInfo>();
+            .Get<List<LanguageInfo>>() ?? [];
 
         _languages = runtimes
             .Where(x => x.IsActive)

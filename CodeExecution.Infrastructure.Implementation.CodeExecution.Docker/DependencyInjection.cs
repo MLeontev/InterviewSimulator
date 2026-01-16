@@ -9,8 +9,8 @@ public static class DependencyInjection
     public static IServiceCollection AddCodeExecutionDocker(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddSingleton(_ => new RuntimeConfig(configuration));
-
         services.AddSingleton<LanguageProvider>();
+        
         services.AddSingleton<ILanguageProvider>(sp => sp.GetRequiredService<LanguageProvider>());
         services.AddSingleton<IExecutorLanguageProvider>(sp => sp.GetRequiredService<LanguageProvider>());
 

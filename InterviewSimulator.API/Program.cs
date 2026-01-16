@@ -1,5 +1,7 @@
 using CodeExecution.Infrastructure.Implementation.CodeExecution;
+using CodeExecution.Infrastructure.Implementation.DataAccess;
 using CodeExecution.UseCases;
+using InterviewSimulator.API.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,18 +13,19 @@ builder.Services.AddOpenApi();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+// CodeExecution module
 builder.Services.AddCodeExecutionDocker(builder.Configuration);
 builder.Services.AddCodeExecutionModuleUseCases();
+builder.Services.AddCodeExecutionDataAccess(builder.Configuration);
 
 var app = builder.Build();
 
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
+app.UseSwagger();
+app.UseSwaggerUI();
 
-    app.MapOpenApi();
-}
+app.MapOpenApi();
+
+app.ApplyMigrations();
 
 app.UseHttpsRedirection();
 
