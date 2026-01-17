@@ -39,6 +39,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		docker-compose.yml = docker-compose.yml
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CodeExecution.Infrastructure.Workers", "CodeExecution.Infrastructure.Workers\CodeExecution.Infrastructure.Workers.csproj", "{61089583-DD06-42F1-A9E6-876B59395EF2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -60,6 +62,7 @@ Global
 		{8B0DB6EF-2AC3-4EA7-B1A1-156B6AA48077} = {5BD6C84F-9A78-474C-9C8B-5289A63BADC7}
 		{9506D73C-B57E-4A74-9D19-479C86060B0F} = {E1550E7E-FCF7-40FB-9460-DC627B515100}
 		{AC750548-E3E1-4109-90DC-5E593A52FA76} = {E1550E7E-FCF7-40FB-9460-DC627B515100}
+		{61089583-DD06-42F1-A9E6-876B59395EF2} = {E1550E7E-FCF7-40FB-9460-DC627B515100}
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{74B9BEED-078D-4CD5-9012-6B4FB59EE464}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -110,5 +113,9 @@ Global
 		{AC750548-E3E1-4109-90DC-5E593A52FA76}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AC750548-E3E1-4109-90DC-5E593A52FA76}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AC750548-E3E1-4109-90DC-5E593A52FA76}.Release|Any CPU.Build.0 = Release|Any CPU
+		{61089583-DD06-42F1-A9E6-876B59395EF2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{61089583-DD06-42F1-A9E6-876B59395EF2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{61089583-DD06-42F1-A9E6-876B59395EF2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{61089583-DD06-42F1-A9E6-876B59395EF2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

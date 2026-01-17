@@ -7,6 +7,8 @@ public class CodeSubmissionTestCase
     public Guid SubmissionId { get; set; }
     public CodeSubmission Submission { get; set; } = null!;
     
+    public int Order { get; set; }
+    
     public string Input { get; set; } = string.Empty;
     public string ExpectedOutput { get; set; } = string.Empty;
     
@@ -17,5 +19,5 @@ public class CodeSubmissionTestCase
     public double TimeElapsed { get; set; }
     public double MemoryUsage { get; set; }
 
-    public Verdict Verdict { get; set; }
+    public Verdict Verdict { get; set; } = Verdict.None;
 }

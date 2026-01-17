@@ -1,7 +1,9 @@
 using CodeExecution.Infrastructure.Implementation.CodeExecution;
 using CodeExecution.Infrastructure.Implementation.DataAccess;
+using CodeExecution.Infrastructure.Workers;
 using CodeExecution.UseCases;
 using InterviewSimulator.API.Extensions;
+using MassTransit;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,6 +19,17 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddCodeExecutionDocker(builder.Configuration);
 builder.Services.AddCodeExecutionModuleUseCases();
 builder.Services.AddCodeExecutionDataAccess(builder.Configuration);
+builder.Services.AddCodeExecutionWorkers();
+
+builder.Services.AddMassTransit(configure =>
+{
+    configure.SetKebabCaseEndpointNameFormatter();
+
+    configure.UsingInMemory((context, cfg) =>
+    {
+        cfg.ConfigureEndpoints(context);
+    });
+});
 
 var app = builder.Build();
 

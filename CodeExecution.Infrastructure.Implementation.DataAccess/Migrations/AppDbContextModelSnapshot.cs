@@ -39,6 +39,13 @@ namespace CodeExecution.Infrastructure.Implementation.DataAccess.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<string>("ErrorMessage")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<bool>("IsEventPublished")
+                        .HasColumnType("boolean");
+
                     b.Property<string>("Language")
                         .IsRequired()
                         .HasColumnType("text");
@@ -48,6 +55,10 @@ namespace CodeExecution.Infrastructure.Implementation.DataAccess.Migrations
 
                     b.Property<int?>("MaxTimeSeconds")
                         .HasColumnType("integer");
+
+                    b.Property<string>("OverallVerdict")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<DateTime?>("StartedAt")
                         .HasColumnType("timestamp with time zone");
@@ -92,6 +103,9 @@ namespace CodeExecution.Infrastructure.Implementation.DataAccess.Migrations
 
                     b.Property<double>("MemoryUsage")
                         .HasColumnType("double precision");
+
+                    b.Property<int>("Order")
+                        .HasColumnType("integer");
 
                     b.Property<Guid>("SubmissionId")
                         .HasColumnType("uuid");

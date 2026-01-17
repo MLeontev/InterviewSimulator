@@ -1,7 +1,7 @@
 using CodeExecution.Infrastructure.Interfaces.CodeExecution;
 using MediatR;
 
-namespace CodeExecution.UseCases;
+namespace CodeExecution.UseCases.Queries;
 
 public record GetLanguagesQuery : IRequest<IReadOnlyCollection<SupportedLanguage>>;
 

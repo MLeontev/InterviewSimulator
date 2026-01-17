@@ -1,6 +1,7 @@
 using CodeExecution.Domain.Entities;
 using CodeExecution.Infrastructure.Interfaces.DataAccess;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 
 namespace CodeExecution.Infrastructure.Implementation.DataAccess;
 
@@ -27,6 +28,11 @@ public class AppDbContext : DbContext, IDbContext
         modelBuilder.Entity<CodeSubmissionTestCase>(entity =>
         {
             entity.Property(e => e.Verdict).HasConversion<string>();
+        });
+        
+        modelBuilder.Entity<CodeSubmission>(entity =>
+        {
+            entity.Property(e => e.OverallVerdict).HasConversion<string>();
         });
     }
 }

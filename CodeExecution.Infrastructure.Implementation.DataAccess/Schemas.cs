@@ -1,6 +1,6 @@
 namespace CodeExecution.Infrastructure.Implementation.DataAccess;
 
-internal class Schemas
+internal static class Schemas
 {
     internal const string CodeExecution = "CodeExecution";
 }

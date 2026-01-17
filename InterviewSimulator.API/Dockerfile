@@ -8,13 +8,16 @@ FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 COPY ["InterviewSimulator.API/InterviewSimulator.API.csproj", "InterviewSimulator.API/"]
+COPY ["CodeExecution.Infrastructure.Implementation.DataAccess/CodeExecution.Infrastructure.Implementation.DataAccess.csproj", "CodeExecution.Infrastructure.Implementation.DataAccess/"]
+COPY ["CodeExecution.Domain/CodeExecution.Domain.csproj", "CodeExecution.Domain/"]
+COPY ["CodeExecution.Infrastructure.Interfaces.DataAccess/CodeExecution.Infrastructure.Interfaces.DataAccess.csproj", "CodeExecution.Infrastructure.Interfaces.DataAccess/"]
 COPY ["CodeExecution.Presentation/CodeExecution.Presentation.csproj", "CodeExecution.Presentation/"]
 COPY ["CodeExecution.UseCases/CodeExecution.UseCases.csproj", "CodeExecution.UseCases/"]
 COPY ["CodeExecution.Infrastructure.Interfaces.CodeExecution/CodeExecution.Infrastructure.Interfaces.CodeExecution.csproj", "CodeExecution.Infrastructure.Interfaces.CodeExecution/"]
+COPY ["Framework.Domain/Framework.Domain.csproj", "Framework.Domain/"]
 COPY ["CodeExecution.Infrastructure.Implementation.CodeExecution.Docker/CodeExecution.Infrastructure.Implementation.CodeExecution.Docker.csproj", "CodeExecution.Infrastructure.Implementation.CodeExecution.Docker/"]
-COPY ["CodeExecution.Infrastructure.Implementation.DataAccess/CodeExecution.Infrastructure.Implementation.DataAccess.csproj", "CodeExecution.Infrastructure.Implementation.DataAccess/"]
-COPY ["CodeExecution.Infrastructure.Interfaces.DataAccess/CodeExecution.Infrastructure.Interfaces.DataAccess.csproj", "CodeExecution.Infrastructure.Interfaces.DataAccess/"]
-COPY ["CodeExecution.Domain/CodeExecution.Domain.csproj", "CodeExecution.Domain/"]
+COPY ["CodeExecution.Infrastructure.Workers/CodeExecution.Infrastructure.Workers.csproj", "CodeExecution.Infrastructure.Workers/"]
+COPY ["CodeExecution.IntegrationEvents/CodeExecution.IntegrationEvents.csproj", "CodeExecution.IntegrationEvents/"]
 RUN dotnet restore "InterviewSimulator.API/InterviewSimulator.API.csproj"
 COPY . .
 WORKDIR "/src/InterviewSimulator.API"

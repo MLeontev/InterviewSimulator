@@ -2,10 +2,10 @@ namespace CodeExecution.IntegrationEvents;
 
 public record CodeSubmissionCompleted(
     Guid SubmissionId,
-    string Code,
-    string Language,
     TestCaseResultDto[] TestCaseResults,
-    string OverallVerdict);
+    Verdict OverallVerdict,
+    int PassedCount,
+    int TotalTests);
     
 public record TestCaseResultDto(
     string Input,
@@ -15,4 +15,15 @@ public record TestCaseResultDto(
     int ExitCode,
     double TimeElapsed,
     double MemoryUsage,
-    string Verdict);
+    Verdict Verdict);
+    
+public enum Verdict
+{
+    FailedSystem,
+    OK,
+    CE,
+    RE,
+    TLE,
+    MLE,
+    WA
+}
