@@ -50,6 +50,7 @@ internal class CodeSubmissionEventPublisher(IServiceProvider serviceProvider, IB
                 Input: testCase.Input,
                 ExpectedOutput: testCase.ExpectedOutput,
                 ActualOutput: testCase.ActualOutput,
+                Order: testCase.Order,
                 Error: testCase.Error,
                 ExitCode: testCase.ExitCode,
                 TimeElapsed: testCase.TimeElapsed,

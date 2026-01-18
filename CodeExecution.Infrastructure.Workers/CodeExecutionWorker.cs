@@ -1,4 +1,3 @@
-using CodeExecution.Domain.Entities;
 using CodeExecution.Infrastructure.Interfaces.DataAccess;
 using CodeExecution.UseCases.Commands;
 using MediatR;
@@ -18,22 +17,24 @@ internal class CodeExecutionWorker(IServiceProvider serviceProvider) : Backgroun
             var dbContext = scope.ServiceProvider.GetRequiredService<IDbContext>();
             var sender = scope.ServiceProvider.GetRequiredService<ISender>();
 
-            var submissionId = await dbContext.CodeSubmissions
+            var submissionId = dbContext.CodeSubmissions
                 .FromSqlRaw("""
-                            UPDATE CodeExecution.CodeSubmissions
-                            SET Status = 'InProgress'
-                            WHERE Id = (
-                                SELECT Id
-                                FROM CodeExecution.CodeSubmissions
-                                WHERE Status = 'Pending'
-                                ORDER BY CreatedAt
+                            UPDATE "CodeExecution"."CodeSubmissions"
+                            SET "Status" = 'InProgress'
+                            WHERE "Id" = (
+                                SELECT "Id"
+                                FROM "CodeExecution"."CodeSubmissions"
+                                WHERE "Status" = 'Pending'
+                                ORDER BY "CreatedAt"
                                 FOR UPDATE SKIP LOCKED
                                 LIMIT 1
                             )
-                            RETURNING Id
+                            RETURNING *
                             """)
+                .AsNoTracking()
+                .AsEnumerable()
                 .Select(s => s.Id)
-                .FirstOrDefaultAsync(stoppingToken);
+                .FirstOrDefault();
 
             if (submissionId != Guid.Empty)
             {

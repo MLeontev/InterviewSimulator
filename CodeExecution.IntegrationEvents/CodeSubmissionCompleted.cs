@@ -11,6 +11,7 @@ public record TestCaseResultDto(
     string Input,
     string ExpectedOutput,
     string ActualOutput,
+    int Order,
     string Error,
     int ExitCode,
     double TimeElapsed,
