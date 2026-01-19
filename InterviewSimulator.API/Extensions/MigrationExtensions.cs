@@ -9,6 +9,7 @@ internal static class MigrationExtensions
         using var scope = app.ApplicationServices.CreateScope();
         
         ApplyMigrations<CodeExecution.Infrastructure.Implementation.DataAccess.AppDbContext>(scope);
+        ApplyMigrations<QuestionBank.Infrastructure.Implementation.DataAccess.AppDbContext>(scope);
     }
     
     private static void ApplyMigrations<TDbContext>(IServiceScope scope) where TDbContext : DbContext

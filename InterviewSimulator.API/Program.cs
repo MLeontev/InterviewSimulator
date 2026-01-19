@@ -4,6 +4,7 @@ using CodeExecution.Infrastructure.Workers;
 using CodeExecution.UseCases;
 using InterviewSimulator.API.Extensions;
 using MassTransit;
+using QuestionBank.Infrastructure.Implementation.DataAccess;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,6 +21,9 @@ builder.Services.AddCodeExecutionDocker(builder.Configuration);
 builder.Services.AddCodeExecutionModuleUseCases();
 builder.Services.AddCodeExecutionDataAccess(builder.Configuration);
 builder.Services.AddCodeExecutionWorkers();
+
+// QuestionBank module
+builder.Services.AddQuestionBankDataAccess(builder.Configuration);
 
 builder.Services.AddMassTransit(configure =>
 {

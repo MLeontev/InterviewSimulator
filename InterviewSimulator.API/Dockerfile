@@ -11,13 +11,16 @@ COPY ["InterviewSimulator.API/InterviewSimulator.API.csproj", "InterviewSimulato
 COPY ["CodeExecution.Infrastructure.Implementation.DataAccess/CodeExecution.Infrastructure.Implementation.DataAccess.csproj", "CodeExecution.Infrastructure.Implementation.DataAccess/"]
 COPY ["CodeExecution.Domain/CodeExecution.Domain.csproj", "CodeExecution.Domain/"]
 COPY ["CodeExecution.Infrastructure.Interfaces.DataAccess/CodeExecution.Infrastructure.Interfaces.DataAccess.csproj", "CodeExecution.Infrastructure.Interfaces.DataAccess/"]
-COPY ["CodeExecution.Presentation/CodeExecution.Presentation.csproj", "CodeExecution.Presentation/"]
+COPY ["CodeExecution.Infrastructure.Workers/CodeExecution.Infrastructure.Workers.csproj", "CodeExecution.Infrastructure.Workers/"]
+COPY ["CodeExecution.IntegrationEvents/CodeExecution.IntegrationEvents.csproj", "CodeExecution.IntegrationEvents/"]
 COPY ["CodeExecution.UseCases/CodeExecution.UseCases.csproj", "CodeExecution.UseCases/"]
 COPY ["CodeExecution.Infrastructure.Interfaces.CodeExecution/CodeExecution.Infrastructure.Interfaces.CodeExecution.csproj", "CodeExecution.Infrastructure.Interfaces.CodeExecution/"]
 COPY ["Framework.Domain/Framework.Domain.csproj", "Framework.Domain/"]
+COPY ["CodeExecution.Presentation/CodeExecution.Presentation.csproj", "CodeExecution.Presentation/"]
 COPY ["CodeExecution.Infrastructure.Implementation.CodeExecution.Docker/CodeExecution.Infrastructure.Implementation.CodeExecution.Docker.csproj", "CodeExecution.Infrastructure.Implementation.CodeExecution.Docker/"]
-COPY ["CodeExecution.Infrastructure.Workers/CodeExecution.Infrastructure.Workers.csproj", "CodeExecution.Infrastructure.Workers/"]
-COPY ["CodeExecution.IntegrationEvents/CodeExecution.IntegrationEvents.csproj", "CodeExecution.IntegrationEvents/"]
+COPY ["QuestionBank.Infrastructure.Implementation.DataAccess/QuestionBank.Infrastructure.Implementation.DataAccess.csproj", "QuestionBank.Infrastructure.Implementation.DataAccess/"]
+COPY ["QuestionBank.Domain/QuestionBank.Domain.csproj", "QuestionBank.Domain/"]
+COPY ["QuestionBank.Infrastructure.Interfaces.DataAccess/QuestionBank.Infrastructure.Interfaces.DataAccess.csproj", "QuestionBank.Infrastructure.Interfaces.DataAccess/"]
 RUN dotnet restore "InterviewSimulator.API/InterviewSimulator.API.csproj"
 COPY . .
 WORKDIR "/src/InterviewSimulator.API"

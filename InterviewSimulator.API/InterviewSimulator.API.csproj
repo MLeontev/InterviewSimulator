@@ -28,6 +28,7 @@
     <ProjectReference Include="..\CodeExecution.UseCases\CodeExecution.UseCases.csproj" />
     <ProjectReference Include="..\CodeExecution.Infrastructure.Implementation.CodeExecution.Docker\CodeExecution.Infrastructure.Implementation.CodeExecution.Docker.csproj" />
     <ProjectReference Include="..\CodeExecution.Infrastructure.Interfaces.CodeExecution\CodeExecution.Infrastructure.Interfaces.CodeExecution.csproj" />
+    <ProjectReference Include="..\QuestionBank.Infrastructure.Implementation.DataAccess\QuestionBank.Infrastructure.Implementation.DataAccess.csproj" />
   </ItemGroup>
 
   <ItemGroup>

@@ -20,3 +20,9 @@ public class Question
     public List<CodingQuestionLanguageLimit> LanguageLimits { get; set; } = [];
     public List<TestCase> TestCases { get; set; } = [];
 }
+
+public enum QuestionType
+{
+    Coding,
+    Theory
+}

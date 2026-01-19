@@ -8,3 +8,13 @@ public class Technology
     public string? Code { get; set; }
     public string Description { get; set; } = string.Empty;
 }
+
+public enum TechnologyCategory
+{
+    ProgrammingLanguage,
+    Framework,
+    ORM,
+    Library,
+    Tool,
+    Database
+}

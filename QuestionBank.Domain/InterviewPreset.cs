@@ -1,11 +1,5 @@
 namespace QuestionBank.Domain;
 
-public enum QuestionType
-{
-    Coding,
-    Theory
-}
-
 public class InterviewPreset
 {
     public int Id { get; set; }
@@ -18,13 +12,4 @@ public class InterviewPreset
     public Specialization Specialization { get; set; } = null!;
     
     public List<InterviewPresetTechnology> Technologies { get; set; } = [];
-}
-
-public class InterviewPresetTechnology
-{
-    public int InterviewPresetId { get; set; }
-    public InterviewPreset InterviewPreset { get; set; } = null!;
-
-    public int TechnologyId { get; set; }
-    public Technology Technology { get; set; } = null!;
 }
