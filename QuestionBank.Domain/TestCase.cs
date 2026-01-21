@@ -2,9 +2,9 @@ namespace QuestionBank.Domain;
 
 public class TestCase
 {
-    public int Id { get; set; }
+    public Guid Id { get; set; }
 
-    public int CodingQuestionId { get; set; }
+    public Guid CodingQuestionId { get; set; }
     public Question CodingQuestion { get; set; } = null!;
 
     public string Input { get; set; } = string.Empty;

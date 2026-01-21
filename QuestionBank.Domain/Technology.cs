@@ -2,7 +2,7 @@ namespace QuestionBank.Domain;
 
 public class Technology
 {
-    public int Id { get; set; }
+    public Guid Id { get; set; }
     public TechnologyCategory Category { get; set; }
     public string Name { get; set; } = string.Empty;
     public string? Code { get; set; }
