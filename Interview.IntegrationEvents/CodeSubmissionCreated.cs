@@ -9,6 +9,7 @@ public record CodeSubmissionCreated(
     int? MaxMemoryMb = null);
     
 public record TestCaseDto(
+    Guid TestCaseId,
     int Order,
     string Input,
     string ExpectedOutput);

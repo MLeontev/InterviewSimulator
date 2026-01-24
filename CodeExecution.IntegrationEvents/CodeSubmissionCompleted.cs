@@ -8,6 +8,7 @@ public record CodeSubmissionCompleted(
     int TotalTests);
     
 public record TestCaseResultDto(
+    Guid TestCaseId,
     string Input,
     string ExpectedOutput,
     string ActualOutput,

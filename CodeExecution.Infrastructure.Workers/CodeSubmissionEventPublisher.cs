@@ -47,6 +47,7 @@ internal class CodeSubmissionEventPublisher(IServiceProvider serviceProvider, IB
         foreach (var testCase in submission.TestCases)
         {
             testCaseResults.Add(new TestCaseResultDto(
+                TestCaseId: testCase.Id,
                 Input: testCase.Input,
                 ExpectedOutput: testCase.ExpectedOutput,
                 ActualOutput: testCase.ActualOutput,

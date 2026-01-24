@@ -10,6 +10,8 @@ internal static class MigrationExtensions
         
         ApplyMigrations<CodeExecution.Infrastructure.Implementation.DataAccess.AppDbContext>(scope);
         ApplyMigrations<QuestionBank.Infrastructure.Implementation.DataAccess.AppDbContext>(scope);
+        ApplyMigrations<Interview.Infrastructure.Implementation.DataAccess.AppDbContext>(scope);
+        ApplyMigrations<Users.Infrastructure.Implementation.DataAccess.AppDbContext>(scope);
     }
     
     private static void ApplyMigrations<TDbContext>(IServiceScope scope) where TDbContext : DbContext

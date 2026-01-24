@@ -7,11 +7,11 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\CodeExecution.Domain\CodeExecution.Domain.csproj" />
+      <ProjectReference Include="..\Users.Infrastructure.Interfaces.DataAccess\Users.Infrastructure.Interfaces.DataAccess.csproj" />
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.2" />
+      <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.0" />
     </ItemGroup>
 
 </Project>

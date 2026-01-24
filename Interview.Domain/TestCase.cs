@@ -4,7 +4,7 @@ public class TestCase
 {
     public Guid Id { get; set; }
 
-    public int InterviewQuestionId { get; set; }
+    public Guid InterviewQuestionId { get; set; }
     public InterviewQuestion InterviewQuestion { get; set; } = null!;
 
     public string Input { get; set; } = string.Empty;

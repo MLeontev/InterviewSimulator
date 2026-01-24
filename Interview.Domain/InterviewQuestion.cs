@@ -37,5 +37,7 @@ public enum QuestionStatus
     NotStarted,
     InProgress,
     Submitted,
+    EvaluatingCode,
+    EvaluatingAi,
     Evaluated
 }

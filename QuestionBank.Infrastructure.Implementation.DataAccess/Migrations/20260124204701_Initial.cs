@@ -1,5 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
-using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
+﻿using System;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
@@ -19,8 +19,7 @@ namespace QuestionBank.Infrastructure.Implementation.DataAccess.Migrations
                 schema: "QuestionBank",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
                     Name = table.Column<string>(type: "text", nullable: false),
                     Description = table.Column<string>(type: "text", nullable: false)
                 },
@@ -34,8 +33,7 @@ namespace QuestionBank.Infrastructure.Implementation.DataAccess.Migrations
                 schema: "QuestionBank",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
                     Name = table.Column<string>(type: "text", nullable: false),
                     Description = table.Column<string>(type: "text", nullable: false)
                 },
@@ -49,8 +47,7 @@ namespace QuestionBank.Infrastructure.Implementation.DataAccess.Migrations
                 schema: "QuestionBank",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
                     Name = table.Column<string>(type: "text", nullable: false),
                     Description = table.Column<string>(type: "text", nullable: false)
                 },
@@ -64,8 +61,7 @@ namespace QuestionBank.Infrastructure.Implementation.DataAccess.Migrations
                 schema: "QuestionBank",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
                     Category = table.Column<int>(type: "integer", nullable: false),
                     Name = table.Column<string>(type: "text", nullable: false),
                     Code = table.Column<string>(type: "text", nullable: true),
@@ -81,10 +77,9 @@ namespace QuestionBank.Infrastructure.Implementation.DataAccess.Migrations
                 schema: "QuestionBank",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    GradeId = table.Column<int>(type: "integer", nullable: false),
-                    SpecializationId = table.Column<int>(type: "integer", nullable: false)
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    GradeId = table.Column<Guid>(type: "uuid", nullable: false),
+                    SpecializationId = table.Column<Guid>(type: "uuid", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -110,11 +105,10 @@ namespace QuestionBank.Infrastructure.Implementation.DataAccess.Migrations
                 schema: "QuestionBank",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
                     Name = table.Column<string>(type: "text", nullable: false),
-                    GradeId = table.Column<int>(type: "integer", nullable: false),
-                    SpecializationId = table.Column<int>(type: "integer", nullable: false)
+                    GradeId = table.Column<Guid>(type: "uuid", nullable: false),
+                    SpecializationId = table.Column<Guid>(type: "uuid", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -140,14 +134,13 @@ namespace QuestionBank.Infrastructure.Implementation.DataAccess.Migrations
                 schema: "QuestionBank",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
                     Text = table.Column<string>(type: "text", nullable: false),
                     Type = table.Column<string>(type: "text", nullable: false),
                     ReferenceSolution = table.Column<string>(type: "text", nullable: false),
-                    CompetencyId = table.Column<int>(type: "integer", nullable: false),
-                    GradeId = table.Column<int>(type: "integer", nullable: false),
-                    TechnologyId = table.Column<int>(type: "integer", nullable: false)
+                    CompetencyId = table.Column<Guid>(type: "uuid", nullable: false),
+                    GradeId = table.Column<Guid>(type: "uuid", nullable: false),
+                    TechnologyId = table.Column<Guid>(type: "uuid", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -180,11 +173,10 @@ namespace QuestionBank.Infrastructure.Implementation.DataAccess.Migrations
                 schema: "QuestionBank",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    CompetencyId = table.Column<int>(type: "integer", nullable: false),
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    CompetencyId = table.Column<Guid>(type: "uuid", nullable: false),
                     Weight = table.Column<double>(type: "double precision", nullable: false),
-                    CompetencyMatrixId = table.Column<int>(type: "integer", nullable: true)
+                    CompetencyMatrixId = table.Column<Guid>(type: "uuid", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -209,8 +201,8 @@ namespace QuestionBank.Infrastructure.Implementation.DataAccess.Migrations
                 schema: "QuestionBank",
                 columns: table => new
                 {
-                    InterviewPresetId = table.Column<int>(type: "integer", nullable: false),
-                    TechnologyId = table.Column<int>(type: "integer", nullable: false)
+                    InterviewPresetId = table.Column<Guid>(type: "uuid", nullable: false),
+                    TechnologyId = table.Column<Guid>(type: "uuid", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -236,10 +228,9 @@ namespace QuestionBank.Infrastructure.Implementation.DataAccess.Migrations
                 schema: "QuestionBank",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    CodingQuestionId = table.Column<int>(type: "integer", nullable: false),
-                    LanguageId = table.Column<int>(type: "integer", nullable: false),
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    CodingQuestionId = table.Column<Guid>(type: "uuid", nullable: false),
+                    LanguageId = table.Column<Guid>(type: "uuid", nullable: false),
                     TimeLimitMs = table.Column<int>(type: "integer", nullable: false),
                     MemoryLimitMb = table.Column<int>(type: "integer", nullable: false)
                 },
@@ -267,9 +258,8 @@ namespace QuestionBank.Infrastructure.Implementation.DataAccess.Migrations
                 schema: "QuestionBank",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    CodingQuestionId = table.Column<int>(type: "integer", nullable: false),
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    CodingQuestionId = table.Column<Guid>(type: "uuid", nullable: false),
                     Input = table.Column<string>(type: "text", nullable: false),
                     ExpectedOutput = table.Column<string>(type: "text", nullable: false),
                     IsHidden = table.Column<bool>(type: "boolean", nullable: false),
