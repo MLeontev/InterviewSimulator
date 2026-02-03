@@ -1,0 +1,20 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Interview.Domain\Interview.Domain.csproj" />
+      <ProjectReference Include="..\Interview.Infrastructure.Interfaces.DataAccess\Interview.Infrastructure.Interfaces.DataAccess.csproj" />
+      <ProjectReference Include="..\QuestionBank.ModuleContract\QuestionBank.ModuleContract.csproj" />
+      <ProjectReference Include="..\Framework.Domain\Framework.Domain.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="MediatR" Version="14.0.0" />
+    </ItemGroup>
+
+</Project>

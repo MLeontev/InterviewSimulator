@@ -29,7 +29,11 @@
     <ProjectReference Include="..\CodeExecution.Infrastructure.Implementation.CodeExecution.Docker\CodeExecution.Infrastructure.Implementation.CodeExecution.Docker.csproj" />
     <ProjectReference Include="..\CodeExecution.Infrastructure.Interfaces.CodeExecution\CodeExecution.Infrastructure.Interfaces.CodeExecution.csproj" />
     <ProjectReference Include="..\Interview.Infrastructure.Implementation.DataAccess\Interview.Infrastructure.Implementation.DataAccess.csproj" />
+    <ProjectReference Include="..\Interview.Presentation\Interview.Presentation.csproj" />
+    <ProjectReference Include="..\Interview.UseCases\Interview.UseCases.csproj" />
     <ProjectReference Include="..\QuestionBank.Infrastructure.Implementation.DataAccess\QuestionBank.Infrastructure.Implementation.DataAccess.csproj" />
+    <ProjectReference Include="..\QuestionBank.ModuleContract.Implementation\QuestionBank.ModuleContract.Implementation.csproj" />
+    <ProjectReference Include="..\QuestionBank.Presentation\QuestionBank.Presentation.csproj" />
     <ProjectReference Include="..\Users.Infrastructure.Implementation.DataAccess\Users.Infrastructure.Implementation.DataAccess.csproj" />
   </ItemGroup>
 

@@ -1,10 +1,10 @@
 using Microsoft.Extensions.DependencyInjection;
 
-namespace CodeExecution.UseCases;
+namespace QuestionBank.UseCases;
 
 public static class DependencyInjection
 {
-    public static IServiceCollection AddCodeExecutionModuleUseCases(this IServiceCollection services)
+    public static IServiceCollection AddQuestionBankModuleUseCases(this IServiceCollection services)
     {
         services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(DependencyInjection).Assembly));
 

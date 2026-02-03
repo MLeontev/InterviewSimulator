@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace CodeExecution.Controllers;
 
 [ApiController]
-[Route("api/code-execution/languages")]
+[Route("api/v1/languages")]
 public class LanguagesController(ISender sender) : ControllerBase
 {
     [HttpGet]
