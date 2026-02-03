@@ -3,6 +3,7 @@ using System;
 using Interview.Infrastructure.Implementation.DataAccess;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Interview.Infrastructure.Implementation.DataAccess.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260131194326_UpdModel")]
+    partial class UpdModel
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -32,7 +35,7 @@ namespace Interview.Infrastructure.Implementation.DataAccess.Migrations
                     b.Property<string>("AiFeedbackJson")
                         .HasColumnType("text");
 
-                    b.Property<string>("Answer")
+                    b.Property<string>("CodeAnswer")
                         .HasColumnType("text");
 
                     b.Property<DateTime?>("EvaluatedAt")
@@ -41,20 +44,10 @@ namespace Interview.Infrastructure.Implementation.DataAccess.Migrations
                     b.Property<Guid>("InterviewSessionId")
                         .HasColumnType("uuid");
 
-                    b.Property<int?>("MemoryLimitMb")
-                        .HasColumnType("integer");
-
                     b.Property<int>("OrderIndex")
                         .HasColumnType("integer");
 
                     b.Property<string>("OverallVerdict")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("ProgrammingLanguageCode")
-                        .HasColumnType("text");
-
-                    b.Property<string>("ReferenceSolution")
                         .IsRequired()
                         .HasColumnType("text");
 
@@ -72,8 +65,8 @@ namespace Interview.Infrastructure.Implementation.DataAccess.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<int?>("TimeLimitMs")
-                        .HasColumnType("integer");
+                    b.Property<string>("TextAnswer")
+                        .HasColumnType("text");
 
                     b.Property<string>("Type")
                         .IsRequired()
@@ -98,12 +91,11 @@ namespace Interview.Infrastructure.Implementation.DataAccess.Migrations
                     b.Property<Guid>("CandidateId")
                         .HasColumnType("uuid");
 
-                    b.Property<DateTime>("EndTime")
+                    b.Property<DateTime?>("EndTime")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<string>("InterviewPresetName")
-                        .IsRequired()
-                        .HasColumnType("text");
+                    b.Property<Guid>("InterviewPresetId")
+                        .HasColumnType("uuid");
 
                     b.Property<DateTime>("StartTime")
                         .HasColumnType("timestamp with time zone");
@@ -124,9 +116,10 @@ namespace Interview.Infrastructure.Implementation.DataAccess.Migrations
                         .HasColumnType("uuid");
 
                     b.Property<string>("ActualOutput")
+                        .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<double?>("ExecutionTimeMs")
+                    b.Property<double>("ExecutionTimeMs")
                         .HasColumnType("double precision");
 
                     b.Property<string>("ExpectedOutput")
@@ -143,7 +136,7 @@ namespace Interview.Infrastructure.Implementation.DataAccess.Migrations
                     b.Property<bool>("IsHidden")
                         .HasColumnType("boolean");
 
-                    b.Property<double?>("MemoryUsedKb")
+                    b.Property<double>("MemoryUsedKb")
                         .HasColumnType("double precision");
 
                     b.Property<int>("OrderIndex")

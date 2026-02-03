@@ -3,6 +3,7 @@ using System;
 using Interview.Infrastructure.Implementation.DataAccess;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Interview.Infrastructure.Implementation.DataAccess.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260201192507_AddNullLimits")]
+    partial class AddNullLimits
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -32,7 +35,7 @@ namespace Interview.Infrastructure.Implementation.DataAccess.Migrations
                     b.Property<string>("AiFeedbackJson")
                         .HasColumnType("text");
 
-                    b.Property<string>("Answer")
+                    b.Property<string>("CodeAnswer")
                         .HasColumnType("text");
 
                     b.Property<DateTime?>("EvaluatedAt")
@@ -70,6 +73,9 @@ namespace Interview.Infrastructure.Implementation.DataAccess.Migrations
 
                     b.Property<string>("Text")
                         .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("TextAnswer")
                         .HasColumnType("text");
 
                     b.Property<int?>("TimeLimitMs")

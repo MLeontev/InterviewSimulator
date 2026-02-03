@@ -9,11 +9,13 @@ public class InterviewQuestion
     
     public string Text { get; set; } = string.Empty;
     public QuestionType Type { get; set; }
+    public string? ProgrammingLanguageCode { get; set; }
     
     public int OrderIndex { get; set; }
     
-    public string? TextAnswer { get; set; }
-    public string? CodeAnswer { get; set; }
+    public string ReferenceSolution { get; set; } = string.Empty;
+    
+    public string? Answer { get; set; }
     
     public string? AiFeedbackJson { get; set; }
     
@@ -23,13 +25,18 @@ public class InterviewQuestion
     public DateTime? SubmittedAt { get; set; }
     public DateTime? EvaluatedAt { get; set; }
     
+    public Verdict OverallVerdict { get; set; }
+    
     public List<TestCase> TestCases { get; set; } = [];
+    
+    public int? TimeLimitMs { get; set; }
+    public int? MemoryLimitMb { get; set; }
 }
 
 public enum QuestionType
 {
-    Coding,
-    Theory
+    Theory,
+    Coding
 }
 
 public enum QuestionStatus

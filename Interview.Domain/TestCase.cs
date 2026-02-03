@@ -10,12 +10,12 @@ public class TestCase
     public string Input { get; set; } = string.Empty;
     public string ExpectedOutput { get; set; } = string.Empty;
     public bool IsHidden { get; set; }
-    
+
     public int OrderIndex { get; set; }
-    
-    public string ActualOutput { get; set; } = string.Empty;
-    public double ExecutionTimeMs { get; set; }
-    public double MemoryUsedKb { get; set; }
+
+    public string? ActualOutput { get; set; }
+    public double? ExecutionTimeMs { get; set; }
+    public double? MemoryUsedKb { get; set; }
     public Verdict Verdict { get; set; } = Verdict.None;
 }
 

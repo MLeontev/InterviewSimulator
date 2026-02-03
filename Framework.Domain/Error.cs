@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace Framework.Domain;
 
 public record Error
@@ -6,6 +8,8 @@ public record Error
     
     public string Code { get; }
     public string Description { get; }
+    
+    [JsonIgnore]
     public ErrorType Type { get; }
 
     public Error(string code, string description, ErrorType type)

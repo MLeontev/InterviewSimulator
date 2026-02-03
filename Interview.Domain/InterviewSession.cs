@@ -9,7 +9,7 @@ public class InterviewSession
     public string InterviewPresetName { get; set; } = string.Empty;
 
     public DateTime StartTime { get; set; }
-    public DateTime? EndTime { get; set; }
+    public DateTime EndTime { get; set; }
 
     public InterviewStatus Status { get; set; }
     
@@ -20,8 +20,9 @@ public class InterviewSession
 
 public enum InterviewStatus
 {
-    Created,
     InProgress,
     Finished,
+    EvaluatingAi,
+    Evaluated,
     Cancelled
 }

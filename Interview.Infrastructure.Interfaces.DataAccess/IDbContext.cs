@@ -7,6 +7,7 @@ public interface IDbContext
 {
     public DbSet<InterviewSession> InterviewSessions { get; set; }
     public DbSet<InterviewQuestion> InterviewQuestions { get; set; }
-    
+    public DbSet<TestCase> TestCases { get; set; }
+
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }

@@ -12,6 +12,7 @@ public class AppDbContext : DbContext, IDbContext
     
     public DbSet<InterviewSession> InterviewSessions { get; set; }
     public DbSet<InterviewQuestion> InterviewQuestions { get; set; }
+    public DbSet<TestCase> TestCases { get; set; }
     
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -27,6 +28,14 @@ public class AppDbContext : DbContext, IDbContext
         
         modelBuilder.Entity<InterviewQuestion>()
             .Property(q => q.Type)
+            .HasConversion<string>();
+        
+        modelBuilder.Entity<InterviewQuestion>()
+            .Property(q => q.OverallVerdict)
+            .HasConversion<string>();
+        
+        modelBuilder.Entity<TestCase>()
+            .Property(q => q.Verdict)
             .HasConversion<string>();
     }
 }

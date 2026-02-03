@@ -23,6 +23,6 @@ public class Question
 
 public enum QuestionType
 {
-    Coding,
-    Theory
+    Theory,
+    Coding
 }
