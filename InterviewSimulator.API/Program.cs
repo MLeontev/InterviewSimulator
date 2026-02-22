@@ -5,7 +5,9 @@ using CodeExecution.Infrastructure.Workers;
 using CodeExecution.UseCases;
 using Interview.Infrastructure.Implementation.DataAccess;
 using Interview.UseCases;
+using InterviewSimulator.API;
 using InterviewSimulator.API.Extensions;
+using InterviewSimulator.API.SeedData;
 using MassTransit;
 using QuestionBank.Infrastructure.Implementation.DataAccess;
 using QuestionBank.ModuleContract.Implementation;
@@ -66,9 +68,8 @@ app.ApplyMigrations();
 
 using (var scope = app.Services.CreateScope())
 {
-    var db = scope.ServiceProvider.GetRequiredService<QuestionBank.Infrastructure.Implementation.DataAccess.AppDbContext>();
-    await DbInitializer.SeedPresetsAsync(db);
-    await DbInitializer.SeedCompetenciesAsync(db);
+    var questionBankDb = scope.ServiceProvider.GetRequiredService<QuestionBank.Infrastructure.Implementation.DataAccess.AppDbContext>();
+    await DbInitializer.SeedQuestionBankAsync(questionBankDb);
 }
 
 app.UseHttpsRedirection();
