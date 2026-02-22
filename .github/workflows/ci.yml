@@ -35,8 +35,11 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Check files
-        run: ls -R
+      - name: Check repo structure
+        run: |
+          pwd
+          ls -la
+          ls -R
 
       - name: Build and push API image
         run: |
