@@ -1,0 +1,423 @@
+{
+  "info": {
+    "_postman_id": "d27615ac-f632-4a84-91c4-1b7b84552ad7",
+    "name": "InterviewSimulator",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "45475342",
+    "_collection_link": "https://go.postman.co/collection/45475342-d27615ac-f632-4a84-91c4-1b7b84552ad7?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "Presets",
+      "item": [
+        {
+          "name": "Get Presets",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Статус 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Ответ - массив\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.be.an(\"array\");",
+                  "});",
+                  "",
+                  "pm.test(\"Каждый пресет содержит id и name\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    jsonData.forEach(function(item) {",
+                  "        pm.expect(item).to.have.property(\"id\");",
+                  "        pm.expect(item.id).to.be.a(\"string\");",
+                  "        pm.expect(item).to.have.property(\"name\");",
+                  "        pm.expect(item.name).to.be.a(\"string\");",
+                  "    });",
+                  "});",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{API_URL}}/api/v1/interview-presets",
+              "host": ["{{API_URL}}"],
+              "path": ["api", "v1", "interview-presets"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Preset By Id",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "",
+                  "if (pm.response.code === 200) {",
+                  "",
+                  "    pm.test(\"Статус 200 OK\", function () {",
+                  "        pm.response.to.have.status(200);",
+                  "    });",
+                  "",
+                  "    pm.test(\"Ответ содержит id, name, grade, specialization и technologies\", function () {",
+                  "        pm.expect(jsonData).to.have.property(\"id\");",
+                  "        pm.expect(jsonData.id).to.be.a(\"string\");",
+                  "",
+                  "        pm.expect(jsonData).to.have.property(\"name\");",
+                  "        pm.expect(jsonData.name).to.be.a(\"string\");",
+                  "",
+                  "        pm.expect(jsonData).to.have.property(\"grade\");",
+                  "        pm.expect(jsonData.grade).to.be.a(\"string\");",
+                  "",
+                  "        pm.expect(jsonData).to.have.property(\"specialization\");",
+                  "        pm.expect(jsonData.specialization).to.be.a(\"string\");",
+                  "",
+                  "        pm.expect(jsonData).to.have.property(\"technologies\");",
+                  "        pm.expect(jsonData.technologies).to.be.an(\"array\").that.is.not.empty;",
+                  "    });",
+                  "",
+                  "    pm.test(\"Проверка технологий\", function () {",
+                  "        jsonData.technologies.forEach(function (tech) {",
+                  "            pm.expect(tech).to.have.property(\"id\");",
+                  "            pm.expect(tech.id).to.be.a(\"string\");",
+                  "",
+                  "            pm.expect(tech).to.have.property(\"name\");",
+                  "            pm.expect(tech.name).to.be.a(\"string\");",
+                  "",
+                  "            pm.expect(tech).to.have.property(\"category\");",
+                  "            pm.expect([\"ProgrammingLanguage\",\"Framework\",\"ORM\",\"Library\",\"Tool\",\"Database\"]).to.include(tech.category);",
+                  "        });",
+                  "    });",
+                  "",
+                  "}",
+                  "",
+                  "if (pm.response.code === 404) {",
+                  "",
+                  "    pm.test(\"Статус 404 Not Found\", function () {",
+                  "        pm.response.to.have.status(404);",
+                  "    });",
+                  "",
+                  "    pm.test(\"Ответ содержит code и description\", function () {",
+                  "        pm.expect(jsonData).to.have.property(\"code\");",
+                  "        pm.expect(jsonData.code).to.equal(\"PRESET_NOT_FOUND\");",
+                  "",
+                  "        pm.expect(jsonData).to.have.property(\"description\");",
+                  "        pm.expect(jsonData.description).to.be.a(\"string\");",
+                  "    });",
+                  "",
+                  "}",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{API_URL}}/api/v1/interview-presets/{{interviewPresetId}}",
+              "host": ["{{API_URL}}"],
+              "path": [
+                "api",
+                "v1",
+                "interview-presets",
+                "{{interviewPresetId}}"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Interviews",
+      "item": [
+        {
+          "name": "Create Session",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Статус 201 Created\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test(\"sessionId присутствует\", function () {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json).to.have.property(\"sessionId\");",
+                  "    pm.expect(json.sessionId).to.be.a(\"string\");",
+                  "    pm.environment.set(\"sessionId\", json.sessionId);",
+                  "});",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"candidateId\": \"{{candidateId}}\",\n  \"interviewPresetId\": \"{{interviewPresetId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{API_URL}}/api/v1/interview-sessions",
+              "host": ["{{API_URL}}"],
+              "path": ["api", "v1", "interview-sessions"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Session By Id",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Статус 200 OK\", () => pm.response.to.have.status(200));",
+                  "",
+                  "pm.test(\"Сессия содержит id, status и вопросы\", () => {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json).to.have.property(\"id\").that.is.a(\"string\");",
+                  "    pm.expect(json).to.have.property(\"status\").that.is.a(\"string\");",
+                  "    pm.expect(json).to.have.property(\"questionIds\").that.is.an(\"array\");",
+                  "    if (json.questionIds && json.questionIds.length > 0) {",
+                  "        pm.environment.set(\"questionId\", json.questionIds[0]);",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Статус сессии валидный\", () => {",
+                  "    const allowed = [\"InProgress\", \"Finished\", \"EvaluatingAi\", \"Evaluated\", \"Cancelled\"];",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(allowed).to.include(json.status);",
+                  "});",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{API_URL}}/api/v1/interview-sessions/{{sessionId}}",
+              "host": ["{{API_URL}}"],
+              "path": ["api", "v1", "interview-sessions", "{{sessionId}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Session Question By Id",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Статус ответа 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Поля вопроса присутствуют\", function () {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json).to.have.property(\"id\");",
+                  "    pm.expect(json).to.have.property(\"interviewSessionId\");",
+                  "    pm.expect(json).to.have.property(\"text\");",
+                  "    pm.expect(json).to.have.property(\"type\");",
+                  "    pm.expect(json).to.have.property(\"orderIndex\");",
+                  "    pm.expect(json).to.have.property(\"status\");",
+                  "    pm.expect(json).to.have.property(\"testCases\");",
+                  "});",
+                  "",
+                  "pm.test(\"Типы полей корректные\", function () {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.id).to.be.a(\"string\");",
+                  "    pm.expect(json.interviewSessionId).to.be.a(\"string\");",
+                  "    pm.expect(json.text).to.be.a(\"string\");",
+                  "    pm.expect([\"Theory\",\"Coding\"]).to.include(json.type);",
+                  "    pm.expect(json.orderIndex).to.be.a(\"number\");",
+                  "    pm.expect(json.status).to.be.a(\"string\");",
+                  "    pm.expect(json.testCases).to.be.an(\"array\");",
+                  "});",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{API_URL}}/api/v1/interview-questions/{{questionId}}",
+              "host": ["{{API_URL}}"],
+              "path": ["api", "v1", "interview-questions", "{{questionId}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Candidate Sessions",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Статус 200 OK\", () => pm.response.to.have.status(200));",
+                  "",
+                  "pm.test(\"Ответ - массив\", () => pm.expect(pm.response.json()).to.be.an(\"array\"));",
+                  "",
+                  "pm.test(\"Сессии содержат id и статус\", () => {",
+                  "    pm.response.json().forEach(s => {",
+                  "        pm.expect(s).to.have.property(\"id\").that.is.a(\"string\");",
+                  "        pm.expect(s).to.have.property(\"status\").that.is.a(\"string\");",
+                  "    });",
+                  "});",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{API_URL}}/api/v1/interview-sessions/candidate/{{candidateId}}",
+              "host": ["{{API_URL}}"],
+              "path": [
+                "api",
+                "v1",
+                "interview-sessions",
+                "candidate",
+                "{{candidateId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Finish Session",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Корректный статус\", () => {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([204, 422, 404]);",
+                  "});",
+                  "",
+                  "pm.test(\"Проверка ошибки SESSION_NOT_ACTIVE\", () => {",
+                  "    if (pm.response.code === 422) {",
+                  "        const json = pm.response.json();",
+                  "        pm.expect(json).to.have.property(\"code\", \"SESSION_NOT_ACTIVE\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Проверка ошибки SESSION_NOT_FOUND\", () => {",
+                  "    if (pm.response.code === 404) {",
+                  "        const json = pm.response.json();",
+                  "        pm.expect(json).to.have.property(\"code\", \"SESSION_NOT_FOUND\");",
+                  "    }",
+                  "});",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{API_URL}}/api/v1/interview-sessions/{{sessionId}}/finish",
+              "host": ["{{API_URL}}"],
+              "path": [
+                "api",
+                "v1",
+                "interview-sessions",
+                "{{sessionId}}",
+                "finish"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Session",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Код ответа 204 или 404\", () => {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([204, 404]);",
+                  "});",
+                  "",
+                  "pm.test(\"Проверка ошибки SESSION_NOT_FOUND\", () => {",
+                  "    if (pm.response.code === 404) {",
+                  "        const json = pm.response.json();",
+                  "        pm.expect(json).to.have.property(\"code\", \"SESSION_NOT_FOUND\");",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test(\"Проверка пустого тела ответа при удалении\", () => {",
+                  "    if (pm.response.code === 204) {",
+                  "        pm.expect(pm.response.text()).to.be.empty;",
+                  "    }",
+                  "});",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{API_URL}}/api/v1/interview-sessions/{{sessionId}}",
+              "host": ["{{API_URL}}"],
+              "path": ["api", "v1", "interview-sessions", "{{sessionId}}"]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}

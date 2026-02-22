@@ -1,0 +1,31 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  compose-ci:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Build and start services
+        run: docker-compose up -d --build
+
+      - name: Wait for API
+        run: |
+          echo "Waiting 20 seconds for services to be ready..."
+          sleep 20
+
+      - name: Run integration tests (Postman)
+        run: |
+          npm install -g newman
+          newman run postman/integration-tests.json \
+            -e postman/ci-environment.json
+
+      - name: Shutdown services
+        if: always()
+        run: docker-compose down
