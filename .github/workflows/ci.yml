@@ -15,16 +15,11 @@ jobs:
       - name: Build and start services
         run: docker compose up -d --build
 
-      - name: Wait for API
-        run: |
-          echo "Waiting 20 seconds for services to be ready..."
-          sleep 20
-
       - name: Run integration tests (Postman)
         run: |
           npm install -g newman
           newman run postman/integration-tests.json \
-            -e postman/ci-environment.json
+            -e postman/ci-env.json
 
       - name: Shutdown services
         if: always()
