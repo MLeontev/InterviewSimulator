@@ -7,9 +7,9 @@ using Microsoft.EntityFrameworkCore;
 namespace CodeExecution.UseCases.Commands;
 
 public record CheckSubmissionCommand(Guid SubmissionId) : IRequest;
-    
+
 internal class CheckSubmissionCommandHandler(
-    IDbContext dbContext, 
+    IDbContext dbContext,
     ICodeExecutor codeExecutor) : IRequestHandler<CheckSubmissionCommand>
 {
     public async Task Handle(CheckSubmissionCommand request, CancellationToken cancellationToken)
@@ -21,7 +21,7 @@ internal class CheckSubmissionCommandHandler(
 
         if (submission == null)
             throw new InvalidOperationException("Submission not found");
-        
+
         submission.StartedAt = DateTime.UtcNow;
 
         var overallVerdict = Verdict.OK;
@@ -31,44 +31,46 @@ internal class CheckSubmissionCommandHandler(
             try
             {
                 executionResult = await codeExecutor.ExecuteCode(
-                    submission.Language, submission.Code, testCase.Input, cancellationToken);
+                    submission.Code, testCase.Input, submission.Language, cancellationToken);
             }
             catch (KeyNotFoundException)
             {
                 submission.Status = ExecutionStatus.Failed;
                 submission.ErrorMessage = "Конфигурация для языка программирования не найдена";
+                await dbContext.SaveChangesAsync(cancellationToken);
                 return;
             }
-            
+
             var actualOutput = executionResult.Output.Trim();
             var expectedOutput = testCase.ExpectedOutput.Trim();
             var verdict = DetermineVerdict(
-                executionResult, actualOutput, expectedOutput, 
+                executionResult, actualOutput, expectedOutput,
                 submission.MaxTimeSeconds, submission.MaxMemoryMb);
-            
+
             testCase.ActualOutput = actualOutput;
             testCase.Error = executionResult.Error.Trim();
             testCase.ExitCode = executionResult.ExitCode;
             testCase.TimeElapsed = executionResult.TimeElapsedMs;
             testCase.MemoryUsage = executionResult.MemoryUsageMb;
-            
+            testCase.Verdict = verdict;
+
             if (verdict != Verdict.OK)
             {
                 overallVerdict = verdict;
                 break;
             }
         }
-        
+
         submission.OverallVerdict = overallVerdict;
         submission.CompletedAt = DateTime.UtcNow;
         submission.Status = ExecutionStatus.Completed;
-        
+
         await dbContext.SaveChangesAsync(cancellationToken);
     }
-    
+
     private static Verdict DetermineVerdict(
-        CodeExecutionResult executionResult, 
-        string actualOutput, 
+        CodeExecutionResult executionResult,
+        string actualOutput,
         string expectedOutput,
         int? maxTimeSeconds = null,
         int? maxMemoryMb = null)
@@ -78,8 +80,8 @@ internal class CheckSubmissionCommandHandler(
 
         if (executionResult.Stage == ExecutionStage.Runtime)
         {
-            if ((maxTimeSeconds.HasValue 
-                 && executionResult.TimeElapsedMs > maxTimeSeconds.Value * 1000) 
+            if ((maxTimeSeconds.HasValue
+                 && executionResult.TimeElapsedMs > maxTimeSeconds.Value * 1000)
                 || executionResult.ExitCode == -1)
                 return Verdict.TLE;
 

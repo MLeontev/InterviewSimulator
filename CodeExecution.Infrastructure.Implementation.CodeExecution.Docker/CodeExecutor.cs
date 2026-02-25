@@ -7,14 +7,14 @@ namespace CodeExecution.Infrastructure.Implementation.CodeExecution;
 internal class CodeExecutor(IExecutorLanguageProvider languageProvider) : ICodeExecutor
 {
     public async Task<CodeExecutionResult> ExecuteCode(
-        string code, 
-        string input, 
-        string language, 
+        string code,
+        string input,
+        string language,
         CancellationToken cancellationToken = default)
     {
         var langConfig = languageProvider.GetLanguage(language);
 
-        var runCommandRaw = "";
+        string runCommandRaw;
         var compileCommand = "";
 
         if (langConfig.IsCompiled)
@@ -22,7 +22,7 @@ internal class CodeExecutor(IExecutorLanguageProvider languageProvider) : ICodeE
             compileCommand = langConfig.CompileCommandTemplate
                 .Replace("{input}", "/code/" + langConfig.DefaultFileName)
                 .Replace("{output}", "/code/program.out");
-            
+
             runCommandRaw = "/code/program.out";
         }
         else
@@ -30,7 +30,7 @@ internal class CodeExecutor(IExecutorLanguageProvider languageProvider) : ICodeE
             runCommandRaw = langConfig.RunCommandTemplate.Replace("{file_path}", "/code/" + langConfig.DefaultFileName);
         }
 
-        var runCommand = $"/usr/bin/time -f 'TIME_ELAPSED:%e\nMEMORY_USAGE:%M' " + 
+        var runCommand = $"/usr/bin/time -f 'TIME_ELAPSED:%e\nMEMORY_USAGE:%M' " +
                          $"-o /code/time_output.txt " + runCommandRaw;
 
         var request = new ExecuteCodeRequest
@@ -49,7 +49,7 @@ internal class CodeExecutor(IExecutorLanguageProvider languageProvider) : ICodeE
 
         return await ExecuteCodeInternal(request, cancellationToken);
     }
-    
+
     private async Task<CodeExecutionResult> ExecuteCodeInternal(ExecuteCodeRequest request, CancellationToken cancellationToken)
     {
         var tempDir = await PrepareTempFiles(request, cancellationToken);
