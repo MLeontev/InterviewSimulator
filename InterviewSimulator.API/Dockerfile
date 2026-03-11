@@ -1,4 +1,6 @@
-﻿FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS base
+﻿FROM docker:27-cli AS dockercli
+
+FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS base
 USER $APP_UID
 WORKDIR /app
 EXPOSE 8080
@@ -44,6 +46,8 @@ ARG BUILD_CONFIGURATION=Release
 RUN dotnet publish "./InterviewSimulator.API.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
 FROM base AS final
+USER root
 WORKDIR /app
+COPY --from=dockercli /usr/local/bin/docker /usr/local/bin/docker
 COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "InterviewSimulator.API.dll"]

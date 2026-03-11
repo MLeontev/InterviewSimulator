@@ -6,6 +6,9 @@ namespace CodeExecution.Infrastructure.Implementation.CodeExecution;
 
 internal class CodeExecutor(IExecutorLanguageProvider languageProvider) : ICodeExecutor
 {
+    private const string TempRootEnvVar = "CODE_EXECUTION_TEMP_ROOT";
+    private const string DockerPlatformEnvVar = "CODE_EXECUTION_DOCKER_PLATFORM";
+
     public async Task<CodeExecutionResult> ExecuteCode(
         string code,
         string input,
@@ -116,7 +119,10 @@ internal class CodeExecutor(IExecutorLanguageProvider languageProvider) : ICodeE
 
     private async Task<string> PrepareTempFiles(ExecuteCodeRequest request, CancellationToken cancellationToken)
     {
-        var tempDir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+        var tempRoot = ResolveTempRoot();
+        Directory.CreateDirectory(tempRoot);
+
+        var tempDir = Path.Combine(tempRoot, Guid.NewGuid().ToString("N"));
         Directory.CreateDirectory(tempDir);
 
         var sourceFile = Path.Combine(tempDir, request.DefaultFileName);
@@ -133,11 +139,14 @@ internal class CodeExecutor(IExecutorLanguageProvider languageProvider) : ICodeE
         CancellationToken cancellationToken)
     {
         var containerName = $"code_{Guid.NewGuid():N}";
+        var platformArg = ResolveDockerPlatformArgument();
+
         var psi = new ProcessStartInfo
         {
             FileName = "docker",
             Arguments = $"run --rm --name {containerName} -i " +
-                        $"-v {tempDir}:/code " +
+                        platformArg +
+                        $"-v \"{tempDir}:/code\" " +
                         $"--memory={request.MaxMemoryMb}m --cpus={request.MaxCpuCores} " +
                         $"--pids-limit=64 --network none {request.DockerImage} " +
                         $"sh -c \"{runCommand}\"",
@@ -216,5 +225,23 @@ internal class CodeExecutor(IExecutorLanguageProvider languageProvider) : ICodeE
         };
         killProcess.Start();
         await killProcess.WaitForExitAsync(cancellationToken);
+    }
+
+    private static string ResolveTempRoot()
+    {
+        var configured = Environment.GetEnvironmentVariable(TempRootEnvVar);
+        if (!string.IsNullOrWhiteSpace(configured))
+            return configured;
+
+        return Path.GetTempPath();
+    }
+
+    private static string ResolveDockerPlatformArgument()
+    {
+        var platform = Environment.GetEnvironmentVariable(DockerPlatformEnvVar);
+        if (string.IsNullOrWhiteSpace(platform))
+            return string.Empty;
+
+        return $"--platform {platform} ";
     }
 }
