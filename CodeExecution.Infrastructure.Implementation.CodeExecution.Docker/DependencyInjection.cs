@@ -14,6 +14,9 @@ public static class DependencyInjection
         services.AddSingleton<ILanguageProvider>(sp => sp.GetRequiredService<LanguageProvider>());
         services.AddSingleton<IExecutorLanguageProvider>(sp => sp.GetRequiredService<LanguageProvider>());
 
+        services.AddScoped<IExecutionRequestStrategy, CompiledExecutionRequestStrategy>();
+        services.AddScoped<IExecutionRequestStrategy, InterpretedExecutionRequestStrategy>();
+
         services.AddScoped<ICodeExecutor, CodeExecutor>();
 
         return services;

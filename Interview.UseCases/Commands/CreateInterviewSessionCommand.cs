@@ -45,73 +45,27 @@ internal class CreateInterviewSessionCommandHandler(
         var sessionId = Guid.NewGuid();
         var now = DateTime.UtcNow;
 
-        var session = new InterviewSession
-        {
-            Id = sessionId,
-            CandidateId = request.CandidateId,
-            InterviewPresetName = presetInfo.Name,
-            StartTime = now,
-            EndTime = now.AddHours(1),
-            Status = InterviewStatus.InProgress,
-            Questions = []
-        };
+        var prototypes = questions
+            .Select(q => new InterviewQuestionPrototype(q))
+            .ToList();
 
-        var interviewQuestions = new List<InterviewQuestion>();
-        foreach (var (question, index) in questions.Select((q, i) => (q, i)))
-        {
-            var interviewQuestionId = Guid.NewGuid();
-            
-            var interviewQuestion = new InterviewQuestion
-            {
-                Id = interviewQuestionId,
-                InterviewSessionId = sessionId,
-                Text = question.Text,
-                Type = MapQuestionType(question.Type),
-                ProgrammingLanguageCode = question.ProgrammingLanguageCode,
-                OrderIndex = index,
-                ReferenceSolution = question.ReferenceSolution,
-                Status = QuestionStatus.NotStarted,
-                OverallVerdict = Verdict.None,
-                TimeLimitMs = question.TimeLimitMs,
-                MemoryLimitMb = question.MemoryLimitMb,
-                TestCases = MapTestCases(question.TestCases, interviewQuestionId)
-            };
+        var interviewQuestions = prototypes
+            .Select((prototype, index) => prototype.CloneForSession(sessionId, index))
+            .ToList();
 
-            interviewQuestions.Add(interviewQuestion);
-        }
-
-        session.Questions = interviewQuestions;
+        var session = new InterviewSessionBuilder()
+            .WithSessionId(sessionId)
+            .ForCandidate(request.CandidateId)
+            .WithPresetName(presetInfo.Name)
+            .StartsAt(now)
+            .WithDuration(TimeSpan.FromHours(1))
+            .WithQuestions(interviewQuestions)
+            .InProgress()
+            .Build();
         
         await dbContext.InterviewSessions.AddAsync(session, ct);
         await dbContext.SaveChangesAsync(ct);
 
         return Result.Success(sessionId);
-    }
-
-    private static QuestionType MapQuestionType(QuestionBank.InternalApi.QuestionType type)
-        => type switch
-        {
-            QuestionBank.InternalApi.QuestionType.Coding => QuestionType.Coding,
-            QuestionBank.InternalApi.QuestionType.Theory => QuestionType.Theory,
-            _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
-        };
-
-    private static List<TestCase> MapTestCases(List<TestCaseApiDto> testCases, Guid interviewQuestionId)
-    {
-        return testCases
-            .Select((tc, index) => new TestCase
-            {
-                Id = Guid.NewGuid(),
-                InterviewQuestionId = interviewQuestionId,
-                Input = tc.Input,
-                ExpectedOutput = tc.ExpectedOutput,
-                IsHidden = tc.IsHidden,
-                OrderIndex = index,
-                ActualOutput = null,
-                ExecutionTimeMs = null,
-                MemoryUsedKb = null,
-                Verdict = Verdict.None
-            })
-            .ToList();
     }
 }

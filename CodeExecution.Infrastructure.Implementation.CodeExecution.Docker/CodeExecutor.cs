@@ -4,7 +4,9 @@ using CodeExecution.Infrastructure.Interfaces.CodeExecution;
 
 namespace CodeExecution.Infrastructure.Implementation.CodeExecution;
 
-internal class CodeExecutor(IExecutorLanguageProvider languageProvider) : ICodeExecutor
+internal class CodeExecutor(
+    IExecutorLanguageProvider languageProvider,
+    IEnumerable<IExecutionRequestStrategy> executionRequestStrategies) : ICodeExecutor
 {
     public async Task<CodeExecutionResult> ExecuteCode(
         string code,
@@ -13,39 +15,11 @@ internal class CodeExecutor(IExecutorLanguageProvider languageProvider) : ICodeE
         CancellationToken cancellationToken = default)
     {
         var langConfig = languageProvider.GetLanguage(language);
+        var strategy = executionRequestStrategies.FirstOrDefault(x => x.CanHandle(langConfig));
+        if (strategy is null)
+            throw new InvalidOperationException($"Execution strategy not found for language: {langConfig.Code}");
 
-        string runCommandRaw;
-        var compileCommand = "";
-
-        if (langConfig.IsCompiled)
-        {
-            compileCommand = langConfig.CompileCommandTemplate
-                .Replace("{input}", "/code/" + langConfig.DefaultFileName)
-                .Replace("{output}", "/code/program.out");
-
-            runCommandRaw = "/code/program.out";
-        }
-        else
-        {
-            runCommandRaw = langConfig.RunCommandTemplate.Replace("{file_path}", "/code/" + langConfig.DefaultFileName);
-        }
-
-        var runCommand = $"/usr/bin/time -f 'TIME_ELAPSED:%e\nMEMORY_USAGE:%M' " +
-                         $"-o /code/time_output.txt " + runCommandRaw;
-
-        var request = new ExecuteCodeRequest
-        {
-            Code = code,
-            Input = input,
-            IsCompiled = langConfig.IsCompiled,
-            DockerImage = langConfig.DockerImage,
-            RunCommand = runCommand,
-            CompileCommand = compileCommand,
-            DefaultFileName = langConfig.DefaultFileName,
-            DefaultTimeoutSeconds = langConfig.DefaultTimeoutSeconds,
-            MaxMemoryMb = langConfig.MaxMemoryMb,
-            MaxCpuCores = langConfig.MaxCpuCores
-        };
+        var request = strategy.Build(code, input, langConfig);
 
         return await ExecuteCodeInternal(request, cancellationToken);
     }
