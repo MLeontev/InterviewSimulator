@@ -23,7 +23,7 @@ internal class FinishInterviewSessionCommandHandler(IDbContext dbContext) : IReq
             return Result.Failure(Error.Business("SESSION_NOT_ACTIVE", "Сессия уже завершена или отменена"));
         
         session.Status = InterviewStatus.Finished;
-        session.EndTime = DateTime.UtcNow;
+        session.FinishedAt = DateTime.UtcNow;
 
         await dbContext.SaveChangesAsync(ct);
 

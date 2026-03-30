@@ -16,7 +16,7 @@ internal class CheckSubmissionCommandHandler(
     {
         var submission = await dbContext.CodeSubmissions
             .Where(s => s.Id == request.SubmissionId)
-            .Include(s => s.TestCases.OrderBy(tc => tc.Order))
+            .Include(s => s.TestCases.OrderBy(tc => tc.OrderIndex))
             .FirstOrDefaultAsync(cancellationToken: cancellationToken);
 
         if (submission == null)
@@ -31,11 +31,12 @@ internal class CheckSubmissionCommandHandler(
             try
             {
                 executionResult = await codeExecutor.ExecuteCode(
-                    submission.Code, testCase.Input, submission.Language, cancellationToken);
+                    submission.Code, testCase.Input, submission.LanguageCode, cancellationToken);
             }
             catch (KeyNotFoundException)
             {
                 submission.Status = ExecutionStatus.Failed;
+                submission.OverallVerdict = Verdict.FailedSystem;
                 submission.ErrorMessage = "Конфигурация для языка программирования не найдена";
                 await dbContext.SaveChangesAsync(cancellationToken);
                 return;
@@ -45,13 +46,13 @@ internal class CheckSubmissionCommandHandler(
             var expectedOutput = testCase.ExpectedOutput.Trim();
             var verdict = DetermineVerdict(
                 executionResult, actualOutput, expectedOutput,
-                submission.MaxTimeSeconds, submission.MaxMemoryMb);
+                submission.TimeLimitMs, submission.MemoryLimitMb);
 
             testCase.ActualOutput = actualOutput;
             testCase.Error = executionResult.Error.Trim();
             testCase.ExitCode = executionResult.ExitCode;
-            testCase.TimeElapsed = executionResult.TimeElapsedMs;
-            testCase.MemoryUsage = executionResult.MemoryUsageMb;
+            testCase.TimeElapsedMs = executionResult.TimeElapsedMs;
+            testCase.MemoryUsedMb = executionResult.MemoryUsageMb;
             testCase.Verdict = verdict;
 
             if (verdict != Verdict.OK)
@@ -72,7 +73,7 @@ internal class CheckSubmissionCommandHandler(
         CodeExecutionResult executionResult,
         string actualOutput,
         string expectedOutput,
-        int? maxTimeSeconds = null,
+        int? maxTimeMs = null,
         int? maxMemoryMb = null)
     {
         if (executionResult.Stage == ExecutionStage.Compilation && executionResult.ExitCode != 0)
@@ -80,8 +81,8 @@ internal class CheckSubmissionCommandHandler(
 
         if (executionResult.Stage == ExecutionStage.Runtime)
         {
-            if ((maxTimeSeconds.HasValue
-                 && executionResult.TimeElapsedMs > maxTimeSeconds.Value * 1000)
+            if ((maxTimeMs.HasValue
+                 && executionResult.TimeElapsedMs > maxTimeMs.Value)
                 || executionResult.ExitCode == -1)
                 return Verdict.TLE;
 

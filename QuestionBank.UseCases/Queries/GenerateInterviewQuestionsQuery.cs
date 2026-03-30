@@ -15,6 +15,7 @@ internal class GenerateInterviewQuestionsHandler(IDbContext dbContext) : IReques
         var preset = await dbContext.InterviewPresets
             .Include(p => p.Technologies)
             .ThenInclude(pt => pt.Technology)
+            .Include(p => p.InterviewPresetCompetencies)
             .FirstOrDefaultAsync(p => p.Id == request.InterviewPresetId, ct);
 
         if (preset == null)
@@ -28,21 +29,15 @@ internal class GenerateInterviewQuestionsHandler(IDbContext dbContext) : IReques
 
         var language = programmingLanguages.FirstOrDefault();
 
-        var matrix = await dbContext.CompetencyMatrices
-            .Include(m => m.Competencies)
-            .ThenInclude(c => c.Competency)
-            .Where(m => m.GradeId == preset.GradeId && m.SpecializationId == preset.SpecializationId)
-            .FirstOrDefaultAsync(ct);
-
-        if (matrix == null)
+        if (preset.InterviewPresetCompetencies.Count == 0)
             return Result.Failure<IReadOnlyList<InterviewQuestionDto>>(
-                Error.NotFound("COMPETENCY_MATRIX_NOT_FOUND", "Матрица компетенций не найдена"));
+                Error.NotFound("PRESET_COMPETENCIES_NOT_FOUND", "Для пресета не настроены компетенции"));
 
         var result = new List<InterviewQuestionDto>();
         var takenQuestions = new HashSet<Guid>();
-        var presetTechIds = preset.Technologies.Select(t => t.TechnologyId).ToList();
+        var presetTechIds = preset.Technologies.Select(t => t.TechnologyId).ToHashSet();
 
-        foreach (var competency in matrix.Competencies)
+        foreach (var competency in preset.InterviewPresetCompetencies)
         {
             var takeCount = (int)Math.Floor(competency.Weight * request.TotalQuestions);
             if (takeCount <= 0) continue;
@@ -52,7 +47,7 @@ internal class GenerateInterviewQuestionsHandler(IDbContext dbContext) : IReques
                 .Include(q => q.LanguageLimits)
                 .Where(q => q.CompetencyId == competency.CompetencyId
                             && q.GradeId == preset.GradeId
-                            && presetTechIds.Contains(q.TechnologyId)
+                            && (!q.TechnologyId.HasValue || presetTechIds.Contains(q.TechnologyId.Value))
                             && !takenQuestions.Contains(q.Id));
 
             var questions = await questionsQuery
@@ -74,7 +69,7 @@ internal class GenerateInterviewQuestionsHandler(IDbContext dbContext) : IReques
                 .Include(q => q.TestCases)
                 .Include(q => q.LanguageLimits)
                 .Where(q => q.GradeId == preset.GradeId
-                            && presetTechIds.Contains(q.TechnologyId)
+                            && (!q.TechnologyId.HasValue || presetTechIds.Contains(q.TechnologyId.Value))
                             && !takenQuestions.Contains(q.Id))
                 .OrderBy(_ => Guid.NewGuid())
                 .Take(missing)
@@ -95,7 +90,7 @@ internal class GenerateInterviewQuestionsHandler(IDbContext dbContext) : IReques
             .Select((q, idx) => q with { OrderIndex = idx + 1 })
             .ToList();
 
-        return result;
+        return Result.Success<IReadOnlyList<InterviewQuestionDto>>(result);
     }
 
     private InterviewQuestionDto MapToDto(Question q, Technology? language)

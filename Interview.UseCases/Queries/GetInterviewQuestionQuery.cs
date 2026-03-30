@@ -43,7 +43,7 @@ internal class GetInterviewQuestionQueryHandler(IDbContext dbContext) : IRequest
                     ActualOutput = tc.ActualOutput,
                     Verdict = tc.Verdict,
                     ExecutionTimeMs = tc.ExecutionTimeMs,
-                    MemoryUsedKb = tc.MemoryUsedKb
+                    MemoryUsedMb = tc.MemoryUsedMb
                 })
                 .ToList()
         };
@@ -75,5 +75,5 @@ public record TestCaseDto
     public string? ActualOutput { get; init; }
     public Verdict Verdict { get; init; }
     public double? ExecutionTimeMs { get; init; }
-    public double? MemoryUsedKb { get; init; }
+    public double? MemoryUsedMb { get; init; }
 }

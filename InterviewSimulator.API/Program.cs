@@ -5,9 +5,9 @@ using CodeExecution.Infrastructure.Workers;
 using CodeExecution.UseCases;
 using Interview.Infrastructure.Implementation.DataAccess;
 using Interview.UseCases;
-using InterviewSimulator.API;
 using InterviewSimulator.API.Extensions;
 using InterviewSimulator.API.SeedData;
+using Interview.Presentation;
 using MassTransit;
 using QuestionBank.Infrastructure.Implementation.DataAccess;
 using QuestionBank.ModuleContract.Implementation;
@@ -50,6 +50,8 @@ builder.Services.AddUsersDataAccess(builder.Configuration);
 builder.Services.AddMassTransit(configure =>
 {
     configure.SetKebabCaseEndpointNameFormatter();
+    configure.AddConsumer<CodeExecution.Infrastructure.Workers.CodeSubmissionCreatedConsumer>();
+    configure.AddConsumer<CodeSubmissionCompletedConsumer>();
 
     configure.UsingInMemory((context, cfg) =>
     {

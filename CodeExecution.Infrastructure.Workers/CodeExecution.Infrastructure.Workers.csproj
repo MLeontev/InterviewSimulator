@@ -7,6 +7,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\Interview.IntegrationEvents\Interview.IntegrationEvents.csproj" />
       <ProjectReference Include="..\CodeExecution.IntegrationEvents\CodeExecution.IntegrationEvents.csproj" />
       <ProjectReference Include="..\CodeExecution.UseCases\CodeExecution.UseCases.csproj" />
     </ItemGroup>

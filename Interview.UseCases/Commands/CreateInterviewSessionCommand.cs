@@ -49,9 +49,10 @@ internal class CreateInterviewSessionCommandHandler(
         {
             Id = sessionId,
             CandidateId = request.CandidateId,
+            InterviewPresetId = request.InterviewPresetId,
             InterviewPresetName = presetInfo.Name,
-            StartTime = now,
-            EndTime = now.AddHours(1),
+            StartedAt = now,
+            PlannedEndAt = now.AddHours(1),
             Status = InterviewStatus.InProgress,
             Questions = []
         };
@@ -68,7 +69,7 @@ internal class CreateInterviewSessionCommandHandler(
                 Text = question.Text,
                 Type = MapQuestionType(question.Type),
                 ProgrammingLanguageCode = question.ProgrammingLanguageCode,
-                OrderIndex = index,
+                OrderIndex = index + 1,
                 ReferenceSolution = question.ReferenceSolution,
                 Status = QuestionStatus.NotStarted,
                 OverallVerdict = Verdict.None,
@@ -106,10 +107,10 @@ internal class CreateInterviewSessionCommandHandler(
                 Input = tc.Input,
                 ExpectedOutput = tc.ExpectedOutput,
                 IsHidden = tc.IsHidden,
-                OrderIndex = index,
+                OrderIndex = index + 1,
                 ActualOutput = null,
                 ExecutionTimeMs = null,
-                MemoryUsedKb = null,
+                MemoryUsedMb = null,
                 Verdict = Verdict.None
             })
             .ToList();

@@ -36,9 +36,9 @@ public static class DbInitializer
     {
         var grades = new[]
         {
-            new Grade { Id = JuniorId, Name = "Junior" },
-            new Grade { Id = MiddleId, Name = "Middle" },
-            new Grade { Id = SeniorId, Name = "Senior" }
+            new Grade { Id = JuniorId, Code = "junior", Name = "Junior" },
+            new Grade { Id = MiddleId, Code = "middle", Name = "Middle" },
+            new Grade { Id = SeniorId, Code = "senior", Name = "Senior" }
         };
 
         foreach (var g in grades)
@@ -52,8 +52,8 @@ public static class DbInitializer
     {
         var specs = new[]
         {
-            new Specialization { Id = FrontendId, Name = "Frontend", Description = "Web UI" },
-            new Specialization { Id = BackendId, Name = "Backend", Description = "Server-side" }
+            new Specialization { Id = FrontendId, Code = "frontend", Name = "Frontend", Description = "Web UI" },
+            new Specialization { Id = BackendId, Code = "backend", Name = "Backend", Description = "Server-side" }
         };
 
         foreach (var s in specs)
@@ -69,10 +69,10 @@ public static class DbInitializer
         {
             new Technology { Id = JavaScriptId, Name = "JavaScript", Code = "javascript", Category = TechnologyCategory.ProgrammingLanguage },
             new Technology { Id = CSharpId, Name = "C#", Code = "csharp", Category = TechnologyCategory.ProgrammingLanguage },
-            new Technology { Id = ReactId, Name = "React", Category = TechnologyCategory.Framework },
-            new Technology { Id = AspNetId, Name = "ASP.NET Core", Category = TechnologyCategory.Framework },
-            new Technology { Id = EfCoreId, Name = "Entity Framework Core", Category = TechnologyCategory.ORM },
-            new Technology { Id = PostgresId, Name = "PostgreSQL", Category = TechnologyCategory.Database },
+            new Technology { Id = ReactId, Name = "React", Code = "react", Category = TechnologyCategory.Framework },
+            new Technology { Id = AspNetId, Name = "ASP.NET Core", Code = "aspnet-core", Category = TechnologyCategory.Framework },
+            new Technology { Id = EfCoreId, Name = "Entity Framework Core", Code = "ef-core", Category = TechnologyCategory.ORM },
+            new Technology { Id = PostgresId, Name = "PostgreSQL", Code = "postgresql", Category = TechnologyCategory.Database },
         };
 
         foreach (var t in techs)
@@ -91,6 +91,7 @@ public static class DbInitializer
             var preset = new InterviewPreset
             {
                 Id = PresetFrontendJuniorId,
+                Code = "frontend-react-junior",
                 Name = "Frontend React Junior",
                 GradeId = JuniorId,
                 SpecializationId = FrontendId
@@ -108,6 +109,7 @@ public static class DbInitializer
             var preset = new InterviewPreset
             {
                 Id = PresetBackendJuniorId,
+                Code = "backend-dotnet-junior",
                 Name = ".NET Backend Junior",
                 GradeId = JuniorId,
                 SpecializationId = BackendId
@@ -133,6 +135,7 @@ public static class DbInitializer
         var oop = new Competency
         {
             Id = Guid.NewGuid(),
+            Code = "oop",
             Name = "OOP",
             Description = "Объектно-ориентированное программирование: классы, наследование, интерфейсы"
         };
@@ -140,6 +143,7 @@ public static class DbInitializer
         var collections = new Competency
         {
             Id = Guid.NewGuid(),
+            Code = "collections",
             Name = "Collections",
             Description = "Списки, словари, массивы, IEnumerable/IEnumerator"
         };
@@ -147,6 +151,7 @@ public static class DbInitializer
         var dbKnowledge = new Competency
         {
             Id = Guid.NewGuid(),
+            Code = "databases",
             Name = "Databases",
             Description = "Основы работы с реляционными БД, SQL, Entity Framework"
         };
@@ -154,33 +159,56 @@ public static class DbInitializer
         var algorithms = new Competency
         {
             Id = Guid.NewGuid(),
+            Code = "algorithms",
             Name = "Algorithms",
             Description = "Алгоритмы, структуры данных, базовые задачи на массивы, строки, списки"
         };
 
         await db.AddRangeAsync(oop, collections, dbKnowledge, algorithms);
-        
-        var juniorBackendGrade = await db.Grades.FirstAsync(g => g.Name == "Junior");
-        var backendSpec = await db.Specializations.FirstAsync(s => s.Name == "Backend");
 
-        var matrix = new CompetencyMatrix
+        var gradeId = JuniorId;
+        var csharpTech = await db.Technologies.FirstAsync(t => t.Code == "csharp");
+
+        var presetCompetencies = new[]
         {
-            Id = Guid.NewGuid(),
-            GradeId = juniorBackendGrade.Id,
-            SpecializationId = backendSpec.Id,
-            Competencies =
+            new InterviewPresetCompetency
             {
-                new CompetencyMatrixItem { Id = Guid.NewGuid(), Competency = oop, Weight = 0.3 },
-                new CompetencyMatrixItem { Id = Guid.NewGuid(), Competency = collections, Weight = 0.2 },
-                new CompetencyMatrixItem { Id = Guid.NewGuid(), Competency = dbKnowledge, Weight = 0.2 },
-                new CompetencyMatrixItem { Id = Guid.NewGuid(), Competency = algorithms, Weight = 0.3 }
+                Id = Guid.NewGuid(),
+                InterviewPresetId = PresetBackendJuniorId,
+                CompetencyId = oop.Id,
+                Weight = 0.3
+            },
+            new InterviewPresetCompetency
+            {
+                Id = Guid.NewGuid(),
+                InterviewPresetId = PresetBackendJuniorId,
+                CompetencyId = collections.Id,
+                Weight = 0.2
+            },
+            new InterviewPresetCompetency
+            {
+                Id = Guid.NewGuid(),
+                InterviewPresetId = PresetBackendJuniorId,
+                CompetencyId = dbKnowledge.Id,
+                Weight = 0.2
+            },
+            new InterviewPresetCompetency
+            {
+                Id = Guid.NewGuid(),
+                InterviewPresetId = PresetBackendJuniorId,
+                CompetencyId = algorithms.Id,
+                Weight = 0.3
             }
         };
 
-        await db.AddAsync(matrix);
-        
-        var gradeId = juniorBackendGrade.Id;
-        var csharpTech = await db.Technologies.FirstAsync(t => t.Code == "csharp");
+        foreach (var pc in presetCompetencies)
+        {
+            if (!await db.InterviewPresetCompetencies.AnyAsync(x =>
+                    x.InterviewPresetId == pc.InterviewPresetId && x.CompetencyId == pc.CompetencyId))
+            {
+                db.InterviewPresetCompetencies.Add(pc);
+            }
+        }
 
         var q1 = new Question
         {

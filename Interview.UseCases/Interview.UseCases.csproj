@@ -8,13 +8,17 @@
 
     <ItemGroup>
       <ProjectReference Include="..\Interview.Domain\Interview.Domain.csproj" />
+      <ProjectReference Include="..\Interview.IntegrationEvents\Interview.IntegrationEvents.csproj" />
       <ProjectReference Include="..\Interview.Infrastructure.Interfaces.DataAccess\Interview.Infrastructure.Interfaces.DataAccess.csproj" />
+      <ProjectReference Include="..\CodeExecution.IntegrationEvents\CodeExecution.IntegrationEvents.csproj" />
       <ProjectReference Include="..\QuestionBank.ModuleContract\QuestionBank.ModuleContract.csproj" />
       <ProjectReference Include="..\Framework.Domain\Framework.Domain.csproj" />
     </ItemGroup>
 
     <ItemGroup>
       <PackageReference Include="MediatR" Version="14.0.0" />
+      <PackageReference Include="MassTransit.Abstractions" Version="8.5.7" />
+      <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.2" />
     </ItemGroup>
 
 </Project>

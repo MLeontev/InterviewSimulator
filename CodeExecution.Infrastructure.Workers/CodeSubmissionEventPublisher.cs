@@ -21,7 +21,7 @@ internal class CodeSubmissionEventPublisher(IServiceProvider serviceProvider, IB
             var submissions = await dbContext.CodeSubmissions
                 .Where(s => !s.IsEventPublished 
                             && (s.Status == ExecutionStatus.Completed || s.Status == ExecutionStatus.Failed))
-                .Include(s => s.TestCases.OrderBy(tc => tc.Order))
+                .Include(s => s.TestCases.OrderBy(tc => tc.OrderIndex))
                 .OrderBy(s => s.CompletedAt)
                 .ToListAsync(stoppingToken);
 
@@ -50,12 +50,12 @@ internal class CodeSubmissionEventPublisher(IServiceProvider serviceProvider, IB
                 TestCaseId: testCase.Id,
                 Input: testCase.Input,
                 ExpectedOutput: testCase.ExpectedOutput,
-                ActualOutput: testCase.ActualOutput,
-                Order: testCase.Order,
-                Error: testCase.Error,
-                ExitCode: testCase.ExitCode,
-                TimeElapsed: testCase.TimeElapsed,
-                MemoryUsage: testCase.MemoryUsage,
+                ActualOutput: testCase.ActualOutput ?? string.Empty,
+                Order: testCase.OrderIndex,
+                Error: testCase.Error ?? string.Empty,
+                ExitCode: testCase.ExitCode ?? 0,
+                TimeElapsed: testCase.TimeElapsedMs ?? 0,
+                MemoryUsage: testCase.MemoryUsedMb ?? 0,
                 Verdict: MapVerdict(testCase.Verdict)));
 
             if (testCase.Verdict == Verdict.OK)

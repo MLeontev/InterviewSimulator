@@ -14,13 +14,13 @@ internal class GetCandidateSessionsQueryHandler(IDbContext dbContext) : IRequest
     {
         var sessions = await dbContext.InterviewSessions
             .Where(s => s.CandidateId == request.CandidateId)
-            .OrderByDescending(s => s.StartTime)
+            .OrderByDescending(s => s.StartedAt)
             .Select(s => new CandidateSessionListItemDto
             {
                 Id = s.Id,
                 InterviewPresetName = s.InterviewPresetName,
-                StartTime = s.StartTime,
-                EndTime = s.EndTime,
+                StartTime = s.StartedAt,
+                EndTime = s.FinishedAt ?? s.PlannedEndAt,
                 Status = s.Status.ToString(),
                 TotalQuestions = s.Questions.Count,
                 AnsweredQuestions = s.Questions.Count(q => q.Status >= QuestionStatus.Submitted)

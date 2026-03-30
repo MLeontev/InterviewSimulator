@@ -1,4 +1,5 @@
 using Framework.Controllers;
+using Interview.UseCases.Commands;
 using Interview.UseCases.Queries;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -15,4 +16,13 @@ public class InterviewQuestionsController(ISender sender) : ControllerBase
         var result = await sender.Send(new GetInterviewQuestionQuery(id), ct);
         return result.IsFailure ? result.ToProblem() : Ok(result.Value);
     }
+
+    [HttpPost("{id:guid}/submit-code")]
+    public async Task<IActionResult> SubmitCode(Guid id, [FromBody] SubmitCodeRequest request, CancellationToken ct)
+    {
+        var result = await sender.Send(new SubmitInterviewCodeAnswerCommand(id, request.Code), ct);
+        return result.IsFailure ? result.ToProblem() : Accepted();
+    }
 }
+
+public sealed record SubmitCodeRequest(string Code);

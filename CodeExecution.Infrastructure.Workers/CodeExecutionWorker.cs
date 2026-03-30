@@ -20,7 +20,7 @@ internal class CodeExecutionWorker(IServiceProvider serviceProvider) : Backgroun
             var submissionId = dbContext.CodeSubmissions
                 .FromSqlRaw("""
                             UPDATE "CodeExecution"."CodeSubmissions"
-                            SET "Status" = 'InProgress'
+                            SET "Status" = 'Running'
                             WHERE "Id" = (
                                 SELECT "Id"
                                 FROM "CodeExecution"."CodeSubmissions"
