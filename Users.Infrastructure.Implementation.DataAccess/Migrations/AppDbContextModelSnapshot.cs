@@ -47,6 +47,12 @@ namespace Users.Infrastructure.Implementation.DataAccess.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("Email")
+                        .IsUnique();
+
+                    b.HasIndex("IdentityId")
+                        .IsUnique();
+
                     b.ToTable("Users", "Users");
                 });
 #pragma warning restore 612, 618

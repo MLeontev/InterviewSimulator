@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Interview.Infrastructure.Implementation.DataAccess.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260202151337_OneAnswerField")]
-    partial class OneAnswerField
+    [Migration("20260330104612_Initial")]
+    partial class Initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -78,13 +78,18 @@ namespace Interview.Infrastructure.Implementation.DataAccess.Migrations
                     b.Property<int?>("TimeLimitMs")
                         .HasColumnType("integer");
 
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<string>("Type")
                         .IsRequired()
                         .HasColumnType("text");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("InterviewSessionId");
+                    b.HasIndex("InterviewSessionId", "OrderIndex")
+                        .IsUnique();
 
                     b.ToTable("InterviewQuestions", "Interview");
                 });
@@ -96,19 +101,25 @@ namespace Interview.Infrastructure.Implementation.DataAccess.Migrations
                         .HasColumnType("uuid");
 
                     b.Property<string>("AiFeedbackJson")
-                        .HasColumnType("text");
+                        .HasColumnType("jsonb");
 
                     b.Property<Guid>("CandidateId")
                         .HasColumnType("uuid");
 
-                    b.Property<DateTime>("EndTime")
+                    b.Property<DateTime?>("FinishedAt")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("InterviewPresetId")
+                        .HasColumnType("uuid");
 
                     b.Property<string>("InterviewPresetName")
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<DateTime>("StartTime")
+                    b.Property<DateTime>("PlannedEndAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("StartedAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Status")
@@ -116,6 +127,10 @@ namespace Interview.Infrastructure.Implementation.DataAccess.Migrations
                         .HasColumnType("text");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CandidateId")
+                        .IsUnique()
+                        .HasFilter("\"Status\" = 'InProgress'");
 
                     b.ToTable("InterviewSessions", "Interview");
                 });
@@ -146,7 +161,7 @@ namespace Interview.Infrastructure.Implementation.DataAccess.Migrations
                     b.Property<bool>("IsHidden")
                         .HasColumnType("boolean");
 
-                    b.Property<double?>("MemoryUsedKb")
+                    b.Property<double?>("MemoryUsedMb")
                         .HasColumnType("double precision");
 
                     b.Property<int>("OrderIndex")
@@ -158,7 +173,8 @@ namespace Interview.Infrastructure.Implementation.DataAccess.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("InterviewQuestionId");
+                    b.HasIndex("InterviewQuestionId", "OrderIndex")
+                        .IsUnique();
 
                     b.ToTable("TestCases", "Interview");
                 });

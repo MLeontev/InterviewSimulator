@@ -12,7 +12,7 @@ using QuestionBank.Infrastructure.Implementation.DataAccess;
 namespace QuestionBank.Infrastructure.Implementation.DataAccess.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260124204701_Initial")]
+    [Migration("20260330104621_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -46,9 +46,10 @@ namespace QuestionBank.Infrastructure.Implementation.DataAccess.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CodingQuestionId");
-
                     b.HasIndex("LanguageId");
+
+                    b.HasIndex("CodingQuestionId", "LanguageId")
+                        .IsUnique();
 
                     b.ToTable("CodingQuestionLanguageLimits", "QuestionBank");
                 });
@@ -59,6 +60,10 @@ namespace QuestionBank.Infrastructure.Implementation.DataAccess.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasColumnType("text");
@@ -69,53 +74,10 @@ namespace QuestionBank.Infrastructure.Implementation.DataAccess.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Competencies", "QuestionBank");
-                });
-
-            modelBuilder.Entity("QuestionBank.Domain.CompetencyMatrix", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("GradeId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("SpecializationId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("SpecializationId");
-
-                    b.HasIndex("GradeId", "SpecializationId")
+                    b.HasIndex("Code")
                         .IsUnique();
 
-                    b.ToTable("CompetencyMatrices", "QuestionBank");
-                });
-
-            modelBuilder.Entity("QuestionBank.Domain.CompetencyMatrixItem", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("CompetencyId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid?>("CompetencyMatrixId")
-                        .HasColumnType("uuid");
-
-                    b.Property<double>("Weight")
-                        .HasColumnType("double precision");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CompetencyId");
-
-                    b.HasIndex("CompetencyMatrixId");
-
-                    b.ToTable("CompetencyMatrixItems", "QuestionBank");
+                    b.ToTable("Competencies", "QuestionBank");
                 });
 
             modelBuilder.Entity("QuestionBank.Domain.Grade", b =>
@@ -124,6 +86,10 @@ namespace QuestionBank.Infrastructure.Implementation.DataAccess.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasColumnType("text");
@@ -133,6 +99,9 @@ namespace QuestionBank.Infrastructure.Implementation.DataAccess.Migrations
                         .HasColumnType("text");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("Code")
+                        .IsUnique();
 
                     b.ToTable("Grades", "QuestionBank");
                 });
@@ -143,6 +112,10 @@ namespace QuestionBank.Infrastructure.Implementation.DataAccess.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<Guid>("GradeId")
                         .HasColumnType("uuid");
 
@@ -155,11 +128,39 @@ namespace QuestionBank.Infrastructure.Implementation.DataAccess.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("Code")
+                        .IsUnique();
+
                     b.HasIndex("GradeId");
 
                     b.HasIndex("SpecializationId");
 
                     b.ToTable("InterviewPresets", "QuestionBank");
+                });
+
+            modelBuilder.Entity("QuestionBank.Domain.InterviewPresetCompetency", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("CompetencyId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("InterviewPresetId")
+                        .HasColumnType("uuid");
+
+                    b.Property<double>("Weight")
+                        .HasColumnType("double precision");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CompetencyId");
+
+                    b.HasIndex("InterviewPresetId", "CompetencyId")
+                        .IsUnique();
+
+                    b.ToTable("InterviewPresetCompetencies", "QuestionBank");
                 });
 
             modelBuilder.Entity("QuestionBank.Domain.InterviewPresetTechnology", b =>
@@ -193,10 +194,14 @@ namespace QuestionBank.Infrastructure.Implementation.DataAccess.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<Guid>("TechnologyId")
+                    b.Property<Guid?>("TechnologyId")
                         .HasColumnType("uuid");
 
                     b.Property<string>("Text")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Title")
                         .IsRequired()
                         .HasColumnType("text");
 
@@ -221,6 +226,10 @@ namespace QuestionBank.Infrastructure.Implementation.DataAccess.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasColumnType("text");
@@ -230,6 +239,9 @@ namespace QuestionBank.Infrastructure.Implementation.DataAccess.Migrations
                         .HasColumnType("text");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("Code")
+                        .IsUnique();
 
                     b.ToTable("Specializations", "QuestionBank");
                 });
@@ -244,6 +256,7 @@ namespace QuestionBank.Infrastructure.Implementation.DataAccess.Migrations
                         .HasColumnType("integer");
 
                     b.Property<string>("Code")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("Description")
@@ -255,6 +268,9 @@ namespace QuestionBank.Infrastructure.Implementation.DataAccess.Migrations
                         .HasColumnType("text");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("Code")
+                        .IsUnique();
 
                     b.ToTable("Technologies", "QuestionBank");
                 });
@@ -308,40 +324,6 @@ namespace QuestionBank.Infrastructure.Implementation.DataAccess.Migrations
                     b.Navigation("Language");
                 });
 
-            modelBuilder.Entity("QuestionBank.Domain.CompetencyMatrix", b =>
-                {
-                    b.HasOne("QuestionBank.Domain.Grade", "Grade")
-                        .WithMany()
-                        .HasForeignKey("GradeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("QuestionBank.Domain.Specialization", "Specialization")
-                        .WithMany()
-                        .HasForeignKey("SpecializationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Grade");
-
-                    b.Navigation("Specialization");
-                });
-
-            modelBuilder.Entity("QuestionBank.Domain.CompetencyMatrixItem", b =>
-                {
-                    b.HasOne("QuestionBank.Domain.Competency", "Competency")
-                        .WithMany()
-                        .HasForeignKey("CompetencyId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("QuestionBank.Domain.CompetencyMatrix", null)
-                        .WithMany("Competencies")
-                        .HasForeignKey("CompetencyMatrixId");
-
-                    b.Navigation("Competency");
-                });
-
             modelBuilder.Entity("QuestionBank.Domain.InterviewPreset", b =>
                 {
                     b.HasOne("QuestionBank.Domain.Grade", "Grade")
@@ -359,6 +341,25 @@ namespace QuestionBank.Infrastructure.Implementation.DataAccess.Migrations
                     b.Navigation("Grade");
 
                     b.Navigation("Specialization");
+                });
+
+            modelBuilder.Entity("QuestionBank.Domain.InterviewPresetCompetency", b =>
+                {
+                    b.HasOne("QuestionBank.Domain.Competency", "Competency")
+                        .WithMany()
+                        .HasForeignKey("CompetencyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("QuestionBank.Domain.InterviewPreset", "InterviewPreset")
+                        .WithMany("InterviewPresetCompetencies")
+                        .HasForeignKey("InterviewPresetId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Competency");
+
+                    b.Navigation("InterviewPreset");
                 });
 
             modelBuilder.Entity("QuestionBank.Domain.InterviewPresetTechnology", b =>
@@ -396,9 +397,7 @@ namespace QuestionBank.Infrastructure.Implementation.DataAccess.Migrations
 
                     b.HasOne("QuestionBank.Domain.Technology", "Technology")
                         .WithMany()
-                        .HasForeignKey("TechnologyId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("TechnologyId");
 
                     b.Navigation("Competency");
 
@@ -418,13 +417,10 @@ namespace QuestionBank.Infrastructure.Implementation.DataAccess.Migrations
                     b.Navigation("CodingQuestion");
                 });
 
-            modelBuilder.Entity("QuestionBank.Domain.CompetencyMatrix", b =>
-                {
-                    b.Navigation("Competencies");
-                });
-
             modelBuilder.Entity("QuestionBank.Domain.InterviewPreset", b =>
                 {
+                    b.Navigation("InterviewPresetCompetencies");
+
                     b.Navigation("Technologies");
                 });
 

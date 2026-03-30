@@ -29,6 +29,20 @@ namespace Users.Infrastructure.Implementation.DataAccess.Migrations
                 {
                     table.PrimaryKey("PK_Users", x => x.Id);
                 });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Users_Email",
+                schema: "Users",
+                table: "Users",
+                column: "Email",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Users_IdentityId",
+                schema: "Users",
+                table: "Users",
+                column: "IdentityId",
+                unique: true);
         }
 
         /// <inheritdoc />

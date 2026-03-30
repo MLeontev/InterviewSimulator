@@ -20,14 +20,18 @@ namespace CodeExecution.Infrastructure.Implementation.DataAccess.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    InterviewQuestionId = table.Column<Guid>(type: "uuid", nullable: false),
                     Code = table.Column<string>(type: "text", nullable: false),
-                    Language = table.Column<string>(type: "text", nullable: false),
-                    MaxTimeSeconds = table.Column<int>(type: "integer", nullable: true),
-                    MaxMemoryMb = table.Column<int>(type: "integer", nullable: true),
+                    LanguageCode = table.Column<string>(type: "text", nullable: false),
+                    TimeLimitMs = table.Column<int>(type: "integer", nullable: false),
+                    MemoryLimitMb = table.Column<int>(type: "integer", nullable: false),
                     Status = table.Column<string>(type: "text", nullable: false),
+                    OverallVerdict = table.Column<string>(type: "text", nullable: false),
+                    ErrorMessage = table.Column<string>(type: "text", nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     StartedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    CompletedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
+                    CompletedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    IsEventPublished = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -41,13 +45,14 @@ namespace CodeExecution.Infrastructure.Implementation.DataAccess.Migrations
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     SubmissionId = table.Column<Guid>(type: "uuid", nullable: false),
+                    OrderIndex = table.Column<int>(type: "integer", nullable: false),
                     Input = table.Column<string>(type: "text", nullable: false),
                     ExpectedOutput = table.Column<string>(type: "text", nullable: false),
-                    ActualOutput = table.Column<string>(type: "text", nullable: false),
-                    Error = table.Column<string>(type: "text", nullable: false),
-                    ExitCode = table.Column<int>(type: "integer", nullable: false),
-                    TimeElapsed = table.Column<double>(type: "double precision", nullable: false),
-                    MemoryUsage = table.Column<double>(type: "double precision", nullable: false),
+                    ActualOutput = table.Column<string>(type: "text", nullable: true),
+                    Error = table.Column<string>(type: "text", nullable: true),
+                    ExitCode = table.Column<int>(type: "integer", nullable: true),
+                    TimeElapsedMs = table.Column<double>(type: "double precision", nullable: true),
+                    MemoryUsedMb = table.Column<double>(type: "double precision", nullable: true),
                     Verdict = table.Column<string>(type: "text", nullable: false)
                 },
                 constraints: table =>
@@ -63,22 +68,11 @@ namespace CodeExecution.Infrastructure.Implementation.DataAccess.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_CodeSubmissions_CreatedAt",
-                schema: "CodeExecution",
-                table: "CodeSubmissions",
-                column: "CreatedAt");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_CodeSubmissions_Status",
-                schema: "CodeExecution",
-                table: "CodeSubmissions",
-                column: "Status");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_CodeSubmissionTestCases_SubmissionId",
+                name: "IX_CodeSubmissionTestCases_SubmissionId_OrderIndex",
                 schema: "CodeExecution",
                 table: "CodeSubmissionTestCases",
-                column: "SubmissionId");
+                columns: new[] { "SubmissionId", "OrderIndex" },
+                unique: true);
         }
 
         /// <inheritdoc />

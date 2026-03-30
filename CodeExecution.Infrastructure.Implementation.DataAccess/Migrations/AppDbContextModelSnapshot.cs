@@ -40,20 +40,19 @@ namespace CodeExecution.Infrastructure.Implementation.DataAccess.Migrations
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("ErrorMessage")
-                        .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<Guid>("InterviewQuestionId")
+                        .HasColumnType("uuid");
 
                     b.Property<bool>("IsEventPublished")
                         .HasColumnType("boolean");
 
-                    b.Property<string>("Language")
+                    b.Property<string>("LanguageCode")
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<int?>("MaxMemoryMb")
-                        .HasColumnType("integer");
-
-                    b.Property<int?>("MaxTimeSeconds")
+                    b.Property<int>("MemoryLimitMb")
                         .HasColumnType("integer");
 
                     b.Property<string>("OverallVerdict")
@@ -67,11 +66,10 @@ namespace CodeExecution.Infrastructure.Implementation.DataAccess.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<int>("TimeLimitMs")
+                        .HasColumnType("integer");
+
                     b.HasKey("Id");
-
-                    b.HasIndex("CreatedAt");
-
-                    b.HasIndex("Status");
 
                     b.ToTable("CodeSubmissions", "CodeExecution");
                 });
@@ -83,14 +81,12 @@ namespace CodeExecution.Infrastructure.Implementation.DataAccess.Migrations
                         .HasColumnType("uuid");
 
                     b.Property<string>("ActualOutput")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("Error")
-                        .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<int>("ExitCode")
+                    b.Property<int?>("ExitCode")
                         .HasColumnType("integer");
 
                     b.Property<string>("ExpectedOutput")
@@ -101,16 +97,16 @@ namespace CodeExecution.Infrastructure.Implementation.DataAccess.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<double>("MemoryUsage")
+                    b.Property<double?>("MemoryUsedMb")
                         .HasColumnType("double precision");
 
-                    b.Property<int>("Order")
+                    b.Property<int>("OrderIndex")
                         .HasColumnType("integer");
 
                     b.Property<Guid>("SubmissionId")
                         .HasColumnType("uuid");
 
-                    b.Property<double>("TimeElapsed")
+                    b.Property<double?>("TimeElapsedMs")
                         .HasColumnType("double precision");
 
                     b.Property<string>("Verdict")
@@ -119,7 +115,8 @@ namespace CodeExecution.Infrastructure.Implementation.DataAccess.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("SubmissionId");
+                    b.HasIndex("SubmissionId", "OrderIndex")
+                        .IsUnique();
 
                     b.ToTable("CodeSubmissionTestCases", "CodeExecution");
                 });

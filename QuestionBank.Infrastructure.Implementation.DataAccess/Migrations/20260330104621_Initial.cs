@@ -20,6 +20,7 @@ namespace QuestionBank.Infrastructure.Implementation.DataAccess.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    Code = table.Column<string>(type: "text", nullable: false),
                     Name = table.Column<string>(type: "text", nullable: false),
                     Description = table.Column<string>(type: "text", nullable: false)
                 },
@@ -34,6 +35,7 @@ namespace QuestionBank.Infrastructure.Implementation.DataAccess.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    Code = table.Column<string>(type: "text", nullable: false),
                     Name = table.Column<string>(type: "text", nullable: false),
                     Description = table.Column<string>(type: "text", nullable: false)
                 },
@@ -48,6 +50,7 @@ namespace QuestionBank.Infrastructure.Implementation.DataAccess.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    Code = table.Column<string>(type: "text", nullable: false),
                     Name = table.Column<string>(type: "text", nullable: false),
                     Description = table.Column<string>(type: "text", nullable: false)
                 },
@@ -64,7 +67,7 @@ namespace QuestionBank.Infrastructure.Implementation.DataAccess.Migrations
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     Category = table.Column<int>(type: "integer", nullable: false),
                     Name = table.Column<string>(type: "text", nullable: false),
-                    Code = table.Column<string>(type: "text", nullable: true),
+                    Code = table.Column<string>(type: "text", nullable: false),
                     Description = table.Column<string>(type: "text", nullable: false)
                 },
                 constraints: table =>
@@ -73,39 +76,12 @@ namespace QuestionBank.Infrastructure.Implementation.DataAccess.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "CompetencyMatrices",
-                schema: "QuestionBank",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    GradeId = table.Column<Guid>(type: "uuid", nullable: false),
-                    SpecializationId = table.Column<Guid>(type: "uuid", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_CompetencyMatrices", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_CompetencyMatrices_Grades_GradeId",
-                        column: x => x.GradeId,
-                        principalSchema: "QuestionBank",
-                        principalTable: "Grades",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_CompetencyMatrices_Specializations_SpecializationId",
-                        column: x => x.SpecializationId,
-                        principalSchema: "QuestionBank",
-                        principalTable: "Specializations",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "InterviewPresets",
                 schema: "QuestionBank",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    Code = table.Column<string>(type: "text", nullable: false),
                     Name = table.Column<string>(type: "text", nullable: false),
                     GradeId = table.Column<Guid>(type: "uuid", nullable: false),
                     SpecializationId = table.Column<Guid>(type: "uuid", nullable: false)
@@ -135,12 +111,13 @@ namespace QuestionBank.Infrastructure.Implementation.DataAccess.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    Title = table.Column<string>(type: "text", nullable: false),
                     Text = table.Column<string>(type: "text", nullable: false),
                     Type = table.Column<string>(type: "text", nullable: false),
                     ReferenceSolution = table.Column<string>(type: "text", nullable: false),
                     CompetencyId = table.Column<Guid>(type: "uuid", nullable: false),
                     GradeId = table.Column<Guid>(type: "uuid", nullable: false),
-                    TechnologyId = table.Column<Guid>(type: "uuid", nullable: false)
+                    TechnologyId = table.Column<Guid>(type: "uuid", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -164,36 +141,36 @@ namespace QuestionBank.Infrastructure.Implementation.DataAccess.Migrations
                         column: x => x.TechnologyId,
                         principalSchema: "QuestionBank",
                         principalTable: "Technologies",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
-                name: "CompetencyMatrixItems",
+                name: "InterviewPresetCompetencies",
                 schema: "QuestionBank",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    InterviewPresetId = table.Column<Guid>(type: "uuid", nullable: false),
                     CompetencyId = table.Column<Guid>(type: "uuid", nullable: false),
-                    Weight = table.Column<double>(type: "double precision", nullable: false),
-                    CompetencyMatrixId = table.Column<Guid>(type: "uuid", nullable: true)
+                    Weight = table.Column<double>(type: "double precision", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_CompetencyMatrixItems", x => x.Id);
+                    table.PrimaryKey("PK_InterviewPresetCompetencies", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_CompetencyMatrixItems_Competencies_CompetencyId",
+                        name: "FK_InterviewPresetCompetencies_Competencies_CompetencyId",
                         column: x => x.CompetencyId,
                         principalSchema: "QuestionBank",
                         principalTable: "Competencies",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_CompetencyMatrixItems_CompetencyMatrices_CompetencyMatrixId",
-                        column: x => x.CompetencyMatrixId,
+                        name: "FK_InterviewPresetCompetencies_InterviewPresets_InterviewPrese~",
+                        column: x => x.InterviewPresetId,
                         principalSchema: "QuestionBank",
-                        principalTable: "CompetencyMatrices",
-                        principalColumn: "Id");
+                        principalTable: "InterviewPresets",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -278,10 +255,11 @@ namespace QuestionBank.Infrastructure.Implementation.DataAccess.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_CodingQuestionLanguageLimits_CodingQuestionId",
+                name: "IX_CodingQuestionLanguageLimits_CodingQuestionId_LanguageId",
                 schema: "QuestionBank",
                 table: "CodingQuestionLanguageLimits",
-                column: "CodingQuestionId");
+                columns: new[] { "CodingQuestionId", "LanguageId" },
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_CodingQuestionLanguageLimits_LanguageId",
@@ -290,29 +268,38 @@ namespace QuestionBank.Infrastructure.Implementation.DataAccess.Migrations
                 column: "LanguageId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_CompetencyMatrices_GradeId_SpecializationId",
+                name: "IX_Competencies_Code",
                 schema: "QuestionBank",
-                table: "CompetencyMatrices",
-                columns: new[] { "GradeId", "SpecializationId" },
+                table: "Competencies",
+                column: "Code",
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_CompetencyMatrices_SpecializationId",
+                name: "IX_Grades_Code",
                 schema: "QuestionBank",
-                table: "CompetencyMatrices",
-                column: "SpecializationId");
+                table: "Grades",
+                column: "Code",
+                unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_CompetencyMatrixItems_CompetencyId",
+                name: "IX_InterviewPresetCompetencies_CompetencyId",
                 schema: "QuestionBank",
-                table: "CompetencyMatrixItems",
+                table: "InterviewPresetCompetencies",
                 column: "CompetencyId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_CompetencyMatrixItems_CompetencyMatrixId",
+                name: "IX_InterviewPresetCompetencies_InterviewPresetId_CompetencyId",
                 schema: "QuestionBank",
-                table: "CompetencyMatrixItems",
-                column: "CompetencyMatrixId");
+                table: "InterviewPresetCompetencies",
+                columns: new[] { "InterviewPresetId", "CompetencyId" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_InterviewPresets_Code",
+                schema: "QuestionBank",
+                table: "InterviewPresets",
+                column: "Code",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_InterviewPresets_GradeId",
@@ -351,6 +338,20 @@ namespace QuestionBank.Infrastructure.Implementation.DataAccess.Migrations
                 column: "TechnologyId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Specializations_Code",
+                schema: "QuestionBank",
+                table: "Specializations",
+                column: "Code",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Technologies_Code",
+                schema: "QuestionBank",
+                table: "Technologies",
+                column: "Code",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_TestCases_CodingQuestionId",
                 schema: "QuestionBank",
                 table: "TestCases",
@@ -365,7 +366,7 @@ namespace QuestionBank.Infrastructure.Implementation.DataAccess.Migrations
                 schema: "QuestionBank");
 
             migrationBuilder.DropTable(
-                name: "CompetencyMatrixItems",
+                name: "InterviewPresetCompetencies",
                 schema: "QuestionBank");
 
             migrationBuilder.DropTable(
@@ -374,10 +375,6 @@ namespace QuestionBank.Infrastructure.Implementation.DataAccess.Migrations
 
             migrationBuilder.DropTable(
                 name: "TestCases",
-                schema: "QuestionBank");
-
-            migrationBuilder.DropTable(
-                name: "CompetencyMatrices",
                 schema: "QuestionBank");
 
             migrationBuilder.DropTable(

@@ -12,7 +12,7 @@ using Users.Infrastructure.Implementation.DataAccess;
 namespace Users.Infrastructure.Implementation.DataAccess.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260124203358_Initial")]
+    [Migration("20260330104633_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -49,6 +49,12 @@ namespace Users.Infrastructure.Implementation.DataAccess.Migrations
                         .HasColumnType("text");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("Email")
+                        .IsUnique();
+
+                    b.HasIndex("IdentityId")
+                        .IsUnique();
 
                     b.ToTable("Users", "Users");
                 });
