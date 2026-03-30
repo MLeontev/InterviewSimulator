@@ -7,30 +7,26 @@ public class InterviewQuestion
     public Guid InterviewSessionId { get; set; }
     public InterviewSession InterviewSession { get; set; } = null!;
     
+    public string Title { get; set; } = string.Empty;
     public string Text { get; set; } = string.Empty;
     public QuestionType Type { get; set; }
-    public string? ProgrammingLanguageCode { get; set; }
     
     public int OrderIndex { get; set; }
-    
-    public string ReferenceSolution { get; set; } = string.Empty;
-    
-    public string? Answer { get; set; }
-    
-    public string? AiFeedbackJson { get; set; }
-    
-    public QuestionStatus Status { get; set; }
     
     public DateTime? StartedAt { get; set; }
     public DateTime? SubmittedAt { get; set; }
     public DateTime? EvaluatedAt { get; set; }
+    public QuestionStatus Status { get; set; } = QuestionStatus.NotStarted;
     
+    public string? Answer { get; set; }
+    public string ReferenceSolution { get; set; } = string.Empty;
+    public string? AiFeedbackJson { get; set; }
+    
+    public string? ProgrammingLanguageCode { get; set; }
     public Verdict OverallVerdict { get; set; }
-    
-    public List<TestCase> TestCases { get; set; } = [];
-    
     public int? TimeLimitMs { get; set; }
     public int? MemoryLimitMb { get; set; }
+    public List<TestCase> TestCases { get; set; } = [];
 }
 
 public enum QuestionType
@@ -42,9 +38,11 @@ public enum QuestionType
 public enum QuestionStatus
 {
     NotStarted,
+    Skipped,
     InProgress,
     Submitted,
     EvaluatingCode,
+    EvaluatedCode,
     EvaluatingAi,
-    Evaluated
+    EvaluatedAi
 }

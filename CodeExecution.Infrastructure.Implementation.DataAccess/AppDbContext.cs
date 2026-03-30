@@ -18,21 +18,20 @@ public class AppDbContext : DbContext, IDbContext
     {
         modelBuilder.HasDefaultSchema(Schemas.CodeExecution);
 
-        modelBuilder.Entity<CodeSubmission>(entity =>
-        {
-            entity.Property(e => e.Status).HasConversion<string>();
-            entity.HasIndex(e => e.Status);
-            entity.HasIndex(e => e.CreatedAt);
-        });
+        modelBuilder.Entity<CodeSubmission>()
+            .Property(cs => cs.Status)
+            .HasConversion<string>();
         
-        modelBuilder.Entity<CodeSubmissionTestCase>(entity =>
-        {
-            entity.Property(e => e.Verdict).HasConversion<string>();
-        });
+        modelBuilder.Entity<CodeSubmission>()
+            .Property(cs => cs.OverallVerdict)
+            .HasConversion<string>();
         
-        modelBuilder.Entity<CodeSubmission>(entity =>
-        {
-            entity.Property(e => e.OverallVerdict).HasConversion<string>();
-        });
+        modelBuilder.Entity<CodeSubmissionTestCase>()
+            .HasIndex(x => new { x.SubmissionId, x.OrderIndex })
+            .IsUnique();
+        
+        modelBuilder.Entity<CodeSubmissionTestCase>()
+            .Property(tc => tc.Verdict)
+            .HasConversion<string>();
     }
 }

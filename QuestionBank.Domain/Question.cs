@@ -3,6 +3,7 @@ namespace QuestionBank.Domain;
 public class Question
 {
     public Guid Id { get; set; }
+    public string Title { get; set; } = string.Empty;
     public string Text { get; set; } = string.Empty;
     public QuestionType Type { get; set; }
     
@@ -14,7 +15,7 @@ public class Question
     public Guid GradeId { get; set; }
     public Grade Grade { get; set; } = null!;
 
-    public Guid TechnologyId { get; set; }
+    public Guid? TechnologyId { get; set; }
     public Technology? Technology { get; set; }
     
     public List<CodingQuestionLanguageLimit> LanguageLimits { get; set; } = [];

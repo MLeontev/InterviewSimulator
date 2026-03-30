@@ -1,8 +1,11 @@
 namespace QuestionBank.Domain;
 
-public class CompetencyMatrixItem
+public class InterviewPresetCompetency
 {
     public Guid Id { get; set; }
+    
+    public Guid InterviewPresetId { get; set; }
+    public InterviewPreset InterviewPreset { get; set; } = null!;
     
     public Guid CompetencyId { get; set; }
     public Competency Competency { get; set; } = null!;

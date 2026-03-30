@@ -22,6 +22,13 @@ public class AppDbContext : DbContext, IDbContext
             .Property(i => i.Status)
             .HasConversion<string>();
         
+        modelBuilder.Entity<InterviewSession>().HasIndex(x => x.CandidateId)
+            .HasFilter("\"Status\" = 'InProgress'")
+            .IsUnique();
+        
+        modelBuilder.Entity<InterviewSession>().Property(x => x.AiFeedbackJson)
+            .HasColumnType("jsonb");
+        
         modelBuilder.Entity<InterviewQuestion>()
             .Property(q => q.Status)
             .HasConversion<string>();
@@ -34,8 +41,16 @@ public class AppDbContext : DbContext, IDbContext
             .Property(q => q.OverallVerdict)
             .HasConversion<string>();
         
+        modelBuilder.Entity<InterviewQuestion>()
+            .HasIndex(x => new { x.InterviewSessionId, x.OrderIndex })
+            .IsUnique();
+        
         modelBuilder.Entity<TestCase>()
             .Property(q => q.Verdict)
             .HasConversion<string>();
+        
+        modelBuilder.Entity<TestCase>()
+            .HasIndex(x => new { x.InterviewQuestionId, x.OrderIndex })
+            .IsUnique();
     }
 }

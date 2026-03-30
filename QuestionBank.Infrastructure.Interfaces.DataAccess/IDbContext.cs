@@ -9,8 +9,7 @@ public interface IDbContext
     public DbSet<TestCase> TestCases { get; set; }
     public DbSet<CodingQuestionLanguageLimit> CodingQuestionLanguageLimits { get; set; }
     public DbSet<Competency> Competencies { get; set; }
-    public DbSet<CompetencyMatrix> CompetencyMatrices { get; set; }
-    public DbSet<CompetencyMatrixItem> CompetencyMatrixItems { get; set; }
+    public DbSet<InterviewPresetCompetency> InterviewPresetCompetencies { get; set; }
     public DbSet<Grade> Grades { get; set; }
     public DbSet<Specialization> Specializations { get; set; }
     public DbSet<Technology> Technologies { get; set; }

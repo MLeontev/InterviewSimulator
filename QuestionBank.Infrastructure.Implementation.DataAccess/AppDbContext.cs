@@ -14,8 +14,7 @@ public class AppDbContext : DbContext, IDbContext
     public DbSet<TestCase> TestCases { get; set; }
     public DbSet<CodingQuestionLanguageLimit> CodingQuestionLanguageLimits { get; set; }
     public DbSet<Competency> Competencies { get; set; }
-    public DbSet<CompetencyMatrix> CompetencyMatrices { get; set; }
-    public DbSet<CompetencyMatrixItem> CompetencyMatrixItems { get; set; }
+    public DbSet<InterviewPresetCompetency> InterviewPresetCompetencies { get; set; }
     public DbSet<Grade> Grades { get; set; }
     public DbSet<Specialization> Specializations { get; set; }
     public DbSet<Technology> Technologies { get; set; }
@@ -26,13 +25,23 @@ public class AppDbContext : DbContext, IDbContext
     {
         modelBuilder.HasDefaultSchema(Schemas.QuestionBank);
         
-        modelBuilder.Entity<Question>().Property(q => q.Type).HasConversion<string>();
-
-        modelBuilder.Entity<CompetencyMatrix>()
-            .HasIndex(c => new { c.GradeId, c.SpecializationId })
+        modelBuilder.Entity<InterviewPreset>().HasIndex(p => p.Code).IsUnique();
+        modelBuilder.Entity<Grade>().HasIndex(g => g.Code).IsUnique();
+        modelBuilder.Entity<Specialization>().HasIndex(s => s.Code).IsUnique();
+        modelBuilder.Entity<Competency>().HasIndex(c => c.Code).IsUnique();
+        modelBuilder.Entity<Technology>().HasIndex(t => t.Code).IsUnique();
+        
+        modelBuilder.Entity<InterviewPresetCompetency>()
+            .HasIndex(pc => new { pc.InterviewPresetId, pc.CompetencyId })
+            .IsUnique();
+        
+        modelBuilder.Entity<CodingQuestionLanguageLimit>()
+            .HasIndex(ll => new { ll.CodingQuestionId, ll.LanguageId })
             .IsUnique();
         
         modelBuilder.Entity<InterviewPresetTechnology>()
             .HasKey(pt => new { pt.InterviewPresetId, pt.TechnologyId });
+        
+        modelBuilder.Entity<Question>().Property(q => q.Type).HasConversion<string>();
     }
 }

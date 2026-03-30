@@ -15,5 +15,8 @@ public class AppDbContext : DbContext, IDbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.HasDefaultSchema(Schemas.Users);
+        
+        modelBuilder.Entity<User>().HasIndex(u => u.Email).IsUnique();
+        modelBuilder.Entity<User>().HasIndex(u => u.IdentityId).IsUnique();
     }
 }
