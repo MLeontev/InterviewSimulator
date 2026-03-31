@@ -3,6 +3,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using QuestionBank.Infrastructure.Implementation.DataAccess.Seeding;
 using QuestionBank.Infrastructure.Implementation.DataAccess.Seeding.Content.Presets;
+using QuestionBank.Infrastructure.Implementation.DataAccess.Seeding.Content.Questions;
 using QuestionBank.Infrastructure.Implementation.DataAccess.Seeding.Reference;
 using QuestionBank.Infrastructure.Interfaces.DataAccess;
 
@@ -35,6 +36,9 @@ public static class DependencyInjection
         services.AddScoped<ISeed, CompetencySeed>();
 
         services.AddScoped<ISeed, PythonPresetSeed>();
+
+        services.AddScoped<ISeed, PythonTheoryQuestionsSeed>();
+        services.AddScoped<ISeed, CodingQuestionsSeed>();
 
         services.AddScoped<QuestionBankSeedRunner>();
         

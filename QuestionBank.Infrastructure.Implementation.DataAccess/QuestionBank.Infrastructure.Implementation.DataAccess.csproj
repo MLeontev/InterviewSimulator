@@ -15,8 +15,4 @@
       <ProjectReference Include="..\QuestionBank.Infrastructure.Interfaces.DataAccess\QuestionBank.Infrastructure.Interfaces.DataAccess.csproj" />
     </ItemGroup>
 
-    <ItemGroup>
-      <Folder Include="Seeding\Content\Questions\Constants\" />
-    </ItemGroup>
-
 </Project>

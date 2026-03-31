@@ -69,12 +69,6 @@ app.MapOpenApi();
 
 app.ApplyMigrations();
 
-// using (var scope = app.Services.CreateScope())
-// {
-//     var questionBankDb = scope.ServiceProvider.GetRequiredService<QuestionBank.Infrastructure.Implementation.DataAccess.AppDbContext>();
-//     await DbInitializer.SeedQuestionBankAsync(questionBankDb);
-// }
-
 using (var scope = app.Services.CreateScope())
 {
     var seedRunner = scope.ServiceProvider.GetRequiredService<QuestionBankSeedRunner>();
