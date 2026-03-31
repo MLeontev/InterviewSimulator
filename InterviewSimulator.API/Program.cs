@@ -6,10 +6,10 @@ using CodeExecution.UseCases;
 using Interview.Infrastructure.Implementation.DataAccess;
 using Interview.UseCases;
 using InterviewSimulator.API.Extensions;
-using InterviewSimulator.API.SeedData;
 using Interview.Presentation;
 using MassTransit;
 using QuestionBank.Infrastructure.Implementation.DataAccess;
+using QuestionBank.Infrastructure.Implementation.DataAccess.Seeding;
 using QuestionBank.ModuleContract.Implementation;
 using QuestionBank.UseCases;
 using Users.Infrastructure.Implementation.DataAccess;
@@ -39,6 +39,7 @@ builder.Services.AddCodeExecutionWorkers();
 builder.Services.AddQuestionBankDataAccess(builder.Configuration);
 builder.Services.AddQuestionBankModuleUseCases();
 builder.Services.AddQuestionBankModuleApi();
+builder.Services.AddQuestionBankSeeding();
 
 // Interview module
 builder.Services.AddInterviewDataAccess(builder.Configuration);
@@ -68,10 +69,16 @@ app.MapOpenApi();
 
 app.ApplyMigrations();
 
+// using (var scope = app.Services.CreateScope())
+// {
+//     var questionBankDb = scope.ServiceProvider.GetRequiredService<QuestionBank.Infrastructure.Implementation.DataAccess.AppDbContext>();
+//     await DbInitializer.SeedQuestionBankAsync(questionBankDb);
+// }
+
 using (var scope = app.Services.CreateScope())
 {
-    var questionBankDb = scope.ServiceProvider.GetRequiredService<QuestionBank.Infrastructure.Implementation.DataAccess.AppDbContext>();
-    await DbInitializer.SeedQuestionBankAsync(questionBankDb);
+    var seedRunner = scope.ServiceProvider.GetRequiredService<QuestionBankSeedRunner>();
+    await seedRunner.RunAsync();
 }
 
 app.UseHttpsRedirection();

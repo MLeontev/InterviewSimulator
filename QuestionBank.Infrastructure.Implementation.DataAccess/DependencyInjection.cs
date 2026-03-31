@@ -1,6 +1,9 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using QuestionBank.Infrastructure.Implementation.DataAccess.Seeding;
+using QuestionBank.Infrastructure.Implementation.DataAccess.Seeding.Content.Presets;
+using QuestionBank.Infrastructure.Implementation.DataAccess.Seeding.Reference;
 using QuestionBank.Infrastructure.Interfaces.DataAccess;
 
 namespace QuestionBank.Infrastructure.Implementation.DataAccess;
@@ -20,6 +23,20 @@ public static class DependencyInjection
         });
         
         services.AddScoped<IDbContext>(sp => sp.GetRequiredService<AppDbContext>());
+        
+        return services;
+    }
+
+    public static IServiceCollection AddQuestionBankSeeding(this IServiceCollection services)
+    {
+        services.AddScoped<ISeed, GradeSeed>();
+        services.AddScoped<ISeed, SpecializationSeed>();
+        services.AddScoped<ISeed, TechnologySeed>();
+        services.AddScoped<ISeed, CompetencySeed>();
+
+        services.AddScoped<ISeed, PythonPresetSeed>();
+
+        services.AddScoped<QuestionBankSeedRunner>();
         
         return services;
     }

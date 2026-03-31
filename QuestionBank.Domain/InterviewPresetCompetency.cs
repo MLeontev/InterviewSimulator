@@ -2,8 +2,6 @@ namespace QuestionBank.Domain;
 
 public class InterviewPresetCompetency
 {
-    public Guid Id { get; set; }
-    
     public Guid InterviewPresetId { get; set; }
     public InterviewPreset InterviewPreset { get; set; } = null!;
     

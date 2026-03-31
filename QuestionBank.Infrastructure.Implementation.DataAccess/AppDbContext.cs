@@ -30,10 +30,9 @@ public class AppDbContext : DbContext, IDbContext
         modelBuilder.Entity<Specialization>().HasIndex(s => s.Code).IsUnique();
         modelBuilder.Entity<Competency>().HasIndex(c => c.Code).IsUnique();
         modelBuilder.Entity<Technology>().HasIndex(t => t.Code).IsUnique();
-        
+
         modelBuilder.Entity<InterviewPresetCompetency>()
-            .HasIndex(pc => new { pc.InterviewPresetId, pc.CompetencyId })
-            .IsUnique();
+            .HasKey(pc => new { pc.InterviewPresetId, pc.CompetencyId });
         
         modelBuilder.Entity<CodingQuestionLanguageLimit>()
             .HasIndex(ll => new { ll.CodingQuestionId, ll.LanguageId })

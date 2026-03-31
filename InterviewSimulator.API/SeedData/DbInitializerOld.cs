@@ -3,7 +3,7 @@ using QuestionBank.Domain;
 
 namespace InterviewSimulator.API.SeedData;
 
-public static class DbInitializer
+public static class DbInitializerOld
 {
     private static readonly Guid JuniorId = Guid.Parse("00000000-0000-0000-0000-000000000001");
     private static readonly Guid MiddleId = Guid.Parse("00000000-0000-0000-0000-000000000002");
@@ -173,28 +173,24 @@ public static class DbInitializer
         {
             new InterviewPresetCompetency
             {
-                Id = Guid.NewGuid(),
                 InterviewPresetId = PresetBackendJuniorId,
                 CompetencyId = oop.Id,
                 Weight = 0.3
             },
             new InterviewPresetCompetency
             {
-                Id = Guid.NewGuid(),
                 InterviewPresetId = PresetBackendJuniorId,
                 CompetencyId = collections.Id,
                 Weight = 0.2
             },
             new InterviewPresetCompetency
             {
-                Id = Guid.NewGuid(),
                 InterviewPresetId = PresetBackendJuniorId,
                 CompetencyId = dbKnowledge.Id,
                 Weight = 0.2
             },
             new InterviewPresetCompetency
             {
-                Id = Guid.NewGuid(),
                 InterviewPresetId = PresetBackendJuniorId,
                 CompetencyId = algorithms.Id,
                 Weight = 0.3
