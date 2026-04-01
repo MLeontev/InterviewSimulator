@@ -1,59 +1,70 @@
+using Framework.Domain;
 using MediatR;
-using QuestionBank.InternalApi;
 using QuestionBank.UseCases.Queries;
 
 namespace QuestionBank.ModuleContract.Implementation;
 
 internal class QuestionBankApi(ISender sender) : IQuestionBankApi
 {
-    public async Task<IReadOnlyList<InterviewQuestionApiDto>> GetQuestionsAsync(Guid interviewPresetId, int totalQuestions)
+    public async Task<GeneratedQuestionSet> GenerateInterviewQuestionsAsync(
+        Guid presetId, 
+        int theoryCount, 
+        int codingCount, 
+        CancellationToken ct = default)
     {
-        var result = await sender.Send(new GenerateInterviewQuestionsQuery(interviewPresetId, totalQuestions));
+        var result = await sender.Send(new GenerateInterviewQuestionsQuery(presetId, theoryCount, codingCount), ct);
 
         if (result.IsFailure)
-            return [];
-
-        var mapped = result.Value.Select(q => new InterviewQuestionApiDto
-        {
-            Text = q.Text,
-            Type = MapQuestionType(q.Type),
-            OrderIndex = q.OrderIndex,
-            ProgrammingLanguageCode = q.ProgrammingLanguageCode,
-            TimeLimitMs = q.TimeLimitMs,
-            MemoryLimitMb = q.MemoryLimitMb,
-            ReferenceSolution = q.ReferenceSolution,
-            TestCases = q.TestCases
-                .Select(tc => new TestCaseApiDto
-                {
-                    Input = tc.Input,
-                    ExpectedOutput = tc.ExpectedOutput,
-                    IsHidden = tc.IsHidden
-                })
-                .ToList()
-        }).ToList();
-
-        return mapped;
+            throw new InvalidOperationException($"{result.Error.Code}: {result.Error.Description}");
+        
+        return MapToApi(result.Value);
     }
-
+    
     public async Task<InterviewPresetApiDto?> GetPresetAsync(Guid interviewPresetId)
     {
         var result = await sender.Send(new GetInterviewPresetByIdQuery(interviewPresetId));
 
         if (result.IsFailure)
-            return null;
-
-        return new InterviewPresetApiDto
         {
-            Id = result.Value.Id,
-            Name = result.Value.Name
-        };
+            if (result.Error.Type == ErrorType.NotFound)
+                return null;
+            
+            throw new InvalidOperationException($"{result.Error.Code}: {result.Error.Description}");
+        }
+
+        return new InterviewPresetApiDto(result.Value.Id, result.Value.Name);
     }
+    
+    private static GeneratedQuestionSet MapToApi(GeneratedQuestionSetDto set) =>
+        new(
+            PresetId: set.PresetId,
+            Questions: set.Questions.Select(MapQuestion).ToList());
 
-    private QuestionType MapQuestionType(Domain.QuestionType type)
-        => type switch
+    private static GeneratedQuestion MapQuestion(GeneratedQuestionDto q) =>
+        new(
+            QuestionId: q.QuestionId,
+            OrderIndex: q.OrderIndex,
+            Type: MapType(q.Type),
+            Title: q.Title,
+            Text: q.Text,
+            ReferenceSolution: q.ReferenceSolution,
+            ProgrammingLanguageCode: q.ProgrammingLanguageCode,
+            TimeLimitMs: q.TimeLimitMs,
+            MemoryLimitMb: q.MemoryLimitMb,
+            TestCases: q.TestCases.Select(MapTestCase).ToList());
+
+    private static GeneratedTestCase MapTestCase(GeneratedTestCaseDto tc) =>
+        new(
+            Input: tc.Input,
+            ExpectedOutput: tc.ExpectedOutput,
+            IsHidden: tc.IsHidden,
+            OrderIndex: tc.OrderIndex);
+
+    private static QuestionType MapType(Domain.QuestionType type) =>
+        type switch
         {
-            Domain.QuestionType.Coding => QuestionType.Coding,
             Domain.QuestionType.Theory => QuestionType.Theory,
+            Domain.QuestionType.Coding => QuestionType.Coding,
             _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
         };
 }

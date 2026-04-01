@@ -23,4 +23,5 @@ public record Error
     public static Error NotFound(string code, string description) => new(code, description, ErrorType.NotFound);
     public static Error Conflict(string code, string description) => new(code, description, ErrorType.Conflict);
     public static Error Business(string code, string description) => new(code, description, ErrorType.Business);
+    public static Error External(string code, string description) => new(code, description, ErrorType.External);
 }

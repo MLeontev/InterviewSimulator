@@ -15,7 +15,7 @@ public class CodingQuestionsSeed : QuestionSeedBase
                 Дан массив целых чисел nums и целое число target.
                 Необходимо вернуть индексы двух чисел, сумма которых равна target.
                 Гарантируется, что существует ровно одно решение, и один и тот же элемент нельзя использовать дважды.
-                Ответ можно вернуть в любом порядке.
+                Индексы в ответе нужно вернуть в порядке возрастания.
                 """,
             Type: QuestionType.Coding,
             ReferenceSolution: """
@@ -100,7 +100,7 @@ public class CodingQuestionsSeed : QuestionSeedBase
                         anagram
                         nagaram
                         """,
-                    ExpectedOutput: "true",
+                    ExpectedOutput: "True",
                     IsHidden: false,
                     OrderIndex: 1),
 
@@ -109,7 +109,7 @@ public class CodingQuestionsSeed : QuestionSeedBase
                         rat
                         car
                         """,
-                    ExpectedOutput: "false",
+                    ExpectedOutput: "False",
                     IsHidden: false,
                     OrderIndex: 2),
 
@@ -118,7 +118,7 @@ public class CodingQuestionsSeed : QuestionSeedBase
                         aacc
                         ccac
                         """,
-                    ExpectedOutput: "false",
+                    ExpectedOutput: "False",
                     IsHidden: true,
                     OrderIndex: 3)
             ]

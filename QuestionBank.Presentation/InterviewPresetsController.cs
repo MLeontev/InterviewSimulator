@@ -24,9 +24,13 @@ public class InterviewPresetsController(ISender sender) : ControllerBase
     }
     
     [HttpGet("{id:Guid}/questions")]
-    public async Task<IActionResult> GetQuestions(Guid id, [FromQuery] int totalQuestions = 5, CancellationToken cancellationToken = default)
+    public async Task<IActionResult> GetQuestions(
+        Guid id, 
+        [FromQuery] int theoryQuestions = 4, 
+        [FromQuery] int codingTasks = 2, 
+        CancellationToken cancellationToken = default)
     {
-        var result = await sender.Send(new GenerateInterviewQuestionsQuery(id, totalQuestions), cancellationToken);
+        var result = await sender.Send(new GenerateInterviewQuestionsQuery(id, theoryQuestions, codingTasks), cancellationToken);
 
         if (result.IsFailure)
             return result.ToProblem();

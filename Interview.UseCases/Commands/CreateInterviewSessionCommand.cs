@@ -3,7 +3,7 @@ using MediatR;
 using Interview.Domain;
 using Interview.Infrastructure.Interfaces.DataAccess;
 using Microsoft.EntityFrameworkCore;
-using QuestionBank.InternalApi;
+using QuestionBank.ModuleContract;
 using QuestionType = Interview.Domain.QuestionType;
 
 namespace Interview.UseCases.Commands;
@@ -16,31 +16,41 @@ internal class CreateInterviewSessionCommandHandler(
 {
     public async Task<Result<Guid>> Handle(CreateInterviewSessionCommand request, CancellationToken ct)
     {
-        const int totalQuestions = 5;
+        const int theoryCount = 4;
+        const int codingCount = 2;
         
         var hasActiveSession = await dbContext.InterviewSessions
-            .AnyAsync(s => s.CandidateId == request.CandidateId 
-                           && s.Status == InterviewStatus.InProgress, ct);
+            .AnyAsync(s => 
+                s.CandidateId == request.CandidateId && 
+                s.Status == InterviewStatus.InProgress, ct);
 
         if (hasActiveSession)
         {
             return Result.Failure<Guid>(Error.Business("ACTIVE_SESSION_EXISTS", "У кандидата уже есть активная сессия интервью"));
         }
 
-        var presetInfo = await questionBankApi.GetPresetAsync(request.InterviewPresetId);
-        if (presetInfo == null)
+        InterviewPresetApiDto? presetInfo;
+        GeneratedQuestionSet questionSet;
+
+        try
         {
+            presetInfo = await questionBankApi.GetPresetAsync(request.InterviewPresetId);
+            questionSet = await questionBankApi.GenerateInterviewQuestionsAsync(
+                request.InterviewPresetId,
+                theoryCount,
+                codingCount,
+                ct);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return Result.Failure<Guid>(Error.External("QUESTION_BANK_ERROR", ex.Message));
+        }
+
+        if (presetInfo is null)
             return Result.Failure<Guid>(Error.NotFound("PRESET_NOT_FOUND", "Пресет интервью не найден"));
-        }
 
-        var questions = await questionBankApi.GetQuestionsAsync(
-            request.InterviewPresetId,
-            totalQuestions);
-
-        if (questions.Count == 0)
-        {
+        if (questionSet.Questions.Count == 0)
             return Result.Failure<Guid>(Error.Business("NO_QUESTIONS", "Не удалось получить вопросы для сессии интервью"));
-        }
 
         var sessionId = Guid.NewGuid();
         var now = DateTime.UtcNow;
@@ -57,29 +67,29 @@ internal class CreateInterviewSessionCommandHandler(
             Questions = []
         };
 
-        var interviewQuestions = new List<InterviewQuestion>();
-        foreach (var (question, index) in questions.Select((q, i) => (q, i)))
-        {
-            var interviewQuestionId = Guid.NewGuid();
-            
-            var interviewQuestion = new InterviewQuestion
+        var interviewQuestions = questionSet.Questions
+            .OrderBy(x => x.OrderIndex)
+            .Select(question =>
             {
-                Id = interviewQuestionId,
-                InterviewSessionId = sessionId,
-                Text = question.Text,
-                Type = MapQuestionType(question.Type),
-                ProgrammingLanguageCode = question.ProgrammingLanguageCode,
-                OrderIndex = index + 1,
-                ReferenceSolution = question.ReferenceSolution,
-                Status = QuestionStatus.NotStarted,
-                OverallVerdict = Verdict.None,
-                TimeLimitMs = question.TimeLimitMs,
-                MemoryLimitMb = question.MemoryLimitMb,
-                TestCases = MapTestCases(question.TestCases, interviewQuestionId)
-            };
+                var interviewQuestionId = Guid.NewGuid();
 
-            interviewQuestions.Add(interviewQuestion);
-        }
+                return new InterviewQuestion
+                {
+                    Id = interviewQuestionId,
+                    InterviewSessionId = sessionId,
+                    Text = question.Text,
+                    Type = MapQuestionType(question.Type),
+                    ProgrammingLanguageCode = question.ProgrammingLanguageCode,
+                    OrderIndex = question.OrderIndex,
+                    ReferenceSolution = question.ReferenceSolution,
+                    Status = QuestionStatus.NotStarted,
+                    OverallVerdict = Verdict.None,
+                    TimeLimitMs = question.TimeLimitMs,
+                    MemoryLimitMb = question.MemoryLimitMb,
+                    TestCases = MapTestCases(question.TestCases, interviewQuestionId)
+                };
+            })
+            .ToList();
 
         session.Questions = interviewQuestions;
         
@@ -89,25 +99,26 @@ internal class CreateInterviewSessionCommandHandler(
         return Result.Success(sessionId);
     }
 
-    private static QuestionType MapQuestionType(QuestionBank.InternalApi.QuestionType type)
+    private static QuestionType MapQuestionType(QuestionBank.ModuleContract.QuestionType type)
         => type switch
         {
-            QuestionBank.InternalApi.QuestionType.Coding => QuestionType.Coding,
-            QuestionBank.InternalApi.QuestionType.Theory => QuestionType.Theory,
+            QuestionBank.ModuleContract.QuestionType.Coding => QuestionType.Coding,
+            QuestionBank.ModuleContract.QuestionType.Theory => QuestionType.Theory,
             _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
         };
 
-    private static List<TestCase> MapTestCases(List<TestCaseApiDto> testCases, Guid interviewQuestionId)
+    private static List<TestCase> MapTestCases(IReadOnlyCollection<GeneratedTestCase> testCases, Guid interviewQuestionId)
     {
         return testCases
-            .Select((tc, index) => new TestCase
+            .OrderBy(tc => tc.OrderIndex)
+            .Select(tc => new TestCase
             {
                 Id = Guid.NewGuid(),
                 InterviewQuestionId = interviewQuestionId,
                 Input = tc.Input,
                 ExpectedOutput = tc.ExpectedOutput,
                 IsHidden = tc.IsHidden,
-                OrderIndex = index + 1,
+                OrderIndex = tc.OrderIndex,
                 ActualOutput = null,
                 ExecutionTimeMs = null,
                 MemoryUsedMb = null,

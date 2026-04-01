@@ -6,12 +6,12 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddCodeExecutionWorkers(this IServiceCollection services)
     {
-        services.AddHostedService<CodeExecutionWorker>();
-        services.AddHostedService<CodeExecutionWorker>();
-        services.AddHostedService<CodeExecutionWorker>();
-        services.AddHostedService<CodeExecutionWorker>();
+        // services.AddHostedService<CodeExecutionWorker>();
+        // services.AddHostedService<CodeExecutionWorker>();
+        // services.AddHostedService<CodeExecutionWorker>();
+        // services.AddHostedService<CodeExecutionWorker>();
 
-        services.AddHostedService<CodeSubmissionEventPublisher>();
+        // services.AddHostedService<CodeSubmissionEventPublisher>();
 
         return services;
     }

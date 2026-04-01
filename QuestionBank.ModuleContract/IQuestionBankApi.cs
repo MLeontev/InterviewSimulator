@@ -1,38 +1,42 @@
-namespace QuestionBank.InternalApi;
+namespace QuestionBank.ModuleContract;
 
 public interface IQuestionBankApi
 {
-    Task<IReadOnlyList<InterviewQuestionApiDto>> GetQuestionsAsync(Guid interviewPresetId, int totalQuestions);
+    Task<GeneratedQuestionSet> GenerateInterviewQuestionsAsync(
+        Guid presetId,
+        int theoryCount,
+        int codingCount,
+        CancellationToken ct = default);
+    
     Task<InterviewPresetApiDto?> GetPresetAsync(Guid interviewPresetId);
 }
 
-public record InterviewPresetApiDto
-{
-    public Guid Id { get; init; }
-    public string Name { get; init; } = string.Empty;
-}
+public record GeneratedQuestionSet(
+    Guid PresetId,
+    IReadOnlyCollection<GeneratedQuestion> Questions);
 
-public record InterviewQuestionApiDto
-{
-    public string Text { get; init; } = string.Empty;
-    public QuestionType Type { get; init; }
-    public int OrderIndex { get; init; }
-    public string? ProgrammingLanguageCode { get; init; }
-    public int? TimeLimitMs { get; init; }
-    public int? MemoryLimitMb { get; init; }
-    public string ReferenceSolution { get; init; } = string.Empty;
-    public List<TestCaseApiDto> TestCases { get; init; } = [];
-}
+public record GeneratedQuestion(
+    Guid QuestionId,
+    int OrderIndex,
+    QuestionType Type,
+    string Title,
+    string Text,
+    string ReferenceSolution,
+    string? ProgrammingLanguageCode,
+    int? TimeLimitMs,
+    int? MemoryLimitMb,
+    IReadOnlyCollection<GeneratedTestCase> TestCases);
 
-public record TestCaseApiDto
-{
-    public string Input { get; init; } = string.Empty;
-    public string ExpectedOutput { get; init; } = string.Empty;
-    public bool IsHidden { get; init; }
-}
+public record GeneratedTestCase(
+    string Input,
+    string ExpectedOutput,
+    bool IsHidden,
+    int OrderIndex);
 
 public enum QuestionType
 {
     Theory,
     Coding
 }
+
+public record InterviewPresetApiDto(Guid Id, string Name);
