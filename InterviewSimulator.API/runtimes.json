@@ -1,7 +1,6 @@
 {
   "Runtimes": [
     {
-      "Id": "8052f875-5a99-4072-830b-0269be3e9c66",
       "Code": "cpp",
       "Name": "C++",
       "Version": "12",
@@ -16,7 +15,6 @@
       "MaxCpuCores": 2
     },
     {
-      "Id": "ea934c4e-3e58-4daa-804f-2bbe317bc974",
       "Code": "python",
       "Name": "Python 3.9",
       "Version": "3.9",

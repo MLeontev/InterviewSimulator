@@ -1,7 +1,6 @@
 namespace CodeExecution.Infrastructure.Implementation.CodeExecution;
 
 public record LanguageInfo(
-    string Id,
     string Code,
     string Name,
     string Version,
@@ -13,5 +12,4 @@ public record LanguageInfo(
     string DefaultFileName,
     int DefaultTimeoutSeconds,
     int MaxMemoryMb,
-    int MaxCpuCores
-);
+    int MaxCpuCores);

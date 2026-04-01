@@ -4,22 +4,12 @@ namespace CodeExecution.Infrastructure.Implementation.CodeExecution;
 
 internal class LanguageProvider(RuntimeConfig runtimeConfig) : ILanguageProvider, IExecutorLanguageProvider
 {
-    public IEnumerable<SupportedLanguage> GetSupportedLanguages()
-    {
-        return runtimeConfig
-            .GetAll()
-            .Select(x => new SupportedLanguage(x.Code, x.Name, x.Version));
-    }
+    public IReadOnlyCollection<SupportedLanguage> GetSupportedLanguages() =>
+        runtimeConfig
+            .GetActive()
+            .Select(x => new SupportedLanguage(x.Code, x.Name, x.Version))
+            .ToList();
 
-    public bool IsSupported(string code)
-    {
-        return runtimeConfig
-            .GetAll()
-            .Any(x => x.Code == code);
-    }
-
-    public LanguageInfo GetLanguage(string code)
-    {
-        return runtimeConfig.Get(code);
-    }
+    public bool TryGetLanguage(string code, out LanguageInfo? language) => 
+        runtimeConfig.TryGetActiveByCode(code, out language);
 }

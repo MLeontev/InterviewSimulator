@@ -13,17 +13,23 @@ internal class RuntimeConfig
             .Get<List<LanguageInfo>>() ?? [];
 
         _languages = runtimes
-            .Where(x => x.IsActive)
-            .ToDictionary(x => x.Code, x => x);
+            .ToDictionary(
+                x => x.Code, 
+                x => x, 
+                StringComparer.OrdinalIgnoreCase);
     }
 
-    public LanguageInfo Get(string code)
+    public IEnumerable<LanguageInfo> GetActive() => _languages.Values.Where(x => x.IsActive);
+    
+    public bool TryGetActiveByCode(string code, out LanguageInfo? language)
     {
-        if (!_languages.TryGetValue(code, out var lang))
-            throw new KeyNotFoundException($"Unsupported language: {code}");
+        if (_languages.TryGetValue(code, out var lang) && lang.IsActive)
+        {
+            language = lang;
+            return true;
+        }
 
-        return lang;
+        language = null;
+        return false;
     }
-
-    public IEnumerable<LanguageInfo> GetAll() => _languages.Values;
 }

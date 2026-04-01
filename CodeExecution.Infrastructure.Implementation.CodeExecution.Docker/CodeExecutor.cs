@@ -15,7 +15,18 @@ internal class CodeExecutor(IExecutorLanguageProvider languageProvider) : ICodeE
         string language,
         CancellationToken cancellationToken = default)
     {
-        var langConfig = languageProvider.GetLanguage(language);
+        if (!languageProvider.TryGetLanguage(language, out var langConfig) || langConfig is null)
+        {
+            return new CodeExecutionResult
+            {
+                Output = string.Empty,
+                Error = $"Unsupported or inactive language: {language}",
+                ExitCode = -2,
+                TimeElapsedMs = 0,
+                MemoryUsageMb = 0,
+                Stage = ExecutionStage.None
+            };
+        }
 
         string runCommandRaw;
         var compileCommand = "";

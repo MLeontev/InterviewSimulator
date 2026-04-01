@@ -2,5 +2,5 @@ namespace CodeExecution.Infrastructure.Implementation.CodeExecution;
 
 internal interface IExecutorLanguageProvider
 {
-    LanguageInfo GetLanguage(string code);
+    bool TryGetLanguage(string code, out LanguageInfo? language);
 }
