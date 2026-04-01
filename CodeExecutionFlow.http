@@ -1,0 +1,98 @@
+# @baseUrl = http://localhost:5258
+@baseUrl = http://localhost:8090
+
+### 1) Получить список доступных языков
+GET {{baseUrl}}/api/v1/languages
+Accept: application/json
+
+### 2) Успешный прогон (ожидаем OK)
+POST {{baseUrl}}/api/v1/code-execution/test-run
+Content-Type: application/json
+Accept: application/json
+
+{
+  "code": "print(input())",
+  "language": "python",
+  "testCases": [
+    {
+      "order": 1,
+      "input": "hello",
+      "expectedOutput": "hello"
+    },
+    {
+      "order": 2,
+      "input": "world",
+      "expectedOutput": "world"
+    }
+  ],
+  "maxTimeSeconds": 3,
+  "maxMemoryMb": 128
+}
+
+### 3) Неверный ответ (ожидаем WA)
+POST {{baseUrl}}/api/v1/code-execution/test-run
+Content-Type: application/json
+Accept: application/json
+
+{
+  "code": "print('wrong')",
+  "language": "python",
+  "testCases": [
+    {
+      "order": 1,
+      "input": "hello",
+      "expectedOutput": "hello"
+    }
+  ],
+  "maxTimeSeconds": 3,
+  "maxMemoryMb": 128
+}
+
+### 4) Ошибка выполнения (ожидаем RE)
+POST {{baseUrl}}/api/v1/code-execution/test-run
+Content-Type: application/json
+Accept: application/json
+
+{
+  "code": "x = 1 / 0\nprint(x)",
+  "language": "python",
+  "testCases": [
+    {
+      "order": 1,
+      "input": "",
+      "expectedOutput": ""
+    }
+  ],
+  "maxTimeSeconds": 3,
+  "maxMemoryMb": 128
+}
+
+### 5) Неподдерживаемый язык (ожидаем none / ошибка конфигурации)
+POST {{baseUrl}}/api/v1/code-execution/test-run
+Content-Type: application/json
+Accept: application/json
+
+{
+  "code": "print('hello')",
+  "language": "python2",
+  "testCases": [
+    {
+      "order": 1,
+      "input": "",
+      "expectedOutput": "hello"
+    }
+  ],
+  "maxTimeSeconds": 3,
+  "maxMemoryMb": 128
+}
+
+### 6) Пустой список тестов (ожидаем 400 EMPTY_TEST_CASES)
+POST {{baseUrl}}/api/v1/code-execution/test-run
+Content-Type: application/json
+Accept: application/json
+
+{
+  "code": "print('hello')",
+  "language": "python",
+  "testCases": []
+}

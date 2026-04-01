@@ -1,13 +1,18 @@
-using System.Diagnostics;
 using System.Globalization;
 using CodeExecution.Infrastructure.Interfaces.CodeExecution;
 
 namespace CodeExecution.Infrastructure.Implementation.CodeExecution;
 
-internal class CodeExecutor(IExecutorLanguageProvider languageProvider) : ICodeExecutor
+internal class CodeExecutor(IExecutorLanguageProvider languageProvider, IDockerRunner dockerRunner) : ICodeExecutor
 {
     private const string TempRootEnvVar = "CODE_EXECUTION_TEMP_ROOT";
-    private const string DockerPlatformEnvVar = "CODE_EXECUTION_DOCKER_PLATFORM";
+
+    private const string StdOutFile = "stdout.txt";
+    private const string StdErrFile = "stderr.txt";
+    private const string CompileStdOutFile = "compile_stdout.txt";
+    private const string CompileStdErrFile = "compile_stderr.txt";
+    private const string TimeOutputFile = "time_output.txt";
+    private const string InputFile = "input.txt";
 
     public async Task<CodeExecutionResult> ExecuteCode(
         string code,
@@ -16,26 +21,19 @@ internal class CodeExecutor(IExecutorLanguageProvider languageProvider) : ICodeE
         CancellationToken cancellationToken = default)
     {
         if (!languageProvider.TryGetLanguage(language, out var langConfig) || langConfig is null)
-        {
-            return new CodeExecutionResult
-            {
-                Output = string.Empty,
-                Error = $"Unsupported or inactive language: {language}",
-                ExitCode = -2,
-                TimeElapsedMs = 0,
-                MemoryUsageMb = 0,
-                Stage = ExecutionStage.None
-            };
-        }
+            throw new KeyNotFoundException($"Unsupported language: {language}");
 
         string runCommandRaw;
-        var compileCommand = "";
+        string compileCommand = string.Empty;
 
         if (langConfig.IsCompiled)
         {
-            compileCommand = langConfig.CompileCommandTemplate
+            var compileCommandRaw = langConfig.CompileCommandTemplate
                 .Replace("{input}", "/code/" + langConfig.DefaultFileName)
                 .Replace("{output}", "/code/program.out");
+
+            compileCommand =
+                $"{compileCommandRaw} > /code/{CompileStdOutFile} 2> /code/{CompileStdErrFile}";
 
             runCommandRaw = "/code/program.out";
         }
@@ -44,8 +42,11 @@ internal class CodeExecutor(IExecutorLanguageProvider languageProvider) : ICodeE
             runCommandRaw = langConfig.RunCommandTemplate.Replace("{file_path}", "/code/" + langConfig.DefaultFileName);
         }
 
-        var runCommand = $"/usr/bin/time -f 'TIME_ELAPSED:%e\nMEMORY_USAGE:%M' " +
-                         $"-o /code/time_output.txt " + runCommandRaw;
+        var timedRunCommand =
+            $"/usr/bin/time -f 'TIME_ELAPSED:%e\\nMEMORY_USAGE:%M' -o /code/{TimeOutputFile} {runCommandRaw}";
+
+        var runCommand =
+            $"{timedRunCommand} < /code/{InputFile} > /code/{StdOutFile} 2> /code/{StdErrFile}";
 
         var request = new ExecuteCodeRequest
         {
@@ -70,21 +71,28 @@ internal class CodeExecutor(IExecutorLanguageProvider languageProvider) : ICodeE
 
         try
         {
-            // 1. Компиляция
             if (request.IsCompiled)
             {
-                var compileCommand = request.CompileCommand;
+                var compileRunResult = await dockerRunner.RunAsync(
+                    request.DockerImage,
+                    tempDir,
+                    request.CompileCommand,
+                    request.DefaultTimeoutSeconds,
+                    request.MaxMemoryMb,
+                    request.MaxCpuCores,
+                    cancellationToken);
 
-                var (cOut, cErr, cExit) = await RunDockerProcess(
-                    tempDir, compileCommand, "", request, cancellationToken);
+                var compileStdOut = await ReadTextIfExists(Path.Combine(tempDir, CompileStdOutFile), cancellationToken);
+                var compileStdErr = await ReadTextIfExists(Path.Combine(tempDir, CompileStdErrFile), cancellationToken);
+                compileStdErr = AppendError(compileStdErr, compileRunResult.ErrorMessage);
 
-                if (cExit != 0)
+                if (compileRunResult.ExitCode != 0 || compileRunResult.TimedOut)
                 {
                     return new CodeExecutionResult
                     {
-                        Output = cOut,
-                        Error = cErr,
-                        ExitCode = cExit,
+                        Output = compileStdOut,
+                        Error = compileStdErr,
+                        ExitCode = compileRunResult.ExitCode,
                         TimeElapsedMs = 0,
                         MemoryUsageMb = 0,
                         Stage = ExecutionStage.Compilation
@@ -92,20 +100,28 @@ internal class CodeExecutor(IExecutorLanguageProvider languageProvider) : ICodeE
                 }
             }
 
-            // 2. Запуск программы
-            var runCommand = request.RunCommand;
+            var runResult = await dockerRunner.RunAsync(
+                request.DockerImage,
+                tempDir,
+                request.RunCommand,
+                request.DefaultTimeoutSeconds,
+                request.MaxMemoryMb,
+                request.MaxCpuCores,
+                cancellationToken);
 
-            var (stdOut, stdErr, exitCode) = await RunDockerProcess(tempDir, runCommand, request.Input, request, cancellationToken);
+            var stdOut = await ReadTextIfExists(Path.Combine(tempDir, StdOutFile), cancellationToken);
+            var stdErr = await ReadTextIfExists(Path.Combine(tempDir, StdErrFile), cancellationToken);
+            stdErr = AppendError(stdErr, runResult.ErrorMessage);
 
-            var (timeElapsed, memoryUsage) = await ParseTimeOutput(tempDir);
+            var (timeElapsed, memoryUsageMb) = await ParseTimeOutput(tempDir);
 
             return new CodeExecutionResult
             {
                 Output = stdOut,
                 Error = stdErr,
-                ExitCode = exitCode,
+                ExitCode = runResult.ExitCode,
                 TimeElapsedMs = timeElapsed,
-                MemoryUsageMb = memoryUsage,
+                MemoryUsageMb = memoryUsageMb,
                 Stage = ExecutionStage.Runtime
             };
         }
@@ -139,69 +155,19 @@ internal class CodeExecutor(IExecutorLanguageProvider languageProvider) : ICodeE
         var sourceFile = Path.Combine(tempDir, request.DefaultFileName);
         await File.WriteAllTextAsync(sourceFile, request.Code, cancellationToken);
 
+        var inputFile = Path.Combine(tempDir, InputFile);
+        await File.WriteAllTextAsync(inputFile, request.Input, cancellationToken);
+
         return tempDir;
     }
 
-    private async Task<(string stdOut, string stdErr, int exitCode)> RunDockerProcess(
-        string tempDir,
-        string runCommand,
-        string input,
-        ExecuteCodeRequest request,
-        CancellationToken cancellationToken)
+    private async Task<(double timeElapsedMs, double memoryUsageMb)> ParseTimeOutput(string tempDir)
     {
-        var containerName = $"code_{Guid.NewGuid():N}";
-        var platformArg = ResolveDockerPlatformArgument();
-
-        var psi = new ProcessStartInfo
-        {
-            FileName = "docker",
-            Arguments = $"run --rm --name {containerName} -i " +
-                        platformArg +
-                        $"-v \"{tempDir}:/code\" " +
-                        $"--memory={request.MaxMemoryMb}m --cpus={request.MaxCpuCores} " +
-                        $"--pids-limit=64 --network none {request.DockerImage} " +
-                        $"sh -c \"{runCommand}\"",
-            RedirectStandardOutput = true,
-            RedirectStandardError = true,
-            RedirectStandardInput = true,
-            UseShellExecute = false,
-            CreateNoWindow = true
-        };
-
-        using var process = new Process();
-        process.StartInfo = psi;
-        process.Start();
-
-        if (!string.IsNullOrEmpty(input))
-        {
-            await process.StandardInput.WriteAsync(input);
-            await process.StandardInput.FlushAsync(cancellationToken);
-        }
-        process.StandardInput.Close();
-
-        var task = process.WaitForExitAsync(cancellationToken);
-        var timeoutTask = Task.Delay(request.DefaultTimeoutSeconds * 1000, cancellationToken);
-
-        if (await Task.WhenAny(task, timeoutTask) == timeoutTask)
-        {
-            await KillContainer(containerName, cancellationToken);
-            return ("", "Error: Execution timed out.", -1);
-        }
-
-        var stdOut = await process.StandardOutput.ReadToEndAsync(cancellationToken);
-        var stdErr = await process.StandardError.ReadToEndAsync(cancellationToken);
-        var exitCode = process.ExitCode;
-
-        return (stdOut, stdErr, exitCode);
-    }
-
-    private async Task<(double timeElapsed, double memoryUsage)> ParseTimeOutput(string tempDir)
-    {
-        var timeOutputPath = Path.Combine(tempDir, "time_output.txt");
+        var timeOutputPath = Path.Combine(tempDir, TimeOutputFile);
         if (!File.Exists(timeOutputPath))
             return (0, 0);
 
-        double memoryUsage = 0;
+        double memoryUsageMb = 0;
         double timeElapsedMs = 0;
 
         var lines = await File.ReadAllLinesAsync(timeOutputPath);
@@ -215,27 +181,11 @@ internal class CodeExecutor(IExecutorLanguageProvider languageProvider) : ICodeE
             else if (line.StartsWith("MEMORY_USAGE:") &&
                      long.TryParse(line.Substring("MEMORY_USAGE:".Length), out var m))
             {
-                memoryUsage = m / 1024.0;
+                memoryUsageMb = m / 1024.0;
             }
         }
 
-        return (timeElapsedMs, memoryUsage);
-    }
-
-    private async Task KillContainer(string containerName, CancellationToken cancellationToken)
-    {
-        using var killProcess = new Process();
-        killProcess.StartInfo = new ProcessStartInfo
-        {
-            FileName = "docker",
-            Arguments = $"kill {containerName}",
-            RedirectStandardOutput = true,
-            RedirectStandardError = true,
-            UseShellExecute = false,
-            CreateNoWindow = true
-        };
-        killProcess.Start();
-        await killProcess.WaitForExitAsync(cancellationToken);
+        return (timeElapsedMs, memoryUsageMb);
     }
 
     private static string ResolveTempRoot()
@@ -247,12 +197,22 @@ internal class CodeExecutor(IExecutorLanguageProvider languageProvider) : ICodeE
         return Path.GetTempPath();
     }
 
-    private static string ResolveDockerPlatformArgument()
+    private static async Task<string> ReadTextIfExists(string path, CancellationToken cancellationToken)
     {
-        var platform = Environment.GetEnvironmentVariable(DockerPlatformEnvVar);
-        if (string.IsNullOrWhiteSpace(platform))
+        if (!File.Exists(path))
             return string.Empty;
 
-        return $"--platform {platform} ";
+        return await File.ReadAllTextAsync(path, cancellationToken);
+    }
+
+    private static string AppendError(string current, string appended)
+    {
+        if (string.IsNullOrWhiteSpace(appended))
+            return current;
+
+        if (string.IsNullOrWhiteSpace(current))
+            return appended;
+
+        return current + Environment.NewLine + appended;
     }
 }

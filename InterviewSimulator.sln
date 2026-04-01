@@ -21,6 +21,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{D1F2D9F1-72B4-4C68-AC17-B3B74E74B089}"
 	ProjectSection(SolutionItems) = preProject
 		SessionFlow.http = SessionFlow.http
+		CodeExecutionFlow.http = CodeExecutionFlow.http
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Framework.Presentation", "Framework.Presentation\Framework.Presentation.csproj", "{E6F54C2C-36C6-4ACC-A7C5-400FA95DDB8C}"

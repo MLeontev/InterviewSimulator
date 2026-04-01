@@ -10,6 +10,7 @@ public static class DependencyInjection
     {
         services.AddSingleton(_ => new RuntimeConfig(configuration));
         services.AddSingleton<LanguageProvider>();
+        services.AddSingleton<IDockerRunner, DockerRunner>();
         
         services.AddSingleton<ILanguageProvider>(sp => sp.GetRequiredService<LanguageProvider>());
         services.AddSingleton<IExecutorLanguageProvider>(sp => sp.GetRequiredService<LanguageProvider>());
