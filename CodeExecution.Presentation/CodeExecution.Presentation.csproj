@@ -13,6 +13,11 @@
 
     <ItemGroup>
       <ProjectReference Include="..\CodeExecution.UseCases\CodeExecution.UseCases.csproj" />
+      <ProjectReference Include="..\Interview.IntegrationEvents\Interview.IntegrationEvents.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="MassTransit.Abstractions" Version="8.5.7" />
     </ItemGroup>
 
 </Project>

@@ -96,3 +96,22 @@ Accept: application/json
   "language": "python",
   "testCases": []
 }
+
+### 7) Time limit exceeded (ожидаем TLE)
+POST {{baseUrl}}/api/v1/code-execution/test-run
+Content-Type: application/json
+Accept: application/json
+
+{
+  "code": "while True:\n    pass",
+  "language": "python",
+  "testCases": [
+    {
+      "order": 1,
+      "input": "",
+      "expectedOutput": ""
+    }
+  ],
+  "maxTimeSeconds": 1,
+  "maxMemoryMb": 128
+}

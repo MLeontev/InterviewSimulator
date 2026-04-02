@@ -1,4 +1,5 @@
 using System.Text.Json.Serialization;
+using CodeExecution.Controllers;
 using CodeExecution.Infrastructure.Implementation.CodeExecution;
 using CodeExecution.Infrastructure.Implementation.DataAccess;
 using CodeExecution.Infrastructure.Workers;
@@ -51,7 +52,7 @@ builder.Services.AddUsersDataAccess(builder.Configuration);
 builder.Services.AddMassTransit(configure =>
 {
     configure.SetKebabCaseEndpointNameFormatter();
-    configure.AddConsumer<CodeExecution.Infrastructure.Workers.CodeSubmissionCreatedConsumer>();
+    configure.AddConsumer<CodeSubmissionCreatedConsumer>();
     configure.AddConsumer<CodeSubmissionCompletedConsumer>();
 
     configure.UsingInMemory((context, cfg) =>

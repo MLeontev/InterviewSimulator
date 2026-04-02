@@ -19,12 +19,13 @@ internal class CheckSubmissionCommandHandler(
             .Include(s => s.TestCases.OrderBy(tc => tc.OrderIndex))
             .FirstOrDefaultAsync(cancellationToken: cancellationToken);
 
-        if (submission == null)
-            throw new InvalidOperationException("Submission not found");
+        if (submission is not { Status: ExecutionStatus.Running })
+            return;
 
-        submission.StartedAt = DateTime.UtcNow;
+        submission.StartedAt ??= DateTime.UtcNow;
 
         var overallVerdict = Verdict.OK;
+        
         foreach (var testCase in submission.TestCases)
         {
             CodeExecutionResult executionResult;
@@ -38,12 +39,14 @@ internal class CheckSubmissionCommandHandler(
                 submission.Status = ExecutionStatus.Failed;
                 submission.OverallVerdict = Verdict.FailedSystem;
                 submission.ErrorMessage = "Конфигурация для языка программирования не найдена";
+                submission.CompletedAt = DateTime.UtcNow;
                 await dbContext.SaveChangesAsync(cancellationToken);
                 return;
             }
 
             var actualOutput = executionResult.Output.Trim();
             var expectedOutput = testCase.ExpectedOutput.Trim();
+            
             var verdict = DetermineVerdict(
                 executionResult, actualOutput, expectedOutput,
                 submission.TimeLimitMs, submission.MemoryLimitMb);
@@ -58,13 +61,22 @@ internal class CheckSubmissionCommandHandler(
             if (verdict != Verdict.OK)
             {
                 overallVerdict = verdict;
+                if (verdict == Verdict.FailedSystem)
+                {
+                    submission.ErrorMessage = string.IsNullOrWhiteSpace(executionResult.Error)
+                        ? "Ошибка инфраструктуры выполнения кода"
+                        : executionResult.Error;
+                }
+                
                 break;
             }
         }
 
         submission.OverallVerdict = overallVerdict;
         submission.CompletedAt = DateTime.UtcNow;
-        submission.Status = ExecutionStatus.Completed;
+        submission.Status = overallVerdict == Verdict.FailedSystem
+            ? ExecutionStatus.Failed
+            : ExecutionStatus.Completed;
 
         await dbContext.SaveChangesAsync(cancellationToken);
     }
@@ -81,8 +93,7 @@ internal class CheckSubmissionCommandHandler(
 
         if (executionResult.Stage == ExecutionStage.Runtime)
         {
-            if ((maxTimeMs.HasValue
-                 && executionResult.TimeElapsedMs > maxTimeMs.Value)
+            if ((maxTimeMs.HasValue && executionResult.TimeElapsedMs > maxTimeMs.Value)
                 || executionResult.ExitCode == -1)
                 return Verdict.TLE;
 
@@ -98,6 +109,6 @@ internal class CheckSubmissionCommandHandler(
             return Verdict.OK;
         }
 
-        return Verdict.None;
+        return Verdict.FailedSystem;
     }
 }

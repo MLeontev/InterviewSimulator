@@ -8,51 +8,59 @@ using Verdict = Interview.Domain.Verdict;
 
 namespace Interview.UseCases.Commands;
 
-public record ApplyCodeSubmissionCompletedCommand(CodeSubmissionCompleted Event) : IRequest<Result>;
+public record ApplyCodeSubmissionCompletedCommand(
+    Guid SubmissionId,
+    Guid InterviewQuestionId,
+    IReadOnlyList<ApplyCodeSubmissionTestCaseResultDto> TestCaseResults,
+    Verdict OverallVerdict,
+    string? ErrorMessage = null) : IRequest<Result>;
+
+public record ApplyCodeSubmissionTestCaseResultDto(
+    Guid InterviewTestCaseId,
+    string ActualOutput,
+    string Error,
+    double TimeElapsedMs,
+    double MemoryUsedMb,
+    Verdict Verdict);
 
 internal sealed class ApplyCodeSubmissionCompletedCommandHandler(IDbContext dbContext)
     : IRequestHandler<ApplyCodeSubmissionCompletedCommand, Result>
 {
     public async Task<Result> Handle(ApplyCodeSubmissionCompletedCommand request, CancellationToken ct)
     {
-        var message = request.Event;
-
         var question = await dbContext.InterviewQuestions
             .Include(q => q.TestCases)
-            .FirstOrDefaultAsync(q => q.Id == message.SubmissionId, ct);
+            .FirstOrDefaultAsync(q => q.Id == request.InterviewQuestionId, ct);
 
         if (question == null)
-            return Result.Failure(Error.NotFound("QUESTION_NOT_FOUND", "Вопрос для результата проверки не найден"));
+            return Result.Failure(Error.NotFound("QUESTION_NOT_FOUND", "Задание для результата проверки не найдено"));
 
-        question.OverallVerdict = MapVerdict(message.OverallVerdict);
+        if (question.LastSubmissionId != request.SubmissionId)
+            return Result.Success();
+
+        question.OverallVerdict = request.OverallVerdict;
         question.EvaluatedAt = DateTime.UtcNow;
         question.Status = QuestionStatus.EvaluatedCode;
+        
+        question.ErrorMessage = request.OverallVerdict == Verdict.FailedSystem
+            ? string.IsNullOrWhiteSpace(request.ErrorMessage)
+                ? "Системная ошибка проверки кода"
+                : request.ErrorMessage
+            : null;
 
         var testCasesById = question.TestCases.ToDictionary(tc => tc.Id);
-        foreach (var result in message.TestCaseResults)
+        foreach (var result in request.TestCaseResults)
         {
-            if (!testCasesById.TryGetValue(result.TestCaseId, out var testCase))
+            if (!testCasesById.TryGetValue(result.InterviewTestCaseId, out var testCase))
                 continue;
 
             testCase.ActualOutput = result.ActualOutput;
-            testCase.ExecutionTimeMs = result.TimeElapsed;
-            testCase.MemoryUsedMb = result.MemoryUsage;
-            testCase.Verdict = MapVerdict(result.Verdict);
+            testCase.ExecutionTimeMs = result.TimeElapsedMs;
+            testCase.MemoryUsedMb = result.MemoryUsedMb;
+            testCase.Verdict = result.Verdict;
         }
 
         await dbContext.SaveChangesAsync(ct);
         return Result.Success();
     }
-
-    private static Verdict MapVerdict(CodeExecution.IntegrationEvents.Verdict verdict) =>
-        verdict switch
-        {
-            CodeExecution.IntegrationEvents.Verdict.OK => Verdict.OK,
-            CodeExecution.IntegrationEvents.Verdict.CE => Verdict.CE,
-            CodeExecution.IntegrationEvents.Verdict.RE => Verdict.RE,
-            CodeExecution.IntegrationEvents.Verdict.TLE => Verdict.TLE,
-            CodeExecution.IntegrationEvents.Verdict.MLE => Verdict.MLE,
-            CodeExecution.IntegrationEvents.Verdict.WA => Verdict.WA,
-            _ => Verdict.FailedSystem
-        };
 }

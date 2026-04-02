@@ -7,6 +7,8 @@ public class CodeSubmissionTestCase
     public Guid SubmissionId { get; set; }
     public CodeSubmission Submission { get; set; } = null!;
     
+    public Guid InterviewTestCaseId { get; set; }
+    
     public int OrderIndex { get; set; }
     
     public string Input { get; set; } = string.Empty;

@@ -2,14 +2,15 @@ namespace Interview.IntegrationEvents;
 
 public record CodeSubmissionCreated(
     Guid SubmissionId,
+    Guid InterviewQuestionId,
     string Code,
-    string Language,
-    TestCaseDto[] TestCases,
-    int? MaxTimeSeconds = null,
-    int? MaxMemoryMb = null);
-    
-public record TestCaseDto(
-    Guid TestCaseId,
-    int Order,
+    string LanguageCode,
+    IReadOnlyList<CodeSubmissionCreatedTestCase> TestCases,
+    int? TimeLimitMs = null,
+    int? MemoryLimitMb = null);
+
+public record CodeSubmissionCreatedTestCase(
+    Guid InterviewTestCaseId,
+    int OrderIndex,
     string Input,
     string ExpectedOutput);

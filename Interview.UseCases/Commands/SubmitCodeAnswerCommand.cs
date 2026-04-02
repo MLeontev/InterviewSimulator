@@ -8,13 +8,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Interview.UseCases.Commands;
 
-public record SubmitInterviewCodeAnswerCommand(Guid QuestionId, string Code) : IRequest<Result>;
+public record SubmitCodeAnswerCommand(Guid QuestionId, string Code) : IRequest<Result>;
 
-internal sealed class SubmitInterviewCodeAnswerCommandHandler(
-    IDbContext dbContext,
-    IBus bus) : IRequestHandler<SubmitInterviewCodeAnswerCommand, Result>
+internal sealed class SubmitCodeAnswerCommandHandler(IDbContext dbContext, IBus bus) : IRequestHandler<SubmitCodeAnswerCommand, Result>
 {
-    public async Task<Result> Handle(SubmitInterviewCodeAnswerCommand request, CancellationToken ct)
+    public async Task<Result> Handle(SubmitCodeAnswerCommand request, CancellationToken ct)
     {
         var question = await dbContext.InterviewQuestions
             .Include(q => q.InterviewSession)
@@ -22,20 +20,23 @@ internal sealed class SubmitInterviewCodeAnswerCommandHandler(
             .FirstOrDefaultAsync(q => q.Id == request.QuestionId, ct);
 
         if (question == null)
-            return Result.Failure(Error.NotFound("QUESTION_NOT_FOUND", "Вопрос не найден"));
+            return Result.Failure(Error.NotFound("QUESTION_NOT_FOUND", "Задание не найдено"));
 
         if (question.Type != QuestionType.Coding)
-            return Result.Failure(Error.Business("QUESTION_NOT_CODING", "Вопрос не является задачей на код"));
+            return Result.Failure(Error.Business("QUESTION_NOT_CODING", "Задание не является задачей на написание кода"));
 
         if (question.InterviewSession.Status != InterviewStatus.InProgress)
             return Result.Failure(Error.Business("SESSION_NOT_ACTIVE", "Сессия уже завершена"));
 
         if (string.IsNullOrWhiteSpace(question.ProgrammingLanguageCode))
-            return Result.Failure(Error.Business("LANGUAGE_NOT_SET", "Для вопроса не задан язык программирования"));
+            return Result.Failure(Error.Business("LANGUAGE_NOT_SET", "Для задания не задан язык программирования"));
 
+        var submissionId = Guid.NewGuid();
+        
         question.Answer = request.Code;
         question.Status = QuestionStatus.EvaluatingCode;
         question.SubmittedAt = DateTime.UtcNow;
+        question.LastSubmissionId = submissionId;
 
         foreach (var testCase in question.TestCases)
         {
@@ -46,21 +47,20 @@ internal sealed class SubmitInterviewCodeAnswerCommandHandler(
         }
 
         var eventPayload = new CodeSubmissionCreated(
-            SubmissionId: question.Id,
+            SubmissionId: submissionId,
+            InterviewQuestionId: question.Id,
             Code: request.Code,
-            Language: question.ProgrammingLanguageCode,
+            LanguageCode: question.ProgrammingLanguageCode,
             TestCases: question.TestCases
                 .OrderBy(tc => tc.OrderIndex)
-                .Select(tc => new Interview.IntegrationEvents.TestCaseDto(
-                    TestCaseId: tc.Id,
-                    Order: tc.OrderIndex,
+                .Select(tc => new CodeSubmissionCreatedTestCase(
+                    InterviewTestCaseId: tc.Id,
+                    OrderIndex: tc.OrderIndex,
                     Input: tc.Input,
                     ExpectedOutput: tc.ExpectedOutput))
                 .ToArray(),
-            MaxTimeSeconds: question.TimeLimitMs.HasValue
-                ? Math.Max(1, (int)Math.Ceiling(question.TimeLimitMs.Value / 1000.0))
-                : null,
-            MaxMemoryMb: question.MemoryLimitMb);
+            TimeLimitMs: question.TimeLimitMs,
+            MemoryLimitMb: question.MemoryLimitMb);
 
         await dbContext.SaveChangesAsync(ct);
         await bus.Publish(eventPayload, ct);

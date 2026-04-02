@@ -21,9 +21,11 @@ public class InterviewQuestion
     public string? Answer { get; set; }
     public string ReferenceSolution { get; set; } = string.Empty;
     public string? AiFeedbackJson { get; set; }
+    public string? ErrorMessage { get; set; }
     
+    public Guid? LastSubmissionId { get; set; }
     public string? ProgrammingLanguageCode { get; set; }
-    public Verdict OverallVerdict { get; set; }
+    public Verdict OverallVerdict { get; set; } = Verdict.None;
     public int? TimeLimitMs { get; set; }
     public int? MemoryLimitMb { get; set; }
     public List<TestCase> TestCases { get; set; } = [];

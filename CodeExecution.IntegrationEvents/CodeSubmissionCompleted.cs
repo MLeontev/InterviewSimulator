@@ -2,21 +2,23 @@ namespace CodeExecution.IntegrationEvents;
 
 public record CodeSubmissionCompleted(
     Guid SubmissionId,
-    TestCaseResultDto[] TestCaseResults,
+    Guid InterviewQuestionId,
+    IReadOnlyList<TestCaseResultDto> TestCaseResults,
     Verdict OverallVerdict,
     int PassedCount,
-    int TotalTests);
+    int TotalTests,
+    string? ErrorMessage = null);
     
 public record TestCaseResultDto(
-    Guid TestCaseId,
+    Guid InterviewTestCaseId,
+    int OrderIndex,
     string Input,
     string ExpectedOutput,
     string ActualOutput,
-    int Order,
     string Error,
     int ExitCode,
-    double TimeElapsed,
-    double MemoryUsage,
+    double TimeElapsedMs,
+    double MemoryUsedMb,
     Verdict Verdict);
     
 public enum Verdict
