@@ -23,13 +23,17 @@ internal class GetInterviewQuestionQueryHandler(IDbContext dbContext) : IRequest
         var dto = new InterviewQuestionDto
         {
             Id = question.Id,
-            InterviewSessionId = question.InterviewSessionId,
+            Title = question.Title,
             Text = question.Text,
             Type = question.Type,
             ProgrammingLanguageCode = question.ProgrammingLanguageCode,
             OrderIndex = question.OrderIndex,
             Status = question.Status,
             Answer = question.Answer,
+            OverallVerdict = question.OverallVerdict,
+            ErrorMessage = question.ErrorMessage,
+            SubmittedAt = question.SubmittedAt,
+            EvaluatedAt = question.EvaluatedAt,
             TimeLimitMs = question.TimeLimitMs,
             MemoryLimitMb = question.MemoryLimitMb,
             TestCases = question.TestCases
@@ -37,7 +41,7 @@ internal class GetInterviewQuestionQueryHandler(IDbContext dbContext) : IRequest
                 .Where(tc => !tc.IsHidden)
                 .Select(tc => new TestCaseDto
                 {
-                    Id = tc.Id,
+                    OrderIndex = tc.OrderIndex,
                     Input = tc.Input,
                     ExpectedOutput = tc.ExpectedOutput,
                     ActualOutput = tc.ActualOutput,
@@ -55,13 +59,17 @@ internal class GetInterviewQuestionQueryHandler(IDbContext dbContext) : IRequest
 public record InterviewQuestionDto
 {
     public Guid Id { get; init; }
-    public Guid InterviewSessionId { get; init; }
+    public string Title { get; init; } = string.Empty;
     public string Text { get; init; } = string.Empty;
     public QuestionType Type { get; init; }
     public string? ProgrammingLanguageCode { get; init; }
     public int OrderIndex { get; init; }
     public QuestionStatus Status { get; init; }
     public string? Answer { get; init; }
+    public Verdict OverallVerdict { get; init; }
+    public string? ErrorMessage { get; init; }
+    public DateTime? SubmittedAt { get; init; }
+    public DateTime? EvaluatedAt { get; init; }
     public int? TimeLimitMs { get; init; }
     public int? MemoryLimitMb { get; init; }
     public IReadOnlyList<TestCaseDto> TestCases { get; init; } = [];
@@ -69,7 +77,7 @@ public record InterviewQuestionDto
 
 public record TestCaseDto
 {
-    public Guid Id { get; init; }
+    public int OrderIndex { get; init; }
     public string Input { get; init; } = string.Empty;
     public string ExpectedOutput { get; init; } = string.Empty;
     public string? ActualOutput { get; init; }
