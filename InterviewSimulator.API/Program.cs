@@ -15,6 +15,7 @@ using QuestionBank.ModuleContract.Implementation;
 using QuestionBank.UseCases;
 using Users.Infrastructure.Implementation.DataAccess;
 using Users.Infrastructure.Implementation.Identity.Keycloak;
+using Users.ModuleContract.Implementation;
 using Users.UseCases;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -54,6 +55,7 @@ builder.Services.AddInterviewModuleUseCases();
 builder.Services.AddUsersDataAccess(builder.Configuration);
 builder.Services.AddKeycloakIdentity(builder.Configuration);
 builder.Services.AddUsersModuleUseCases();
+builder.Services.AddUsersModuleApi();
 
 builder.Services.AddMassTransit(configure =>
 {

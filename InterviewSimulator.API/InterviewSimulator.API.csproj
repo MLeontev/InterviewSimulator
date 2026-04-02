@@ -37,6 +37,7 @@
     <ProjectReference Include="..\QuestionBank.Presentation\QuestionBank.Presentation.csproj" />
     <ProjectReference Include="..\Users.Infrastructure.Implementation.DataAccess\Users.Infrastructure.Implementation.DataAccess.csproj" />
     <ProjectReference Include="..\Users.Infrastructure.Implementation.Identity.Keycloak\Users.Infrastructure.Implementation.Identity.Keycloak.csproj" />
+    <ProjectReference Include="..\Users.ModuleContract.Implementation\Users.ModuleContract.Implementation.csproj" />
     <ProjectReference Include="..\Users.Presentation\Users.Presentation.csproj" />
     <ProjectReference Include="..\Users.UseCases\Users.UseCases.csproj" />
   </ItemGroup>
