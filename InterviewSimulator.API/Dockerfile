@@ -1,6 +1,4 @@
-﻿FROM docker:27-cli AS dockercli
-
-FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS base
+﻿FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS base
 USER $APP_UID
 WORKDIR /app
 EXPOSE 8080
@@ -14,6 +12,7 @@ COPY ["CodeExecution.Infrastructure.Implementation.DataAccess/CodeExecution.Infr
 COPY ["CodeExecution.Domain/CodeExecution.Domain.csproj", "CodeExecution.Domain/"]
 COPY ["CodeExecution.Infrastructure.Interfaces.DataAccess/CodeExecution.Infrastructure.Interfaces.DataAccess.csproj", "CodeExecution.Infrastructure.Interfaces.DataAccess/"]
 COPY ["CodeExecution.Infrastructure.Workers/CodeExecution.Infrastructure.Workers.csproj", "CodeExecution.Infrastructure.Workers/"]
+COPY ["Interview.IntegrationEvents/Interview.IntegrationEvents.csproj", "Interview.IntegrationEvents/"]
 COPY ["CodeExecution.IntegrationEvents/CodeExecution.IntegrationEvents.csproj", "CodeExecution.IntegrationEvents/"]
 COPY ["CodeExecution.UseCases/CodeExecution.UseCases.csproj", "CodeExecution.UseCases/"]
 COPY ["CodeExecution.Infrastructure.Interfaces.CodeExecution/CodeExecution.Infrastructure.Interfaces.CodeExecution.csproj", "CodeExecution.Infrastructure.Interfaces.CodeExecution/"]
@@ -23,19 +22,24 @@ COPY ["CodeExecution.Infrastructure.Implementation.CodeExecution.Docker/CodeExec
 COPY ["Interview.Infrastructure.Implementation.DataAccess/Interview.Infrastructure.Implementation.DataAccess.csproj", "Interview.Infrastructure.Implementation.DataAccess/"]
 COPY ["Interview.Infrastructure.Interfaces.DataAccess/Interview.Infrastructure.Interfaces.DataAccess.csproj", "Interview.Infrastructure.Interfaces.DataAccess/"]
 COPY ["Interview.Domain/Interview.Domain.csproj", "Interview.Domain/"]
+COPY ["Interview.Presentation/Interview.Presentation.csproj", "Interview.Presentation/"]
+COPY ["Framework.Presentation/Framework.Presentation.csproj", "Framework.Presentation/"]
+COPY ["Interview.UseCases/Interview.UseCases.csproj", "Interview.UseCases/"]
+COPY ["QuestionBank.ModuleContract/QuestionBank.ModuleContract.csproj", "QuestionBank.ModuleContract/"]
 COPY ["QuestionBank.Infrastructure.Implementation.DataAccess/QuestionBank.Infrastructure.Implementation.DataAccess.csproj", "QuestionBank.Infrastructure.Implementation.DataAccess/"]
 COPY ["QuestionBank.Domain/QuestionBank.Domain.csproj", "QuestionBank.Domain/"]
 COPY ["QuestionBank.Infrastructure.Interfaces.DataAccess/QuestionBank.Infrastructure.Interfaces.DataAccess.csproj", "QuestionBank.Infrastructure.Interfaces.DataAccess/"]
+COPY ["QuestionBank.ModuleContract.Implementation/QuestionBank.ModuleContract.Implementation.csproj", "QuestionBank.ModuleContract.Implementation/"]
+COPY ["QuestionBank.UseCases/QuestionBank.UseCases.csproj", "QuestionBank.UseCases/"]
+COPY ["QuestionBank.Presentation/QuestionBank.Presentation.csproj", "QuestionBank.Presentation/"]
 COPY ["Users.Infrastructure.Implementation.DataAccess/Users.Infrastructure.Implementation.DataAccess.csproj", "Users.Infrastructure.Implementation.DataAccess/"]
 COPY ["Users.Infrastructure.Interfaces.DataAccess/Users.Infrastructure.Interfaces.DataAccess.csproj", "Users.Infrastructure.Interfaces.DataAccess/"]
 COPY ["Users.Domain/Users.Domain.csproj", "Users.Domain/"]
-COPY ["QuestionBank.Presentation/QuestionBank.Presentation.csproj", "QuestionBank.Presentation/"]
-COPY ["Framework.Presentation/Framework.Presentation.csproj", "Framework.Presentation/"]
-COPY ["QuestionBank.UseCases/QuestionBank.UseCases.csproj", "QuestionBank.UseCases/"]
-COPY ["Interview.UseCases/Interview.UseCases.csproj", "Interview.UseCases/"]
-COPY ["QuestionBank.ModuleContract/QuestionBank.ModuleContract.csproj", "QuestionBank.ModuleContract/"]
-COPY ["QuestionBank.ModuleContract.Implementation/QuestionBank.ModuleContract.Implementation.csproj", "QuestionBank.ModuleContract.Implementation/"]
-COPY ["Interview.Presentation/Interview.Presentation.csproj", "Interview.Presentation/"]
+COPY ["Users.Infrastructure.Implementation.Identity.Keycloak/Users.Infrastructure.Implementation.Identity.Keycloak.csproj", "Users.Infrastructure.Implementation.Identity.Keycloak/"]
+COPY ["Users.Infrastructure.Interfaces.Identity/Users.Infrastructure.Interfaces.Identity.csproj", "Users.Infrastructure.Interfaces.Identity/"]
+COPY ["Users.Presentation/Users.Presentation.csproj", "Users.Presentation/"]
+COPY ["Users.UseCases/Users.UseCases.csproj", "Users.UseCases/"]
+COPY ["Framework.UseCases/Framework.UseCases.csproj", "Framework.UseCases/"]
 RUN dotnet restore "InterviewSimulator.API/InterviewSimulator.API.csproj"
 COPY . .
 WORKDIR "/src/InterviewSimulator.API"
@@ -46,8 +50,6 @@ ARG BUILD_CONFIGURATION=Release
 RUN dotnet publish "./InterviewSimulator.API.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
 FROM base AS final
-USER root
 WORKDIR /app
-COPY --from=dockercli /usr/local/bin/docker /usr/local/bin/docker
 COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "InterviewSimulator.API.dll"]

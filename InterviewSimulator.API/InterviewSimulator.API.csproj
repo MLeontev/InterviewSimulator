@@ -9,6 +9,7 @@
 
     <ItemGroup>
         <PackageReference Include="MassTransit" Version="8.5.7" />
+        <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.5" />
         <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.0-rc.1.25451.107"/>
         <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.2">
           <PrivateAssets>all</PrivateAssets>
@@ -35,6 +36,9 @@
     <ProjectReference Include="..\QuestionBank.ModuleContract.Implementation\QuestionBank.ModuleContract.Implementation.csproj" />
     <ProjectReference Include="..\QuestionBank.Presentation\QuestionBank.Presentation.csproj" />
     <ProjectReference Include="..\Users.Infrastructure.Implementation.DataAccess\Users.Infrastructure.Implementation.DataAccess.csproj" />
+    <ProjectReference Include="..\Users.Infrastructure.Implementation.Identity.Keycloak\Users.Infrastructure.Implementation.Identity.Keycloak.csproj" />
+    <ProjectReference Include="..\Users.Presentation\Users.Presentation.csproj" />
+    <ProjectReference Include="..\Users.UseCases\Users.UseCases.csproj" />
   </ItemGroup>
 
   <ItemGroup>

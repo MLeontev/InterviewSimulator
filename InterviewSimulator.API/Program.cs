@@ -14,6 +14,8 @@ using QuestionBank.Infrastructure.Implementation.DataAccess.Seeding;
 using QuestionBank.ModuleContract.Implementation;
 using QuestionBank.UseCases;
 using Users.Infrastructure.Implementation.DataAccess;
+using Users.Infrastructure.Implementation.Identity.Keycloak;
+using Users.UseCases;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -29,6 +31,8 @@ builder.Services.AddOpenApi();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+builder.Services.AddAuth(builder.Configuration);
 
 // CodeExecution module
 builder.Services.AddCodeExecutionDocker(builder.Configuration);
@@ -48,6 +52,8 @@ builder.Services.AddInterviewModuleUseCases();
 
 // Users module
 builder.Services.AddUsersDataAccess(builder.Configuration);
+builder.Services.AddKeycloakIdentity(builder.Configuration);
+builder.Services.AddUsersModuleUseCases();
 
 builder.Services.AddMassTransit(configure =>
 {
@@ -78,6 +84,7 @@ using (var scope = app.Services.CreateScope())
 
 app.UseHttpsRedirection();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
