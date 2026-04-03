@@ -36,6 +36,7 @@ internal sealed class SubmitCodeAnswerCommandHandler(IDbContext dbContext, IBus 
         question.Answer = request.Code;
         question.Status = QuestionStatus.EvaluatingCode;
         question.SubmittedAt = DateTime.UtcNow;
+        question.QuestionVerdict = QuestionVerdict.None;
         question.LastSubmissionId = submissionId;
 
         foreach (var testCase in question.TestCases)

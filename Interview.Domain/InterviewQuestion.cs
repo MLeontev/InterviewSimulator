@@ -25,6 +25,7 @@ public class InterviewQuestion
     
     public Guid? LastSubmissionId { get; set; }
     public string? ProgrammingLanguageCode { get; set; }
+    public QuestionVerdict QuestionVerdict { get; set; } = QuestionVerdict.None;
     public Verdict OverallVerdict { get; set; } = Verdict.None;
     public int? TimeLimitMs { get; set; }
     public int? MemoryLimitMb { get; set; }
@@ -47,4 +48,12 @@ public enum QuestionStatus
     EvaluatedCode,
     EvaluatingAi,
     EvaluatedAi
+}
+
+public enum QuestionVerdict
+{
+    None,
+    Correct,
+    PartiallyCorrect,
+    Incorrect
 }

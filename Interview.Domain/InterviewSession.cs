@@ -14,6 +14,7 @@ public class InterviewSession
     public DateTime? FinishedAt { get; set; }
 
     public InterviewStatus Status { get; set; }
+    public SessionVerdict SessionVerdict { get; set; } = SessionVerdict.None;
     
     public string? AiFeedbackJson { get; set; }
 
@@ -26,4 +27,12 @@ public enum InterviewStatus
     Finished,
     EvaluatingAi,
     Evaluated
+}
+
+public enum SessionVerdict
+{
+    None,
+    Passed,
+    Borderline,
+    Failed
 }

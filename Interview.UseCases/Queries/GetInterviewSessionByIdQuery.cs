@@ -21,6 +21,7 @@ internal class GetInterviewSessionByIdQueryHandler(IDbContext dbContext) : IRequ
                 StartTime = s.StartedAt,
                 EndTime = s.FinishedAt ?? s.PlannedEndAt,
                 Status = s.Status.ToString(),
+                SessionVerdict = s.SessionVerdict,
                 TotalQuestions = s.Questions.Count,
                 AnsweredQuestions = s.Questions.Count(q => q.Status >= QuestionStatus.Submitted),
                 QuestionIds = s.Questions.OrderBy(q => q.OrderIndex).Select(q => q.Id).ToList()
@@ -45,6 +46,7 @@ public record InterviewSessionDto
     public DateTime StartTime { get; init; }
     public DateTime EndTime { get; init; }
     public string Status { get; init; } = string.Empty;
+    public SessionVerdict SessionVerdict { get; init; }
     public int TotalQuestions { get; init; }
     public int AnsweredQuestions { get; init; }
     public IReadOnlyList<Guid> QuestionIds { get; init; } = [];

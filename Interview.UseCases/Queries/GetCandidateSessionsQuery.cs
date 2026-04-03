@@ -22,6 +22,7 @@ internal class GetCandidateSessionsQueryHandler(IDbContext dbContext) : IRequest
                 StartTime = s.StartedAt,
                 EndTime = s.FinishedAt ?? s.PlannedEndAt,
                 Status = s.Status.ToString(),
+                SessionVerdict = s.SessionVerdict,
                 TotalQuestions = s.Questions.Count,
                 AnsweredQuestions = s.Questions.Count(q => q.Status >= QuestionStatus.Submitted)
             })
@@ -38,6 +39,7 @@ public record CandidateSessionListItemDto
     public DateTime StartTime { get; init; }
     public DateTime EndTime { get; init; }
     public string Status { get; init; } = string.Empty;
+    public SessionVerdict SessionVerdict { get; init; }
     public int TotalQuestions { get; init; }
     public int AnsweredQuestions { get; init; }
 }

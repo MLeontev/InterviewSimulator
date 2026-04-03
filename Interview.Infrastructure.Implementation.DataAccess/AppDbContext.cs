@@ -21,6 +21,10 @@ public class AppDbContext : DbContext, IDbContext
         modelBuilder.Entity<InterviewSession>()
             .Property(i => i.Status)
             .HasConversion<string>();
+
+        modelBuilder.Entity<InterviewSession>()
+            .Property(i => i.SessionVerdict)
+            .HasConversion<string>();
         
         modelBuilder.Entity<InterviewSession>().HasIndex(x => x.CandidateId)
             .HasFilter("\"Status\" = 'InProgress'")
@@ -39,6 +43,10 @@ public class AppDbContext : DbContext, IDbContext
         
         modelBuilder.Entity<InterviewQuestion>()
             .Property(q => q.OverallVerdict)
+            .HasConversion<string>();
+
+        modelBuilder.Entity<InterviewQuestion>()
+            .Property(q => q.QuestionVerdict)
             .HasConversion<string>();
         
         modelBuilder.Entity<InterviewQuestion>()

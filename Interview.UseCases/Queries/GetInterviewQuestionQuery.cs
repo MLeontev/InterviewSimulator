@@ -30,6 +30,7 @@ internal class GetInterviewQuestionQueryHandler(IDbContext dbContext) : IRequest
             OrderIndex = question.OrderIndex,
             Status = question.Status,
             Answer = question.Answer,
+            QuestionVerdict = question.QuestionVerdict,
             OverallVerdict = question.OverallVerdict,
             ErrorMessage = question.ErrorMessage,
             SubmittedAt = question.SubmittedAt,
@@ -66,6 +67,7 @@ public record InterviewQuestionDto
     public int OrderIndex { get; init; }
     public QuestionStatus Status { get; init; }
     public string? Answer { get; init; }
+    public QuestionVerdict QuestionVerdict { get; init; }
     public Verdict OverallVerdict { get; init; }
     public string? ErrorMessage { get; init; }
     public DateTime? SubmittedAt { get; init; }

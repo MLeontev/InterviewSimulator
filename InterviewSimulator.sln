@@ -93,6 +93,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Users.ModuleContract", "Use
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Users.ModuleContract.Implementation", "Users.ModuleContract.Implementation\Users.ModuleContract.Implementation.csproj", "{F64038D0-FD76-4CB5-A0E5-4CCDD19F0430}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{CB975811-A02E-4796-BCF1-A60063D6C3E4}"
+	ProjectSection(SolutionItems) = preProject
+		docs\prompts.md = docs\prompts.md
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

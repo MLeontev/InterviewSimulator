@@ -42,6 +42,18 @@ internal sealed class ApplyCodeSubmissionCompletedCommandHandler(IDbContext dbCo
         question.EvaluatedAt = DateTime.UtcNow;
         question.Status = QuestionStatus.EvaluatedCode;
         
+        var total = request.TestCaseResults.Count;
+        var passed = request.TestCaseResults.Count(x => x.Verdict == Verdict.OK);
+
+        question.QuestionVerdict = total == 0
+            ? QuestionVerdict.Incorrect
+            : passed == total
+                ? QuestionVerdict.Correct
+                : passed > 0
+                    ? QuestionVerdict.PartiallyCorrect
+                    : QuestionVerdict.Incorrect;
+
+        
         question.ErrorMessage = request.OverallVerdict == Verdict.FailedSystem
             ? string.IsNullOrWhiteSpace(request.ErrorMessage)
                 ? "Системная ошибка проверки кода"
