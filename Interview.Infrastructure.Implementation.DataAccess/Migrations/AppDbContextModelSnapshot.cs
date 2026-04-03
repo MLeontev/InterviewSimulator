@@ -60,6 +60,10 @@ namespace Interview.Infrastructure.Implementation.DataAccess.Migrations
                     b.Property<string>("ProgrammingLanguageCode")
                         .HasColumnType("text");
 
+                    b.Property<string>("QuestionVerdict")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<string>("ReferenceSolution")
                         .IsRequired()
                         .HasColumnType("text");
@@ -121,6 +125,10 @@ namespace Interview.Infrastructure.Implementation.DataAccess.Migrations
 
                     b.Property<DateTime>("PlannedEndAt")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("SessionVerdict")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<DateTime>("StartedAt")
                         .HasColumnType("timestamp with time zone");
