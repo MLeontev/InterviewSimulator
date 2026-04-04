@@ -70,6 +70,7 @@ internal sealed class ApplyCodeSubmissionCompletedCommandHandler(IDbContext dbCo
             testCase.ExecutionTimeMs = result.TimeElapsedMs;
             testCase.MemoryUsedMb = result.MemoryUsedMb;
             testCase.Verdict = result.Verdict;
+            testCase.ErrorMessage = string.IsNullOrWhiteSpace(result.Error) ? null : result.Error;
         }
 
         await dbContext.SaveChangesAsync(ct);

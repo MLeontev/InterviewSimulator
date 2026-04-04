@@ -1,13 +1,17 @@
-﻿using Interview.Infrastructure.Interfaces.DataAccess;
+﻿using Interview.Domain;
+using Interview.Infrastructure.Interfaces.DataAccess;
 using Interview.UseCases.Commands;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 
 namespace interview.Infrastructure.Workers;
 
-internal class TheoryAiEvaluationWorker(IServiceProvider serviceProvider) : BackgroundService
+internal class AiEvaluationWorker(
+    IServiceProvider serviceProvider,
+    ILogger<AiEvaluationWorker> logger) : BackgroundService
 {
     private const int DelayMs = 1000;
     
@@ -21,8 +25,9 @@ internal class TheoryAiEvaluationWorker(IServiceProvider serviceProvider) : Back
                 if (!processed)
                     await Task.Delay(DelayMs, stoppingToken);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                logger.LogError(ex, "Ошибка в AiEvaluationWorker при обработке очереди AI-оценки");
                 await Task.Delay(DelayMs, stoppingToken);
             }
         }
@@ -41,8 +46,10 @@ internal class TheoryAiEvaluationWorker(IServiceProvider serviceProvider) : Back
                         WHERE q."Id" = (
                             SELECT q2."Id"
                             FROM "Interview"."InterviewQuestions" q2
-                            WHERE q2."Type" = 'Theory'
-                              AND q2."Status" = 'Submitted'
+                            WHERE (
+                                (q2."Type" = 'Theory' AND q2."Status" = 'Submitted')
+                                OR (q2."Type" = 'Coding' AND q2."Status" = 'EvaluatedCode')
+                            )
                               AND q2."Answer" IS NOT NULL
                               AND btrim(q2."Answer") <> ''
                             ORDER BY q2."SubmittedAt" NULLS FIRST
@@ -59,7 +66,17 @@ internal class TheoryAiEvaluationWorker(IServiceProvider serviceProvider) : Back
         if (question == null)
             return false;
         
-        await sender.Send(new EvaluateTheoryQuestionCommand(question.Id), ct);
+        switch (question.Type)
+        {
+            case QuestionType.Theory:
+                await sender.Send(new EvaluateTheoryAnswerCommand(question.Id), ct);
+                break;
+            case QuestionType.Coding:
+                await sender.Send(new EvaluateCodingAnswerCommand(question.Id), ct);
+                break;
+            default:
+                throw new InvalidOperationException($"Unexpected question type: {question.Type}");
+        }
 
         return true;
     }

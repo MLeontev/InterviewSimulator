@@ -41,8 +41,8 @@ public enum QuestionType
 public enum QuestionStatus
 {
     NotStarted,
-    Skipped,
     InProgress,
+    Skipped,
     Submitted,
     EvaluatingCode,
     EvaluatedCode,

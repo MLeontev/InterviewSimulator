@@ -13,6 +13,7 @@ internal class GetInterviewSessionByIdQueryHandler(IDbContext dbContext) : IRequ
     public async Task<Result<InterviewSessionDto>> Handle(GetInterviewSessionByIdQuery request, CancellationToken ct)
     {
         var sessionDto = await dbContext.InterviewSessions
+            .AsNoTracking()
             .Where(s => s.Id == request.SessionId)
             .Select(s => new InterviewSessionDto
             {
@@ -23,7 +24,7 @@ internal class GetInterviewSessionByIdQueryHandler(IDbContext dbContext) : IRequ
                 Status = s.Status.ToString(),
                 SessionVerdict = s.SessionVerdict,
                 TotalQuestions = s.Questions.Count,
-                AnsweredQuestions = s.Questions.Count(q => q.Status >= QuestionStatus.Submitted),
+                AnsweredQuestions = s.Questions.Count(q => q.Status >= QuestionStatus.Skipped),
                 QuestionIds = s.Questions.OrderBy(q => q.OrderIndex).Select(q => q.Id).ToList()
             })
             .FirstOrDefaultAsync(ct);
@@ -32,7 +33,6 @@ internal class GetInterviewSessionByIdQueryHandler(IDbContext dbContext) : IRequ
         {
             return Result.Failure<InterviewSessionDto>(
                 Error.NotFound("SESSION_NOT_FOUND", "Сессия интервью не найдена"));
-            
         }
 
         return Result.Success(sessionDto);

@@ -8,13 +8,13 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Interview.UseCases.Commands;
 
-public record EvaluateTheoryQuestionCommand(Guid QuestionId) :  IRequest<Result>;
+public record EvaluateTheoryAnswerCommand(Guid QuestionId) :  IRequest<Result>;
 
 internal class EvaluateTheoryQuestionCommandHandler(
     IDbContext dbContext,
-    IAiEvaluationService aiEvaluationService) : IRequestHandler<EvaluateTheoryQuestionCommand, Result>
+    IAiEvaluationService aiEvaluationService) : IRequestHandler<EvaluateTheoryAnswerCommand, Result>
 {
-    public async Task<Result> Handle(EvaluateTheoryQuestionCommand request, CancellationToken cancellationToken)
+    public async Task<Result> Handle(EvaluateTheoryAnswerCommand request, CancellationToken cancellationToken)
     {
         var question = await dbContext.InterviewQuestions
             .FirstOrDefaultAsync(q => q.Id == request.QuestionId, cancellationToken);
@@ -44,7 +44,6 @@ internal class EvaluateTheoryQuestionCommandHandler(
             question.ErrorMessage = null;
 
             await dbContext.SaveChangesAsync(cancellationToken);
-
             return Result.Success();
         }
         catch (Exception ex)

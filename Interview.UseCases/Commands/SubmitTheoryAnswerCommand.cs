@@ -35,6 +35,9 @@ internal class SubmitTheoryAnswerCommandHandler(IDbContext dbContext) : IRequest
         if (question.InterviewSession.Status != InterviewStatus.InProgress)
             return Result.Failure(Error.Business("SESSION_NOT_ACTIVE", "Сессия уже завершена"));
         
+        if (question.Status >= QuestionStatus.Skipped)
+            return Result.Failure(Error.Business("QUESTION_COMPLETED", "Задание уже решено или пропущено"));
+        
         question.Answer = request.Answer.Trim();
         question.SubmittedAt = DateTime.UtcNow;
         question.EvaluatedAt = null;

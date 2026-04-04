@@ -34,8 +34,19 @@ internal class GigaChatAiEvaluationService(
         return result ?? throw new InvalidOperationException("Invalid theory JSON from GigaChat.");
     }
 
-    public Task<CodingEvaluationResult> EvaluateCodingAsync(CodingEvaluationRequest request, CancellationToken ct = default) 
-        => throw new NotImplementedException();
+    public async Task<CodingEvaluationResult> EvaluateCodingAsync(CodingEvaluationRequest request, CancellationToken ct = default)
+    {
+        var systemPrompt = GigaChatPromptFactory.BuildCodingSystemPrompt();
+        var userPrompt = GigaChatPromptFactory.BuildCodingUserPrompt(request);
+        
+        var result = await SendAndParseCodingAsync(systemPrompt, userPrompt, ct);
+        if (result is not null) return result;
+        
+        var retry = userPrompt + "\n\nВерни строго валидный JSON";
+        result = await SendAndParseCodingAsync(systemPrompt, retry, ct);
+
+        return result ?? throw new InvalidOperationException("Invalid theory JSON from GigaChat.");
+    }
 
     public Task<SessionEvaluationResult> EvaluateSessionAsync(SessionEvaluationRequest request, CancellationToken ct = default) 
         => throw new NotImplementedException();
@@ -102,7 +113,28 @@ internal class GigaChatAiEvaluationService(
         return new TheoryEvaluationResult(parsed.Score, parsed.Feedback, content);
     }
     
+    private async Task<CodingEvaluationResult?> SendAndParseCodingAsync(string systemPrompt, string userPrompt, CancellationToken ct)
+    {
+        var content = await SendAsync(_options.CodingModel, systemPrompt, userPrompt, _options.MaxTokensCoding, ct);
+        if (string.IsNullOrWhiteSpace(content)) return null;
+        
+        CodingResponseJson? parsed;
+        try { parsed = JsonSerializer.Deserialize<CodingResponseJson>(content); }
+        catch { return null; }
+
+        if (parsed is null || parsed.Score is < 0 or > 10 || string.IsNullOrWhiteSpace(parsed.Feedback))
+            return null;
+
+        return new CodingEvaluationResult(parsed.Score, parsed.Feedback, content);
+    }
+    
     private record TheoryResponseJson
+    {
+        [JsonPropertyName("score")] public int Score { get; init; }
+        [JsonPropertyName("feedback")] public string Feedback { get; init; } = string.Empty;
+    }
+    
+    private record CodingResponseJson
     {
         [JsonPropertyName("score")] public int Score { get; init; }
         [JsonPropertyName("feedback")] public string Feedback { get; init; } = string.Empty;

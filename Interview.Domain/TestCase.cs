@@ -17,6 +17,7 @@ public class TestCase
     public double? ExecutionTimeMs { get; set; }
     public double? MemoryUsedMb { get; set; }
     public Verdict Verdict { get; set; } = Verdict.None;
+    public string? ErrorMessage { get; set; }
 }
 
 public enum Verdict
