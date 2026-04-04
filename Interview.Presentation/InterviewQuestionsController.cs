@@ -23,4 +23,11 @@ public class InterviewQuestionsController(ISender sender) : ControllerBase
         var result = await sender.Send(new SubmitCodeAnswerCommand(id, request.Code), ct);
         return result.IsFailure ? result.ToProblem() : Accepted();
     }
+    
+    [HttpPost("{id:guid}/submit-theory")]
+    public async Task<IActionResult> SubmitTheory(Guid id, [FromBody] SubmitTheoryRequest request, CancellationToken ct)
+    {
+        var result = await sender.Send(new SubmitTheoryAnswerCommand(id, request.Answer), ct);
+        return result.IsFailure ? result.ToProblem() : Accepted();
+    }
 }

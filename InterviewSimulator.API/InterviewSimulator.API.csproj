@@ -29,7 +29,9 @@
     <ProjectReference Include="..\CodeExecution.UseCases\CodeExecution.UseCases.csproj" />
     <ProjectReference Include="..\CodeExecution.Infrastructure.Implementation.CodeExecution.Docker\CodeExecution.Infrastructure.Implementation.CodeExecution.Docker.csproj" />
     <ProjectReference Include="..\CodeExecution.Infrastructure.Interfaces.CodeExecution\CodeExecution.Infrastructure.Interfaces.CodeExecution.csproj" />
+    <ProjectReference Include="..\Interview.Infrastructure.Implementation.AiEvaluation.GigaChat\Interview.Infrastructure.Implementation.AiEvaluation.GigaChat.csproj" />
     <ProjectReference Include="..\Interview.Infrastructure.Implementation.DataAccess\Interview.Infrastructure.Implementation.DataAccess.csproj" />
+    <ProjectReference Include="..\interview.Infrastructure.Workers\interview.Infrastructure.Workers.csproj" />
     <ProjectReference Include="..\Interview.Presentation\Interview.Presentation.csproj" />
     <ProjectReference Include="..\Interview.UseCases\Interview.UseCases.csproj" />
     <ProjectReference Include="..\QuestionBank.Infrastructure.Implementation.DataAccess\QuestionBank.Infrastructure.Implementation.DataAccess.csproj" />
@@ -46,6 +48,10 @@
     <Content Include="..\.dockerignore">
       <Link>.dockerignore</Link>
     </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="certs\" />
   </ItemGroup>
 
 </Project>  

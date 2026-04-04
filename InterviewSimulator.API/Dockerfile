@@ -19,13 +19,16 @@ COPY ["CodeExecution.Infrastructure.Interfaces.CodeExecution/CodeExecution.Infra
 COPY ["Framework.Domain/Framework.Domain.csproj", "Framework.Domain/"]
 COPY ["CodeExecution.Presentation/CodeExecution.Presentation.csproj", "CodeExecution.Presentation/"]
 COPY ["CodeExecution.Infrastructure.Implementation.CodeExecution.Docker/CodeExecution.Infrastructure.Implementation.CodeExecution.Docker.csproj", "CodeExecution.Infrastructure.Implementation.CodeExecution.Docker/"]
+COPY ["Interview.Infrastructure.Implementation.AiEvaluation.GigaChat/Interview.Infrastructure.Implementation.AiEvaluation.GigaChat.csproj", "Interview.Infrastructure.Implementation.AiEvaluation.GigaChat/"]
+COPY ["Interview.Infrastructure.Interfaces.AiEvaluation/Interview.Infrastructure.Interfaces.AiEvaluation.csproj", "Interview.Infrastructure.Interfaces.AiEvaluation/"]
 COPY ["Interview.Infrastructure.Implementation.DataAccess/Interview.Infrastructure.Implementation.DataAccess.csproj", "Interview.Infrastructure.Implementation.DataAccess/"]
 COPY ["Interview.Infrastructure.Interfaces.DataAccess/Interview.Infrastructure.Interfaces.DataAccess.csproj", "Interview.Infrastructure.Interfaces.DataAccess/"]
 COPY ["Interview.Domain/Interview.Domain.csproj", "Interview.Domain/"]
-COPY ["Interview.Presentation/Interview.Presentation.csproj", "Interview.Presentation/"]
-COPY ["Framework.Presentation/Framework.Presentation.csproj", "Framework.Presentation/"]
+COPY ["interview.Infrastructure.Workers/interview.Infrastructure.Workers.csproj", "interview.Infrastructure.Workers/"]
 COPY ["Interview.UseCases/Interview.UseCases.csproj", "Interview.UseCases/"]
 COPY ["QuestionBank.ModuleContract/QuestionBank.ModuleContract.csproj", "QuestionBank.ModuleContract/"]
+COPY ["Interview.Presentation/Interview.Presentation.csproj", "Interview.Presentation/"]
+COPY ["Framework.Presentation/Framework.Presentation.csproj", "Framework.Presentation/"]
 COPY ["QuestionBank.Infrastructure.Implementation.DataAccess/QuestionBank.Infrastructure.Implementation.DataAccess.csproj", "QuestionBank.Infrastructure.Implementation.DataAccess/"]
 COPY ["QuestionBank.Domain/QuestionBank.Domain.csproj", "QuestionBank.Domain/"]
 COPY ["QuestionBank.Infrastructure.Interfaces.DataAccess/QuestionBank.Infrastructure.Interfaces.DataAccess.csproj", "QuestionBank.Infrastructure.Interfaces.DataAccess/"]
@@ -37,9 +40,11 @@ COPY ["Users.Infrastructure.Interfaces.DataAccess/Users.Infrastructure.Interface
 COPY ["Users.Domain/Users.Domain.csproj", "Users.Domain/"]
 COPY ["Users.Infrastructure.Implementation.Identity.Keycloak/Users.Infrastructure.Implementation.Identity.Keycloak.csproj", "Users.Infrastructure.Implementation.Identity.Keycloak/"]
 COPY ["Users.Infrastructure.Interfaces.Identity/Users.Infrastructure.Interfaces.Identity.csproj", "Users.Infrastructure.Interfaces.Identity/"]
-COPY ["Users.Presentation/Users.Presentation.csproj", "Users.Presentation/"]
+COPY ["Users.ModuleContract.Implementation/Users.ModuleContract.Implementation.csproj", "Users.ModuleContract.Implementation/"]
+COPY ["Users.ModuleContract/Users.ModuleContract.csproj", "Users.ModuleContract/"]
 COPY ["Users.UseCases/Users.UseCases.csproj", "Users.UseCases/"]
 COPY ["Framework.UseCases/Framework.UseCases.csproj", "Framework.UseCases/"]
+COPY ["Users.Presentation/Users.Presentation.csproj", "Users.Presentation/"]
 RUN dotnet restore "InterviewSimulator.API/InterviewSimulator.API.csproj"
 COPY . .
 WORKDIR "/src/InterviewSimulator.API"
@@ -50,6 +55,16 @@ ARG BUILD_CONFIGURATION=Release
 RUN dotnet publish "./InterviewSimulator.API.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
 FROM base AS final
+USER root
 WORKDIR /app
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends ca-certificates libgssapi-krb5-2 \
+    && rm -rf /var/lib/apt/
+
+COPY InterviewSimulator.API/certs/russian_trusted_root_ca_pem.crt /usr/local/share/ca-certificates/russian_trusted_root_ca.crt
+COPY InterviewSimulator.API/certs/russian_trusted_sub_ca_pem.crt /usr/local/share/ca-certificates/russian_trusted_sub_ca.crt
+RUN update-ca-certificates
+
 COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "InterviewSimulator.API.dll"]

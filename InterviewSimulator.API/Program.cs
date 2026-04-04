@@ -4,7 +4,9 @@ using CodeExecution.Infrastructure.Implementation.CodeExecution;
 using CodeExecution.Infrastructure.Implementation.DataAccess;
 using CodeExecution.Infrastructure.Workers;
 using CodeExecution.UseCases;
+using Interview.Infrastructure.Implementation.AiEvaluation.GigaChat;
 using Interview.Infrastructure.Implementation.DataAccess;
+using interview.Infrastructure.Workers;
 using Interview.UseCases;
 using InterviewSimulator.API.Extensions;
 using Interview.Presentation;
@@ -50,6 +52,8 @@ builder.Services.AddQuestionBankSeeding();
 // Interview module
 builder.Services.AddInterviewDataAccess(builder.Configuration);
 builder.Services.AddInterviewModuleUseCases();
+builder.Services.AddGigaChatAiEvaluation(builder.Configuration);
+builder.Services.AddInterviewWorkers();
 
 // Users module
 builder.Services.AddUsersDataAccess(builder.Configuration);
