@@ -10,6 +10,7 @@ using interview.Infrastructure.Workers;
 using Interview.UseCases;
 using InterviewSimulator.API.Extensions;
 using Interview.Presentation;
+using InterviewSimulator.API.Middleware;
 using MassTransit;
 using QuestionBank.Infrastructure.Implementation.DataAccess;
 using QuestionBank.Infrastructure.Implementation.DataAccess.Seeding;
@@ -76,7 +77,12 @@ builder.Services.AddMassTransit(configure =>
     });
 });
 
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+builder.Services.AddProblemDetails();
+
 var app = builder.Build();
+
+app.UseExceptionHandler();
 
 app.UseSwagger();
 app.UseSwaggerUI();
