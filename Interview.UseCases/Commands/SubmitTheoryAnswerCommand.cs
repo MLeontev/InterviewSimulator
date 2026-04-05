@@ -2,12 +2,12 @@ using FluentValidation;
 using Framework.Domain;
 using Interview.Domain;
 using Interview.Infrastructure.Interfaces.DataAccess;
+using Interview.UseCases.Services;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 
 namespace Interview.UseCases.Commands;
 
-public record SubmitTheoryAnswerCommand(Guid QuestionId, string Answer) : IRequest<Result>;
+public record SubmitTheoryAnswerCommand(Guid CandidateId, string Answer) : IRequest<Result>;
 
 internal class SubmitTheoryAnswerCommandValidator : AbstractValidator<SubmitTheoryAnswerCommand>
 {
@@ -18,13 +18,13 @@ internal class SubmitTheoryAnswerCommandValidator : AbstractValidator<SubmitTheo
     }
 }
 
-internal class SubmitTheoryAnswerCommandHandler(IDbContext dbContext) : IRequestHandler<SubmitTheoryAnswerCommand, Result>
+internal class SubmitTheoryAnswerCommandHandler(
+    IDbContext dbContext,
+    ICurrentQuestionResolver currentQuestionResolver) : IRequestHandler<SubmitTheoryAnswerCommand, Result>
 {
     public async Task<Result> Handle(SubmitTheoryAnswerCommand request, CancellationToken cancellationToken)
     {
-        var question = await dbContext.InterviewQuestions
-            .Include(x => x.InterviewSession)
-            .FirstOrDefaultAsync(x => x.Id == request.QuestionId, cancellationToken);
+        var question = await currentQuestionResolver.GetCurrentQuestionAsync(request.CandidateId, cancellationToken);
         
         if (question is null)
             return Result.Failure(Error.NotFound("QUESTION_NOT_FOUND", "Задание не найдено"));
@@ -32,8 +32,8 @@ internal class SubmitTheoryAnswerCommandHandler(IDbContext dbContext) : IRequest
         if (question.Type != QuestionType.Theory)
             return Result.Failure(Error.Business("QUESTION_NOT_THEORY", "Задание не является теоретическим"));
 
-        if (question.InterviewSession.Status != InterviewStatus.InProgress)
-            return Result.Failure(Error.Business("SESSION_NOT_ACTIVE", "Сессия уже завершена"));
+        if (question.InterviewSession.PlannedEndAt <= DateTime.UtcNow)
+            return Result.Failure(Error.Business("SESSION_EXPIRED", "Время сессии истекло"));
         
         if (question.Status >= QuestionStatus.Skipped)
             return Result.Failure(Error.Business("QUESTION_COMPLETED", "Задание уже решено или пропущено"));

@@ -10,6 +10,8 @@ public static class DependencyInjection
 
         services.AddHostedService<AiSessionEvaluationWorker>();
 
+        services.AddHostedService<SessionTimeoutWorker>();
+
         return services;
     }
 }

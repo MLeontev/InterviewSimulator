@@ -14,6 +14,7 @@
       <ProjectReference Include="..\Framework.Presentation\Framework.Presentation.csproj" />
       <ProjectReference Include="..\CodeExecution.IntegrationEvents\CodeExecution.IntegrationEvents.csproj" />
       <ProjectReference Include="..\Interview.UseCases\Interview.UseCases.csproj" />
+      <ProjectReference Include="..\Users.ModuleContract\Users.ModuleContract.csproj" />
     </ItemGroup>
 
     <ItemGroup>

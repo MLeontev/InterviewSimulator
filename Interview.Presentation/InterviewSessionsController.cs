@@ -2,58 +2,32 @@ using Framework.Controllers;
 using Interview.UseCases.Commands;
 using Interview.UseCases.Queries;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Interview.Presentation;
 
 [ApiController]
+[Authorize]
+[RequireCandidate]
 [Route("api/v1/interview-sessions")]
 public class InterviewSessionsController(ISender sender) : ControllerBase
 {
-    [HttpPost]
-    public async Task<IActionResult> CreateSession([FromBody] CreateSessionRequest request, CancellationToken cancellationToken = default)
+    [HttpGet("history")]
+    public async Task<IActionResult> GetHistory(CancellationToken cancellationToken)
     {
-        var command = new CreateInterviewSessionCommand(request.CandidateId, request.InterviewPresetId);
-        var result = await sender.Send(command, cancellationToken);
-
-        return result.IsFailure
-            ? result.ToProblem()
-            : Created($"/api/v1/interview-sessions/{result.Value}", new { sessionId = result.Value });
-    }
-    
-    [HttpGet("candidate/{candidateId:Guid}")]
-    public async Task<IActionResult> GetCandidateSessions(Guid candidateId, CancellationToken cancellationToken = default)
-    {
-        var query = new GetCandidateSessionsQuery(candidateId);
-        var result = await sender.Send(query, cancellationToken);
-
-        return result.IsFailure ? result.ToProblem() : Ok(result.Value);
-    }
-    
-    [HttpGet("{id:Guid}")]
-    public async Task<IActionResult> GetSession(Guid id, CancellationToken cancellationToken = default)
-    {
-        var query = new GetInterviewSessionByIdQuery(id);
+        var query = new GetInterviewSessionHistoryQuery(HttpContext.GetCandidateId());
         var result = await sender.Send(query, cancellationToken);
 
         return result.IsFailure ? result.ToProblem() : Ok(result.Value);
     }
 
-    [HttpDelete("{id:Guid}")]
-    public async Task<IActionResult> DeleteSession(Guid id, CancellationToken cancellationToken = default)
+    [HttpGet("{sessionId:guid}/report")]
+    public async Task<IActionResult> GetReport(Guid sessionId, CancellationToken cancellationToken)
     {
-        var command = new DeleteInterviewSessionCommand(id);
-        var result = await sender.Send(command, cancellationToken);
+        var query = new GetInterviewSessionReportQuery(HttpContext.GetCandidateId(), sessionId);
+        var result = await sender.Send(query, cancellationToken);
 
-        return result.IsFailure ? result.ToProblem() : NoContent();
-    }
-    
-    [HttpPost("{sessionId:guid}/finish")]
-    public async Task<IActionResult> FinishSession(Guid sessionId, CancellationToken cancellationToken = default)
-    {
-        var command = new FinishInterviewSessionCommand(sessionId);
-        var result = await sender.Send(command, cancellationToken);
-
-        return result.IsFailure ? result.ToProblem() : NoContent();
+        return result.IsFailure ? result.ToProblem() : Ok(result.Value);
     }
 }

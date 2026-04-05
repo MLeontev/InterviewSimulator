@@ -13,6 +13,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\Framework.Domain\Framework.Domain.csproj" />
+      <ProjectReference Include="..\Users.ModuleContract\Users.ModuleContract.csproj" />
     </ItemGroup>
 
 </Project>

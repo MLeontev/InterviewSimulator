@@ -1,6 +1,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using FluentValidation;
 using Framework.UseCases.Behaviors;
+using Interview.UseCases.Services;
 using MediatR;
 
 namespace Interview.UseCases;
@@ -16,6 +17,9 @@ public static class DependencyInjection
         });
 
         services.AddValidatorsFromAssembly(typeof(DependencyInjection).Assembly, includeInternalTypes: true);
+        
+        services.AddScoped<ICurrentSessionResolver, CurrentSessionResolver>();
+        services.AddScoped<ICurrentQuestionResolver, CurrentQuestionResolver>();
         
         return services;
     }

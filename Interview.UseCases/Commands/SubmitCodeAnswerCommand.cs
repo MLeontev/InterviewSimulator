@@ -1,23 +1,33 @@
+using FluentValidation;
 using Framework.Domain;
 using Interview.Domain;
 using Interview.Infrastructure.Interfaces.DataAccess;
 using Interview.IntegrationEvents;
+using Interview.UseCases.Services;
 using MassTransit;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 
 namespace Interview.UseCases.Commands;
 
-public record SubmitCodeAnswerCommand(Guid QuestionId, string Code) : IRequest<Result>;
+public record SubmitCodeAnswerCommand(Guid CandidateId, string Code) : IRequest<Result>;
 
-internal sealed class SubmitCodeAnswerCommandHandler(IDbContext dbContext, IBus bus) : IRequestHandler<SubmitCodeAnswerCommand, Result>
+internal class SubmitCodeAnswerCommandValidator : AbstractValidator<SubmitCodeAnswerCommand>
+{
+    public SubmitCodeAnswerCommandValidator()
+    {
+        RuleFor(x => x.Code)
+            .NotEmpty().WithMessage("Код не может быть пустым");
+    }
+}
+
+internal sealed class SubmitCodeAnswerCommandHandler(
+    IDbContext dbContext, 
+    IBus bus,
+    ICurrentQuestionResolver currentQuestionResolver) : IRequestHandler<SubmitCodeAnswerCommand, Result>
 {
     public async Task<Result> Handle(SubmitCodeAnswerCommand request, CancellationToken ct)
     {
-        var question = await dbContext.InterviewQuestions
-            .Include(q => q.InterviewSession)
-            .Include(q => q.TestCases)
-            .FirstOrDefaultAsync(q => q.Id == request.QuestionId, ct);
+        var question = await currentQuestionResolver.GetCurrentQuestionAsync(request.CandidateId, ct);
 
         if (question == null)
             return Result.Failure(Error.NotFound("QUESTION_NOT_FOUND", "Задание не найдено"));
@@ -25,8 +35,8 @@ internal sealed class SubmitCodeAnswerCommandHandler(IDbContext dbContext, IBus 
         if (question.Type != QuestionType.Coding)
             return Result.Failure(Error.Business("QUESTION_NOT_CODING", "Задание не является задачей на написание кода"));
 
-        if (question.InterviewSession.Status != InterviewStatus.InProgress)
-            return Result.Failure(Error.Business("SESSION_NOT_ACTIVE", "Сессия уже завершена"));
+        if (question.InterviewSession.PlannedEndAt <= DateTime.UtcNow)
+            return Result.Failure(Error.Business("SESSION_EXPIRED", "Время сессии истекло"));
 
         if (string.IsNullOrWhiteSpace(question.ProgrammingLanguageCode))
             return Result.Failure(Error.Business("LANGUAGE_NOT_SET", "Для задания не задан язык программирования"));

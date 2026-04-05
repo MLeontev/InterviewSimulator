@@ -1,4 +1,3 @@
-using CodeExecution.IntegrationEvents;
 using Framework.Domain;
 using Interview.Domain;
 using Interview.Infrastructure.Interfaces.DataAccess;

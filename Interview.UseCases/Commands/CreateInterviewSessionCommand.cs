@@ -29,7 +29,7 @@ internal class CreateInterviewSessionCommandHandler(
                 s.Status == InterviewStatus.InProgress, ct);
 
         if (hasActiveSession)
-            return Result.Failure<Guid>(Error.Business("ACTIVE_SESSION_EXISTS", "У кандидата уже есть активная сессия интервью"));
+            return Result.Failure<Guid>(Error.Conflict("ACTIVE_SESSION_EXISTS", "У кандидата уже есть активная сессия интервью"));
 
         InterviewPresetApiDto? presetInfo;
         GeneratedQuestionSet questionSet;
@@ -79,6 +79,7 @@ internal class CreateInterviewSessionCommandHandler(
                 {
                     Id = interviewQuestionId,
                     InterviewSessionId = sessionId,
+                    Title = question.Title,
                     Text = question.Text,
                     Type = MapQuestionType(question.Type),
                     CompetencyId = question.CompetencyId,
