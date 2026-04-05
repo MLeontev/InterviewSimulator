@@ -48,8 +48,20 @@ internal class GigaChatAiEvaluationService(
         return result ?? throw new InvalidOperationException("Invalid theory JSON from GigaChat.");
     }
 
-    public Task<SessionEvaluationResult> EvaluateSessionAsync(SessionEvaluationRequest request, CancellationToken ct = default) 
-        => throw new NotImplementedException();
+    public async Task<SessionEvaluationResult> EvaluateSessionAsync(SessionEvaluationRequest request, CancellationToken ct = default)
+    {
+        var systemPrompt = GigaChatPromptFactory.BuildSessionSystemPrompt();
+        var userPrompt = GigaChatPromptFactory.BuildSessionUserPrompt(request);
+
+        var result = await SendAndParseSessionAsync(systemPrompt, userPrompt, ct);
+        if (result is not null) return result;
+
+        var retry = userPrompt + "\n\nВерни строго валидный JSON";
+        result = await SendAndParseSessionAsync(systemPrompt, retry, ct);
+
+        return result ?? throw new InvalidOperationException("Invalid session JSON from GigaChat.");
+
+    }
 
     private async Task<string?> SendAsync(string model, string systemPrompt, string userPrompt, int maxTokens, CancellationToken ct)
     {
@@ -66,8 +78,10 @@ internal class GigaChatAiEvaluationService(
             Stream = false
         };
         
+        var payloadJson = JsonSerializer.Serialize(payload);
+        
         using var request = new HttpRequestMessage(HttpMethod.Post, "chat/completions");
-        request.Content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
+        request.Content = new StringContent(payloadJson, Encoding.UTF8, "application/json");
 
         var accessToken = await tokenClient.GetAccessTokenAsync(ct);
         request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
@@ -77,6 +91,8 @@ internal class GigaChatAiEvaluationService(
             model,
             maxTokens,
             _options.Temperature);
+        
+        logger.LogInformation("GigaChat request payload: {Payload}", payloadJson);
         
         using var response = await httpClient.SendAsync(request, ct);
         response.EnsureSuccessStatusCode();
@@ -128,6 +144,26 @@ internal class GigaChatAiEvaluationService(
         return new CodingEvaluationResult(parsed.Score, parsed.Feedback, content);
     }
     
+    private async Task<SessionEvaluationResult?> SendAndParseSessionAsync(string systemPrompt, string userPrompt, CancellationToken ct)
+    {
+        var content = await SendAsync(_options.SessionModel, systemPrompt, userPrompt, _options.MaxTokensSession, ct);
+        if (string.IsNullOrWhiteSpace(content)) return null;
+
+        SessionResponseJson? parsed;
+        try { parsed = JsonSerializer.Deserialize<SessionResponseJson>(content); }
+        catch { return null; }
+
+        if (string.IsNullOrWhiteSpace(parsed?.Summary))
+            return null;
+
+        return new SessionEvaluationResult(
+            parsed.Summary,
+            parsed.Strengths?.Where(x => !string.IsNullOrWhiteSpace(x)).ToList() ?? [],
+            parsed.Weaknesses?.Where(x => !string.IsNullOrWhiteSpace(x)).ToList() ?? [],
+            parsed.Recommendations?.Where(x => !string.IsNullOrWhiteSpace(x)).ToList() ?? [],
+            content);
+    }
+    
     private record TheoryResponseJson
     {
         [JsonPropertyName("score")] public int Score { get; init; }
@@ -138,5 +174,13 @@ internal class GigaChatAiEvaluationService(
     {
         [JsonPropertyName("score")] public int Score { get; init; }
         [JsonPropertyName("feedback")] public string Feedback { get; init; } = string.Empty;
+    }
+    
+    private record SessionResponseJson
+    {
+        [JsonPropertyName("summary")] public string Summary { get; init; } = string.Empty;
+        [JsonPropertyName("strengths")] public List<string>? Strengths { get; init; }
+        [JsonPropertyName("weaknesses")] public List<string>? Weaknesses { get; init; }
+        [JsonPropertyName("recommendations")] public List<string>? Recommendations { get; init; }
     }
 }

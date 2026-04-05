@@ -63,7 +63,7 @@ internal class EvaluateCodingAnswerCommandHandler(
         }
         catch (Exception ex)
         {
-            question.Status = QuestionStatus.EvaluatedAi;
+            question.Status = QuestionStatus.EvaluatedCode;
             question.ErrorMessage = $"Ошибка AI-оценки кода: {ex.Message}";
             await dbContext.SaveChangesAsync(cancellationToken);
             return Result.Failure(Error.External("AI_EVALUATION_FAILED", "Не удалось выполнить AI-оценку"));

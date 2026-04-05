@@ -1,4 +1,8 @@
+using System.Globalization;
+using System.Text.Encodings.Web;
+using System.Text.Json;
 using Interview.Infrastructure.Interfaces.AiEvaluation.Coding;
+using Interview.Infrastructure.Interfaces.AiEvaluation.Session;
 using Interview.Infrastructure.Interfaces.AiEvaluation.Theory;
 
 namespace Interview.Infrastructure.Implementation.AiEvaluation.GigaChat;
@@ -88,24 +92,86 @@ internal static class GigaChatPromptFactory
         - не делай выводов о других тестах, которых нет во входе
 
         """;
-    
+
     public static string BuildCodingUserPrompt(CodingEvaluationRequest request) =>
         $"""
-           Задача:
-           {request.QuestionText}
-           
-           Эталонный подход:
-           {request.ReferenceSolution}
-           
-           Код кандидата:
-           {request.CandidateCode}
-           
-           Результаты автопроверки:
-           - overallVerdict: {request.OverallVerdict}
-           - passedCount: {request.PassedCount}
-           - totalTests: {request.TotalTests}
-           
-           Первый упавший тест (если есть):
-           {request.FirstFailedTest}
-           """;
+         Задача:
+         {request.QuestionText}
+
+         Эталонный подход:
+         {request.ReferenceSolution}
+
+         Код кандидата:
+         {request.CandidateCode}
+
+         Результаты автопроверки:
+         - overallVerdict: {request.OverallVerdict}
+         - passedCount: {request.PassedCount}
+         - totalTests: {request.TotalTests}
+
+         Первый упавший тест (если есть):
+         {request.FirstFailedTest}
+         """;
+    
+    public static string BuildSessionSystemPrompt() =>
+        """
+        Ты – ассистент платформы технических собеседований.
+        Твоя задача: сформировать итоговый отчет по завершенной сессии собеседования.
+        
+        Оценивай только по данным из сообщения пользователя.
+        Не выдумывай факты.
+        Не добавляй выводы, которых нельзя сделать из входных данных.
+        Не переоценивай задачи заново, используй уже готовые результаты по вопросам.
+        
+        Верни только JSON без markdown и без дополнительных полей:
+        {
+        "summary": "",
+        "strengths": [],
+        "weaknesses": [],
+        "recommendations": []
+        }
+        
+        Правила:
+        - summary: 3..8 предложений, до 1200 символов
+        - пиши напрямую кандидату на "ты"
+        - summary должен кратко подводить итог всей сессии: что получилось лучше, где есть пробелы, как в целом выглядит результат
+        - strengths: 1..5 коротких пункта о сильных сторонах кандидата по всей сессии
+        - weaknesses: 1..5 коротких пункта о слабых сторонах кандидата по всей сессии
+        - recommendations: 1..5 коротких практических рекомендаций, что стоит подтянуть
+        - не дублируй одну и ту же мысль во всех полях
+        - strengths — это то, что у кандидата получается хорошо
+        - weaknesses — это проблемные места
+        - recommendations — это конкретные советы, что улучшить
+        """;
+    
+    public static string BuildSessionUserPrompt(SessionEvaluationRequest request)
+    {
+        var jsonOptions = new JsonSerializerOptions
+        {
+            WriteIndented = true,
+            Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+        };
+        
+        var questionsJson = JsonSerializer.Serialize(request.QuestionResults, jsonOptions);
+        var competencyJson = JsonSerializer.Serialize(request.CompetencyResults, jsonOptions);
+
+        return $"""
+                Сформируй итоговый отчет по результатам сессии технического собеседования.
+
+                Пресет:
+                {request.PresetName}
+
+                Технологический стек:
+                {request.TechnologyStack}
+
+                Результаты по вопросам:
+                {questionsJson}
+
+                Агрегированные результаты по компетенциям:
+                {competencyJson}
+
+                Средний балл по заданиям (0-10):
+                {request.OverallScore.ToString("0.##", CultureInfo.InvariantCulture)}
+                """;
+    }
 }

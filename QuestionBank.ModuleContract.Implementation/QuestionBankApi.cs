@@ -35,6 +35,29 @@ internal class QuestionBankApi(ISender sender) : IQuestionBankApi
         return new InterviewPresetApiDto(result.Value.Id, result.Value.Name);
     }
     
+    public async Task<InterviewPresetDetailsApiDto?> GetPresetDetailsAsync(
+        Guid interviewPresetId,
+        CancellationToken ct = default)
+    {
+        var result = await sender.Send(new GetInterviewPresetDetailsQuery(interviewPresetId), ct);
+
+        if (result.IsFailure)
+        {
+            if (result.Error.Type == ErrorType.NotFound)
+                return null;
+
+            throw new InvalidOperationException($"{result.Error.Code}: {result.Error.Description}");
+        }
+
+        return new InterviewPresetDetailsApiDto(
+            Id: result.Value.Id,
+            Name: result.Value.Name,
+            Technologies: result.Value.Technologies,
+            Competencies: result.Value.Competencies
+                .Select(c => new PresetCompetencyApiDto(c.CompetencyId, c.CompetencyName, c.Weight))
+                .ToList());
+    }
+    
     private static GeneratedQuestionSet MapToApi(GeneratedQuestionSetDto set) =>
         new(
             PresetId: set.PresetId,
@@ -48,6 +71,8 @@ internal class QuestionBankApi(ISender sender) : IQuestionBankApi
             Title: q.Title,
             Text: q.Text,
             ReferenceSolution: q.ReferenceSolution,
+            CompetencyId: q.CompetencyId,
+            CompetencyName: q.CompetencyName,
             ProgrammingLanguageCode: q.ProgrammingLanguageCode,
             TimeLimitMs: q.TimeLimitMs,
             MemoryLimitMb: q.MemoryLimitMb,

@@ -79,6 +79,8 @@ internal class CreateInterviewSessionCommandHandler(
                     InterviewSessionId = sessionId,
                     Text = question.Text,
                     Type = MapQuestionType(question.Type),
+                    CompetencyId = question.CompetencyId,
+                    CompetencyName = question.CompetencyName,
                     ProgrammingLanguageCode = question.ProgrammingLanguageCode,
                     OrderIndex = question.OrderIndex,
                     ReferenceSolution = question.ReferenceSolution,

@@ -13,7 +13,7 @@ namespace CodeExecution.Infrastructure.Workers;
 
 internal class CodeExecutionWorker(IServiceProvider serviceProvider) : BackgroundService
 {
-    private const int DelayMs = 500;
+    private const int DelayMs = 5000;
     private const int SubmissionsToPublishCount = 10;
     
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)

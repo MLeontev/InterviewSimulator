@@ -9,6 +9,10 @@ public interface IQuestionBankApi
         CancellationToken ct = default);
     
     Task<InterviewPresetApiDto?> GetPresetAsync(Guid interviewPresetId);
+    
+    Task<InterviewPresetDetailsApiDto?> GetPresetDetailsAsync(
+        Guid interviewPresetId,
+        CancellationToken ct = default);
 }
 
 public record GeneratedQuestionSet(
@@ -22,6 +26,8 @@ public record GeneratedQuestion(
     string Title,
     string Text,
     string ReferenceSolution,
+    Guid CompetencyId,
+    string CompetencyName,
     string? ProgrammingLanguageCode,
     int? TimeLimitMs,
     int? MemoryLimitMb,
@@ -40,3 +46,14 @@ public enum QuestionType
 }
 
 public record InterviewPresetApiDto(Guid Id, string Name);
+
+public record InterviewPresetDetailsApiDto(
+    Guid Id,
+    string Name,
+    IReadOnlyList<string> Technologies,
+    IReadOnlyList<PresetCompetencyApiDto> Competencies);
+
+public record PresetCompetencyApiDto(
+    Guid CompetencyId,
+    string CompetencyName,
+    double Weight);

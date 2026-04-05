@@ -9,11 +9,11 @@ using Microsoft.Extensions.Logging;
 
 namespace interview.Infrastructure.Workers;
 
-internal class AiEvaluationWorker(
+internal class AiAnswerEvaluationWorker(
     IServiceProvider serviceProvider,
-    ILogger<AiEvaluationWorker> logger) : BackgroundService
+    ILogger<AiAnswerEvaluationWorker> logger) : BackgroundService
 {
-    private const int DelayMs = 1000;
+    private const int DelayMs = 5000;
     
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
@@ -27,7 +27,7 @@ internal class AiEvaluationWorker(
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "Ошибка в AiEvaluationWorker при обработке очереди AI-оценки");
+                logger.LogError(ex, "Ошибка в AiAnswerEvaluationWorker при обработке очереди AI-оценки");
                 await Task.Delay(DelayMs, stoppingToken);
             }
         }

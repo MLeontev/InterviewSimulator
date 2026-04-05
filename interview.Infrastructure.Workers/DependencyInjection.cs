@@ -6,7 +6,9 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddInterviewWorkers(this IServiceCollection services)
     {
-        services.AddHostedService<AiEvaluationWorker>();
+        services.AddHostedService<AiAnswerEvaluationWorker>();
+
+        services.AddHostedService<AiSessionEvaluationWorker>();
 
         return services;
     }

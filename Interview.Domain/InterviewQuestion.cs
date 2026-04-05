@@ -10,6 +10,8 @@ public class InterviewQuestion
     public string Title { get; set; } = string.Empty;
     public string Text { get; set; } = string.Empty;
     public QuestionType Type { get; set; }
+    public Guid? CompetencyId { get; set; }
+    public string? CompetencyName { get; set; }
     
     public int OrderIndex { get; set; }
     

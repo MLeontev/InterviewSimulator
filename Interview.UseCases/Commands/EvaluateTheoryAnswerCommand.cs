@@ -48,7 +48,7 @@ internal class EvaluateTheoryQuestionCommandHandler(
         }
         catch (Exception ex)
         {
-            question.Status = QuestionStatus.EvaluatedAi;
+            question.Status = QuestionStatus.Submitted;
             question.ErrorMessage = $"Ошибка AI-оценки теории: {ex.Message}";
             await dbContext.SaveChangesAsync(cancellationToken);
             return Result.Failure(Error.External("AI_EVALUATION_FAILED", "Не удалось выполнить AI-оценку"));
