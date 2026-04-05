@@ -24,6 +24,9 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.AddAppConfiguration();
 
+builder.Services.Configure<InterviewSessionQuestionSetOptions>(
+    builder.Configuration.GetSection("Interview:SessionQuestionSet"));
+
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {

@@ -3,6 +3,7 @@ using MediatR;
 using Interview.Domain;
 using Interview.Infrastructure.Interfaces.DataAccess;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using QuestionBank.ModuleContract;
 using QuestionType = Interview.Domain.QuestionType;
 
@@ -12,12 +13,15 @@ public record CreateInterviewSessionCommand(Guid CandidateId, Guid InterviewPres
 
 internal class CreateInterviewSessionCommandHandler(
     IDbContext dbContext,
-    IQuestionBankApi questionBankApi) : IRequestHandler<CreateInterviewSessionCommand, Result<Guid>>
+    IQuestionBankApi questionBankApi,
+    IOptions<InterviewSessionQuestionSetOptions> questionSetOptions) : IRequestHandler<CreateInterviewSessionCommand, Result<Guid>>
 {
+    private readonly InterviewSessionQuestionSetOptions _questionSetOptions = questionSetOptions.Value;
+    
     public async Task<Result<Guid>> Handle(CreateInterviewSessionCommand request, CancellationToken ct)
     {
-        const int theoryCount = 4;
-        const int codingCount = 2;
+        var theoryCount = _questionSetOptions.TheoryCount;
+        var codingCount = _questionSetOptions.CodingCount;
         
         var hasActiveSession = await dbContext.InterviewSessions
             .AnyAsync(s => 
@@ -25,9 +29,7 @@ internal class CreateInterviewSessionCommandHandler(
                 s.Status == InterviewStatus.InProgress, ct);
 
         if (hasActiveSession)
-        {
             return Result.Failure<Guid>(Error.Business("ACTIVE_SESSION_EXISTS", "У кандидата уже есть активная сессия интервью"));
-        }
 
         InterviewPresetApiDto? presetInfo;
         GeneratedQuestionSet questionSet;
