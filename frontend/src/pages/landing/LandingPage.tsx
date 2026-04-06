@@ -1,3 +1,7 @@
+import { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../features/auth/context/AuthContext';
+import { Footer } from '../../shared/components/layout/Footer';
 import { Button } from '../../shared/components/ui/Button';
 
 interface Feature {
@@ -38,6 +42,15 @@ const steps: Step[] = [
 ];
 
 export function LandingPage() {
+  const { isAuthenticated, login } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/history');
+    }
+  }, [isAuthenticated, navigate]);
+
   return (
     <div className='min-h-screen bg-white flex flex-col'>
       <nav className='border-b border-gray-200'>
@@ -46,7 +59,9 @@ export function LandingPage() {
             Тренажер собеседований
           </span>
           <div className='flex gap-2'>
-            <Button variant='outline'>Войти</Button>
+            <Button variant='outline' onClick={login}>
+              Войти
+            </Button>
             <Button variant='primary'>Зарегистрироваться</Button>
           </div>
         </div>
@@ -106,11 +121,7 @@ export function LandingPage() {
         </section>
       </main>
 
-      <footer className='border-t border-gray-200 py-8'>
-        <div className='max-w-5xl mx-auto text-center text-sm text-gray-400'>
-          © 2026 Тренажер собеседований
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }

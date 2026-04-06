@@ -2,7 +2,7 @@ import type {
   InterviewPresetDetails,
   InterviewPresetListItem,
 } from '../models/interviewPreset';
-import api from './api';
+import { api } from '../shared/lib/axios';
 
 export const getInterviewPresets = async () => {
   const response = await api.get<InterviewPresetListItem[]>(

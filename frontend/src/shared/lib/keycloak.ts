@@ -5,3 +5,15 @@ export const keycloak = new Keycloak({
   realm: 'InterviewSimulator',
   clientId: 'interview-public-client',
 });
+
+let initPromise: Promise<boolean> | null = null;
+
+export function initKeycloak() {
+  if (!initPromise) {
+    initPromise = keycloak.init({ onLoad: 'check-sso' }).catch((e) => {
+      initPromise = null;
+      throw e;
+    });
+  }
+  return initPromise;
+}
