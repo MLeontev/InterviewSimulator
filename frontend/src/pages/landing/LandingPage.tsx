@@ -39,7 +39,7 @@ const steps: Step[] = [
 
 export function LandingPage() {
   return (
-    <div className='min-h-screen bg-white'>
+    <div className='min-h-screen bg-white flex flex-col'>
       <nav className='border-b border-gray-200'>
         <div className='flex items-center justify-between max-w-5xl mx-auto py-4'>
           <span className='text-indigo-600 font-semibold'>
@@ -52,52 +52,65 @@ export function LandingPage() {
         </div>
       </nav>
 
-      <section className='bg-indigo-50 py-16 px-16'>
-        <div className='text-center mb-12'>
-          <h1 className='text-4xl font-bold text-gray-900 max-w-4xl mx-auto leading-tight mb-4'>
-            Подготовься к техническому собеседованию
-          </h1>
-          <p className='text-indigo-600 text-base max-w-lg mx-auto mb-8 leading-relaxed'>
-            Проходи пробные интервью с теоретическими вопросами и
-            алгоритмическими задачами. Получай обратную связь от ИИ
-          </p>
-          <Button variant='primary' className='px-8 py-3 text-base rounded-xl'>
-            Начать подготовку
-          </Button>
-        </div>
-
-        <div className='flex gap-4 max-w-5xl mx-auto'>
-          {features.map((f) => (
-            <div
-              key={f.title}
-              className='flex-1 bg-white border border-gray-200 rounded-xl p-6'
+      <main className='flex-1'>
+        <section className='bg-indigo-50 py-16 px-16'>
+          <div className='text-center mb-12'>
+            <h1 className='text-4xl font-bold text-gray-900 max-w-4xl mx-auto leading-tight mb-4'>
+              Подготовься к техническому собеседованию
+            </h1>
+            <p className='text-indigo-600 text-lg max-w-xl mx-auto mb-8 leading-relaxed'>
+              Проходи пробные интервью с теоретическими вопросами и
+              алгоритмическими задачами. Получай обратную связь от ИИ
+            </p>
+            <Button
+              variant='primary'
+              className='px-8 py-3 text-base rounded-xl'
             >
-              <div className='text-indigo-600 font-semibold text-sm mb-2'>
-                {f.title}
-              </div>
-              <div className='text-gray-500 text-sm leading-relaxed'>
-                {f.text}
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
+              Начать подготовку
+            </Button>
+          </div>
 
-      <div className='border-t border-gray-200' />
-
-      <section className='py-16 px-16'>
-        <div className='flex justify-center gap-12 max-w-4xl mx-auto text-center'>
-          {steps.map((s) => (
-            <div key={s.num} className='flex-1'>
-              <div className='w-12 h-12 rounded-full bg-indigo-600 text-white flex items-center justify-center text-lg font-bold mx-auto mb-4'>
-                {s.num}
+          <div className='flex gap-4 max-w-5xl mx-auto'>
+            {features.map((f) => (
+              <div
+                key={f.title}
+                className='flex-1 bg-white border border-gray-200 rounded-xl p-6'
+              >
+                <div className='text-indigo-600 font-semibold text-sm mb-2'>
+                  {f.title}
+                </div>
+                <div className='text-gray-500 text-sm leading-relaxed'>
+                  {f.text}
+                </div>
               </div>
-              <div className='font-semibold text-gray-900 mb-1'>{s.title}</div>
-              <div className='text-sm text-gray-500'>{s.text}</div>
-            </div>
-          ))}
+            ))}
+          </div>
+        </section>
+
+        <div className='border-t border-gray-200' />
+
+        <section className='py-16 px-16'>
+          <div className='flex justify-center gap-12 max-w-4xl mx-auto text-center'>
+            {steps.map((s) => (
+              <div key={s.num} className='flex-1'>
+                <div className='w-12 h-12 rounded-full bg-indigo-600 text-white flex items-center justify-center text-lg font-bold mx-auto mb-4'>
+                  {s.num}
+                </div>
+                <div className='font-semibold text-gray-900 mb-1'>
+                  {s.title}
+                </div>
+                <div className='text-sm text-gray-500'>{s.text}</div>
+              </div>
+            ))}
+          </div>
+        </section>
+      </main>
+
+      <footer className='border-t border-gray-200 py-8'>
+        <div className='max-w-5xl mx-auto text-center text-sm text-gray-400'>
+          © 2026 Тренажер собеседований
         </div>
-      </section>
+      </footer>
     </div>
   );
 }
