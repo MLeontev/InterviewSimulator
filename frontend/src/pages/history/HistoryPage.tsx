@@ -38,7 +38,9 @@ export function HistoryPage() {
   return (
     <div className='max-w-5xl mx-auto py-12'>
       <div className='flex items-center justify-between mb-8'>
-        <h1 className='text-2xl font-bold text-gray-900'>Мои собеседования</h1>
+        <h1 className='text-2xl font-semibold text-gray-900'>
+          Мои собеседования
+        </h1>
         <Button variant='primary' onClick={() => navigate('/presets')}>
           Начать новое собеседование
         </Button>
