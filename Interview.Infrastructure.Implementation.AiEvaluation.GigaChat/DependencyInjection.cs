@@ -10,6 +10,14 @@ public static class DependencyInjection
         this IServiceCollection services,
         IConfiguration configuration)
     {
+        var useFake = configuration.GetValue<bool>("AiEvaluation:UseFake");
+
+        if (useFake)
+        {
+            services.AddScoped<IAiEvaluationService, FakeAiEvaluationService>();
+            return services;
+        }
+
         services.Configure<GigaChatOptions>(configuration.GetSection("GigaChat"));
         services.Configure<GigaChatAuthOptions>(configuration.GetSection("GigaChat:Auth"));
         
