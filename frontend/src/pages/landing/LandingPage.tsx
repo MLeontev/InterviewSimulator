@@ -62,7 +62,9 @@ export function LandingPage() {
             <Button variant='outline' onClick={login}>
               Войти
             </Button>
-            <Button variant='primary'>Зарегистрироваться</Button>
+            <Button variant='primary' onClick={() => navigate('/register')}>
+              Зарегистрироваться
+            </Button>
           </div>
         </div>
       </nav>

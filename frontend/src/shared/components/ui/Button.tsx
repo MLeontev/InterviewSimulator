@@ -6,6 +6,8 @@ interface ButtonProps {
   variant?: 'primary' | 'outline';
   onClick?: () => void;
   className?: string;
+  type?: 'button' | 'submit' | 'reset';
+  disabled?: boolean;
 }
 
 export function Button({
@@ -13,6 +15,8 @@ export function Button({
   variant = 'primary',
   onClick,
   className,
+  type = 'button',
+  disabled = false,
 }: ButtonProps) {
   const base =
     'px-4 py-2 text-sm rounded-lg font-medium transition-colors cursor-pointer';
@@ -24,8 +28,15 @@ export function Button({
 
   return (
     <button
+      type={type}
       onClick={onClick}
-      className={twMerge(base, variants[variant], className)}
+      disabled={disabled}
+      className={twMerge(
+        base,
+        variants[variant],
+        disabled && 'opacity-60 cursor-not-allowed',
+        className,
+      )}
     >
       {children}
     </button>
