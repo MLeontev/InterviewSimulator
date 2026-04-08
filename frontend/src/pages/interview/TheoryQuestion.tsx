@@ -18,12 +18,12 @@ export function TheoryQuestion({
   const [answer, setAnswer] = useState(() => question.answer ?? '');
 
   return (
-    <div className='max-w-4xl mx-auto py-10'>
+    <div className='py-10'>
       <div className='border-l-4 border-indigo-400 bg-gray-100 rounded-xl px-5 py-4 mb-6'>
         <h2 className='text-lg font-semibold text-gray-900 mb-2'>
           {question.title || 'Теоретический вопрос'}
         </h2>
-        <p>{question.text}</p>
+        <p className='whitespace-pre-wrap'>{question.text}</p>
       </div>
 
       <textarea

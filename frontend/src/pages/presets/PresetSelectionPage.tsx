@@ -9,6 +9,7 @@ import {
 } from '../../features/interview-presets/api';
 import { createSession } from '../../features/interview/api';
 import { Button } from '../../shared/components/ui/Button';
+import { Tag } from '../../shared/components/ui/Tag';
 
 export function PresetSelectionPage() {
   const navigate = useNavigate();
@@ -117,12 +118,7 @@ export function PresetSelectionPage() {
         ) : (
           <div className='flex flex-wrap gap-2'>
             {technologyNames.map((name) => (
-              <span
-                key={name}
-                className='px-3 py-1 rounded-lg bg-indigo-50 text-indigo-700 text-sm'
-              >
-                {name}
-              </span>
+              <Tag key={name}>{name}</Tag>
             ))}
           </div>
         )}

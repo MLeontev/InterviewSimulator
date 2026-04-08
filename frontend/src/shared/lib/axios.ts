@@ -23,7 +23,7 @@ api.interceptors.response.use(
     const skipToast = !!error.config?.skipErrorToast;
     if (!skipToast) {
       if (apiError.validationMessages.length > 0) {
-        toast.error(apiError.validationMessages[0]); // или склеить все
+        toast.error(apiError.validationMessages[0]);
       } else {
         toast.error(apiError.message);
       }
