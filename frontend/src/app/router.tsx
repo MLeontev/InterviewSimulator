@@ -1,5 +1,6 @@
 import { createBrowserRouter } from 'react-router-dom';
 import { HistoryPage } from '../pages/history/HistoryPage';
+import { InterviewPage } from '../pages/interview/InterviewPage';
 import { LandingPage } from '../pages/landing/LandingPage';
 import { PresetSelectionPage } from '../pages/presets/PresetSelectionPage';
 import { RegisterPage } from '../pages/register/RegisterPage';
@@ -25,6 +26,7 @@ export const router = createBrowserRouter([
           { path: '/presets', element: <PresetSelectionPage /> },
         ],
       },
+      { path: '/interview', element: <InterviewPage /> },
     ],
   },
 ]);

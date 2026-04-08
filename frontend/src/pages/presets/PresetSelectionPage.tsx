@@ -7,6 +7,7 @@ import {
   type InterviewPresetDetails,
   type InterviewPresetListItem,
 } from '../../features/interview-presets/api';
+import { createSession } from '../../features/interview/api';
 import { Button } from '../../shared/components/ui/Button';
 
 export function PresetSelectionPage() {
@@ -64,20 +65,19 @@ export function PresetSelectionPage() {
   const technologyNames =
     selectedPreset?.technologies?.map((x) => x.name) ?? [];
 
-  //   const handleStartInterview = async () => {
-  //     if (!selectedPresetId) return;
+  const handleStartInterview = async () => {
+    if (!selectedPresetId) return;
 
-  //     try {
-  //       setIsStarting(true);
-  //       await createInterviewSession(selectedPresetId);
-  //       toast.success('Сессия создана');
-  //       navigate('/history');
-  //     } catch {
-  //       toast.error('Не удалось создать сессию');
-  //     } finally {
-  //       setIsStarting(false);
-  //     }
-  //   };
+    try {
+      setIsStarting(true);
+      await createSession(selectedPresetId);
+      navigate('/interview');
+    } catch {
+      toast.error('Не удалось создать сессию');
+    } finally {
+      setIsStarting(false);
+    }
+  };
 
   return (
     <div className='max-w-2xl mx-auto py-12 px-8'>
@@ -132,6 +132,7 @@ export function PresetSelectionPage() {
         variant='primary'
         className='w-full py-3'
         disabled={!selectedPresetId || isStarting}
+        onClick={handleStartInterview}
       >
         {isStarting ? 'Создание сессии...' : 'Начать собеседование'}
       </Button>
