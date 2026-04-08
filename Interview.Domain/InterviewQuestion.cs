@@ -42,14 +42,14 @@ public enum QuestionType
 
 public enum QuestionStatus
 {
-    NotStarted,
-    InProgress,
-    Skipped,
-    Submitted,
-    EvaluatingCode,
-    EvaluatedCode,
-    EvaluatingAi,
-    EvaluatedAi
+    NotStarted,       // Задача ещё не начата
+    InProgress,       // Пользователь начал редактировать код
+    Skipped,          // Пропущена
+    EvaluatingCode,   // Прогон тестов черновика
+    EvaluatedCode,    // Результат тестов готов
+    Submitted,        // Финальная отправка для AI
+    EvaluatingAi,     // AI оценивает финальную попытку
+    EvaluatedAi       // AI завершил оценку
 }
 
 public enum QuestionVerdict

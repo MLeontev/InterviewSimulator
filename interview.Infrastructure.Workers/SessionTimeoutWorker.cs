@@ -47,11 +47,14 @@ internal class SessionTimeoutWorker(
         session.Status = InterviewStatus.Finished;
         session.FinishedAt = DateTime.UtcNow;
         
-        var inProgressQuestions = await dbContext.InterviewQuestions
-            .Where(q => q.InterviewSessionId == session.Id && q.Status == QuestionStatus.InProgress)
+        var questionsToSkip = await dbContext.InterviewQuestions
+            .Where(q => q.InterviewSessionId == session.Id &&
+                        (q.Status == QuestionStatus.InProgress ||
+                         q.Status == QuestionStatus.EvaluatingCode ||
+                         q.Status == QuestionStatus.EvaluatedCode))
             .ToListAsync(ct);
 
-        foreach (var q in inProgressQuestions)
+        foreach (var q in questionsToSkip)
             q.Status = QuestionStatus.Skipped;
         
         await dbContext.SaveChangesAsync(ct);

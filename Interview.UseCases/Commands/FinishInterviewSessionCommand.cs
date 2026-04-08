@@ -25,11 +25,17 @@ internal class FinishInterviewSessionCommandHandler(IDbContext dbContext) : IReq
         session.Status = InterviewStatus.Finished;
         session.FinishedAt = DateTime.UtcNow;
         
-        foreach (var q in session.Questions.Where(x => x.Status == QuestionStatus.InProgress))
+        var questionsToSkip = await dbContext.InterviewQuestions
+            .Where(q => q.InterviewSessionId == session.Id &&
+                        (q.Status == QuestionStatus.InProgress ||
+                         q.Status == QuestionStatus.EvaluatingCode ||
+                         q.Status == QuestionStatus.EvaluatedCode))
+            .ToListAsync(ct);
+        
+        foreach (var q in questionsToSkip)
             q.Status = QuestionStatus.Skipped;
 
         await dbContext.SaveChangesAsync(ct);
-
         return Result.Success();
     }
 }

@@ -59,6 +59,7 @@ internal class GenerateInterviewQuestionsHandler(IDbContext dbContext) : IReques
         
         var theoryPool = await dbContext.Questions
             .AsNoTracking()
+            .Include(x => x.Competency)
             .Where(x => 
                 x.Type == QuestionType.Theory && 
                 x.GradeId == preset.GradeId &&
@@ -68,6 +69,7 @@ internal class GenerateInterviewQuestionsHandler(IDbContext dbContext) : IReques
         
         var codingPool = await dbContext.Questions
             .AsNoTracking()
+            .Include(x => x.Competency)
             .Include(x => x.LanguageLimits)
             .ThenInclude(x => x.Language)
             .Include(x => x.TestCases)

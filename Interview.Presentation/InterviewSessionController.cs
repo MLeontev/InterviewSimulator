@@ -49,10 +49,19 @@ public class InterviewSessionController(ISender sender) : ControllerBase
         return result.IsFailure ? result.ToProblem() : NoContent();
     }
     
-    [HttpPost("question/submit-code")]
-    public async Task<IActionResult> SubmitCodeAnswer([FromBody] SubmitCodeRequest request, CancellationToken cancellationToken)
+    [HttpPost("question/submit-draft-code")]
+    public async Task<IActionResult> SubmitDraftCodeAnswer([FromBody] SubmitDraftCodeRequest request, CancellationToken cancellationToken)
     {
-        var command = new SubmitCodeAnswerCommand(HttpContext.GetCandidateId(), request.Code);
+        var command = new SubmitDraftCodeAnswerCommand(HttpContext.GetCandidateId(), request.Code);
+        var result = await sender.Send(command, cancellationToken);
+        
+        return result.IsFailure ? result.ToProblem() : Accepted();
+    }
+    
+    [HttpPost("question/submit-code")]
+    public async Task<IActionResult> SubmitCodeAnswer(CancellationToken cancellationToken)
+    {
+        var command = new SubmitCodeAnswerCommand(HttpContext.GetCandidateId());
         var result = await sender.Send(command, cancellationToken);
         
         return result.IsFailure ? result.ToProblem() : Accepted();

@@ -46,10 +46,7 @@ internal class AiAnswerEvaluationWorker(
                         WHERE q."Id" = (
                             SELECT q2."Id"
                             FROM "Interview"."InterviewQuestions" q2
-                            WHERE (
-                                (q2."Type" = 'Theory' AND q2."Status" = 'Submitted')
-                                OR (q2."Type" = 'Coding' AND q2."Status" = 'EvaluatedCode')
-                            )
+                            WHERE "Status" = 'Submitted'
                               AND q2."Answer" IS NOT NULL
                               AND btrim(q2."Answer") <> ''
                             ORDER BY q2."SubmittedAt" NULLS FIRST

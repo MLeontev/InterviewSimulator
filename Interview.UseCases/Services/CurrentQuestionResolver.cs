@@ -17,6 +17,7 @@ internal class CurrentQuestionResolver(
     [
         QuestionStatus.Skipped,
         QuestionStatus.Submitted,
+        QuestionStatus.EvaluatingAi,
         QuestionStatus.EvaluatedAi
     ];
     

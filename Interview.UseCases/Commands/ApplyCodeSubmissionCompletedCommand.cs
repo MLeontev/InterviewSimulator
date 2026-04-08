@@ -34,7 +34,8 @@ internal sealed class ApplyCodeSubmissionCompletedCommandHandler(IDbContext dbCo
         if (question == null)
             return Result.Failure(Error.NotFound("QUESTION_NOT_FOUND", "Задание для результата проверки не найдено"));
 
-        if (question.LastSubmissionId != request.SubmissionId)
+        if (question.LastSubmissionId != request.SubmissionId 
+            || question.Status != QuestionStatus.EvaluatingCode)
             return Result.Success();
 
         question.OverallVerdict = request.OverallVerdict;
