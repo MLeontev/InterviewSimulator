@@ -1,7 +1,9 @@
 import { useNavigate } from 'react-router-dom';
+import { QuestionType } from '../../features/interview/api';
 import { useInterview } from '../../features/interview/hooks/useInterview';
 import { Button } from '../../shared/components/ui/Button';
 import { InterviewHeader } from './InterviewHeader';
+import { TheoryQuestion } from './TheoryQuestion';
 
 export function InterviewPage() {
   const navigate = useNavigate();
@@ -46,6 +48,20 @@ export function InterviewPage() {
         plannedEndAt={session.plannedEndAt}
         onFinish={handleFinish}
       />
+
+      {question!.type === QuestionType.Theory ? (
+        <TheoryQuestion
+          key={question.questionId}
+          question={question!}
+          isSubmitting={isSubmitting}
+          onSubmit={handleSubmitTheory}
+          onSkip={handleSkip}
+        />
+      ) : (
+        <div className='max-w-4xl mx-auto py-10 px-4 text-gray-500'>
+          UI для кодовой задачи добавим следующим шагом.
+        </div>
+      )}
     </div>
   );
 }

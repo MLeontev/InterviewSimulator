@@ -41,10 +41,10 @@ export function useInterview() {
     init();
   }, [loadQuestion, loadSession]);
 
-  const handleStartQuestion = async () => {
+  const handleStartQuestion = useCallback(async () => {
     await startQuestion();
     await loadQuestion();
-  };
+  }, [loadQuestion]);
 
   const handleSubmitTheory = async (answer: string) => {
     setIsSubmitting(true);

@@ -23,7 +23,7 @@ export function Button({
   const variants = {
     primary: 'bg-indigo-600 text-white hover:bg-indigo-700',
     outline:
-      'border border-gray-300 text-gray-700 hover:border-indigo-600 hover:text-indigo-600',
+      'border border-gray-300 text-gray-600 hover:border-indigo-600 hover:text-indigo-600',
   };
 
   return (

@@ -38,7 +38,7 @@ export function InterviewHeader({
 
   return (
     <nav className='bg-indigo-50 border-b border-indigo-100'>
-      <div className='flex items-center justify-between  max-w-5xl mx-auto py-4'>
+      <div className='flex items-center justify-between  max-w-4xl mx-auto py-4'>
         <span className='text-indigo-600 font-semibold'>
           Задание {currentIndex} из {totalQuestions}
         </span>
