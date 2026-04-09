@@ -39,6 +39,9 @@ internal class GetInterviewSessionReportQueryHandler(IDbContext dbContext) : IRe
             .Where(x => x.AiScore.HasValue)
             .Select(x => (double)x.AiScore!.Value)
             .ToList();
+
+        var totalQuestions = session.Questions.Count;
+        var answeredQuestions = session.Questions.Count(q => q.Status == QuestionStatus.EvaluatedAi);
         
         var (sessionSummary, sessionStrengths, sessionWeaknesses, sessionRecommendations) = ParseSessionAiFeedback(session.AiFeedbackJson);
         
@@ -55,6 +58,8 @@ internal class GetInterviewSessionReportQueryHandler(IDbContext dbContext) : IRe
             StartedAt = session.StartedAt,
             PlannedEndAt = session.PlannedEndAt,
             FinishedAt = session.FinishedAt,
+            TotalQuestions = totalQuestions,
+            AnsweredQuestions = answeredQuestions,
 
             AverageQuestionAiScore = questionScores.Count != 0
                 ? Math.Round(questionScores.Average(), 2)
@@ -74,6 +79,14 @@ internal class GetInterviewSessionReportQueryHandler(IDbContext dbContext) : IRe
     private InterviewSessionReportQuestionDto MapQuestion(InterviewQuestion q)
     {
         var (score, feedback) = ParseQuestionAiFeedback(q.AiFeedbackJson);
+        int? totalTests = null;
+        int? passedTests = null;
+
+        if (q.Type == QuestionType.Coding)
+        {
+            totalTests = q.TestCases.Count;
+            passedTests = q.TestCases.Count(tc => tc.Verdict == Verdict.OK);
+        }
 
         return new InterviewSessionReportQuestionDto
         {
@@ -100,22 +113,8 @@ internal class GetInterviewSessionReportQueryHandler(IDbContext dbContext) : IRe
 
             AiScore = score,
             AiFeedback = feedback,
-
-            TestCases = q.TestCases
-                .Where(tc => !tc.IsHidden)
-                .OrderBy(tc => tc.OrderIndex)
-                .Select(tc => new InterviewSessionReportTestCaseDto
-                {
-                    OrderIndex = tc.OrderIndex,
-                    Input = tc.Input,
-                    ExpectedOutput = tc.ExpectedOutput,
-                    ActualOutput = tc.ActualOutput,
-                    Verdict = tc.Verdict,
-                    ExecutionTimeMs = tc.ExecutionTimeMs,
-                    MemoryUsedMb = tc.MemoryUsedMb,
-                    ErrorMessage = tc.ErrorMessage
-                })
-                .ToList()
+            PassedTests = passedTests,
+            TotalTests = totalTests
         };
     }
     
@@ -182,6 +181,8 @@ public record InterviewSessionReportDto
     public DateTime StartedAt { get; init; }
     public DateTime PlannedEndAt { get; init; }
     public DateTime? FinishedAt { get; init; }
+    public int TotalQuestions { get; init; }
+    public int AnsweredQuestions { get; init; }
 
     public double? AverageQuestionAiScore { get; init; }
 
@@ -218,18 +219,6 @@ public record InterviewSessionReportQuestionDto
 
     public int? AiScore { get; init; }
     public string? AiFeedback { get; init; }
-
-    public IReadOnlyList<InterviewSessionReportTestCaseDto> TestCases { get; init; } = [];
-}
-
-public record InterviewSessionReportTestCaseDto
-{
-    public int OrderIndex { get; init; }
-    public string Input { get; init; } = string.Empty;
-    public string ExpectedOutput { get; init; } = string.Empty;
-    public string? ActualOutput { get; init; }
-    public Verdict Verdict { get; init; }
-    public double? ExecutionTimeMs { get; init; }
-    public double? MemoryUsedMb { get; init; }
-    public string? ErrorMessage { get; init; }
+    public int? PassedTests { get; init; }
+    public int? TotalTests { get; init; }
 }

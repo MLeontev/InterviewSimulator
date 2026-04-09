@@ -3,6 +3,8 @@ using Interview.Infrastructure.Interfaces.AiEvaluation.Coding;
 using Interview.Infrastructure.Interfaces.AiEvaluation.Session;
 using Interview.Infrastructure.Interfaces.AiEvaluation.Theory;
 
+namespace Interview.Infrastructure.Implementation.AiEvaluation.GigaChat;
+
 internal class FakeAiEvaluationService : IAiEvaluationService
 {
     public async Task<TheoryEvaluationResult> EvaluateTheoryAsync(
