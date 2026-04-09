@@ -155,12 +155,22 @@ export function CodingQuestion({
           </div>
         )}
 
+      {question.status === QuestionStatus.EvaluatedCode &&
+        question.overallVerdict === Verdict.FailedSystem && (
+          <div className='mt-3 mb-3 text-sm text-red-700 bg-red-50 border border-red-200 rounded-lg p-3'>
+            Во время проверки решения произошла техническая ошибка. Результат
+            тестов может быть неполным.
+          </div>
+        )}
+
       {lastRunVerdict.text !== '—' && (
         <div className='mb-4'>
-          <span>Вердикт последнего запуска – </span>
-          <span className={lastRunVerdict.className}>
-            {lastRunVerdict.text}
-          </span>
+          <div className='inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-gray-200 bg-gray-50 text-sm'>
+            <span className='text-gray-600'>Вердикт последнего запуска:</span>
+            <span className={lastRunVerdict.className}>
+              {lastRunVerdict.text}
+            </span>
+          </div>
         </div>
       )}
 

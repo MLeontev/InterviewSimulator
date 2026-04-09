@@ -54,7 +54,7 @@ export function InterviewPage() {
 
   if (!session || !question) {
     return (
-      <div className='flex flex-col items-center justify-center min-h-screen gap-4'>
+      <div className='flex flex-col items-center justify-center gap-4 py-12'>
         <div className='text-gray-400 text-sm'>Сессия не найдена</div>
         <Button variant='outline' onClick={() => navigate('/history')}>
           К истории

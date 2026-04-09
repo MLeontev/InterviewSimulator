@@ -51,6 +51,15 @@ export const Verdict = {
 } as const;
 export type Verdict = (typeof Verdict)[keyof typeof Verdict];
 
+export const QuestionVerdict = {
+  None: 'None',
+  Correct: 'Correct',
+  PartiallyCorrect: 'PartiallyCorrect',
+  Incorrect: 'Incorrect',
+} as const;
+export type QuestionVerdict =
+  (typeof QuestionVerdict)[keyof typeof QuestionVerdict];
+
 export interface HistoryItem {
   sessionId: string;
   interviewPresetName: string;
@@ -99,6 +108,49 @@ export interface TestCase {
   errorMessage: string | null;
 }
 
+export interface InterviewSessionReportQuestion {
+  questionId: string;
+  orderIndex: number;
+  type: QuestionType;
+  status: QuestionStatus;
+  questionVerdict: QuestionVerdict;
+  overallVerdict: Verdict;
+  title: string;
+  text: string;
+  answer: string | null;
+  programmingLanguageCode: string | null;
+  startedAt: string | null;
+  submittedAt: string | null;
+  evaluatedAt: string | null;
+  timeLimitMs: number | null;
+  memoryLimitMb: number | null;
+  errorMessage: string | null;
+  aiScore: number | null;
+  aiFeedback: string | null;
+  passedTests: number | null;
+  totalTests: number | null;
+}
+
+export interface InterviewSessionReport {
+  sessionId: string;
+  candidateId: string;
+  interviewPresetId: string;
+  interviewPresetName: string;
+  status: InterviewStatus;
+  sessionVerdict: SessionVerdict;
+  startedAt: string;
+  plannedEndAt: string;
+  finishedAt: string | null;
+  totalQuestions: number;
+  answeredQuestions: number;
+  averageQuestionAiScore: number | null;
+  sessionSummary: string | null;
+  sessionStrengths: string[];
+  sessionWeaknesses: string[];
+  sessionRecommendations: string[];
+  questions: InterviewSessionReportQuestion[];
+}
+
 export const createSession = (presetId: string) =>
   api.post('/v1/interview-session', { interviewPresetId: presetId });
 
@@ -129,3 +181,13 @@ export const finishSession = () => api.post('/v1/interview-session/finish');
 
 export const getHistory = () =>
   api.get<HistoryItem[]>('/v1/interview-sessions/history').then((r) => r.data);
+
+export const getSessionReport = (
+  sessionId: string,
+  options?: { skipErrorToast?: boolean },
+) =>
+  api
+    .get<InterviewSessionReport>(`/v1/interview-sessions/${sessionId}/report`, {
+      skipErrorToast: options?.skipErrorToast,
+    })
+    .then((r) => r.data);

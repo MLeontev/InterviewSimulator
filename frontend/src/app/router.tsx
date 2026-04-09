@@ -1,5 +1,6 @@
 import { createBrowserRouter } from 'react-router-dom';
 import { HistoryPage } from '../pages/history/HistoryPage';
+import { InterviewResultPage } from '../pages/interview-result/InterviewResultPage';
 import { InterviewPage } from '../pages/interview/InterviewPage';
 import { LandingPage } from '../pages/landing/LandingPage';
 import { PresetSelectionPage } from '../pages/presets/PresetSelectionPage';
@@ -24,6 +25,10 @@ export const router = createBrowserRouter([
         children: [
           { path: '/history', element: <HistoryPage /> },
           { path: '/presets', element: <PresetSelectionPage /> },
+          {
+            path: '/interview/result/:sessionId',
+            element: <InterviewResultPage />,
+          },
         ],
       },
       { path: '/interview', element: <InterviewPage /> },
