@@ -52,7 +52,7 @@ export function InterviewHeader({
         >
           {display}
         </span>
-        <Button onClick={onFinish}>Завершить сессию</Button>
+        <Button onClick={onFinish}>Завершить сессию досрочно</Button>
       </div>
     </nav>
   );

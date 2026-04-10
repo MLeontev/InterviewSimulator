@@ -151,8 +151,12 @@ export interface InterviewSessionReport {
   questions: InterviewSessionReportQuestion[];
 }
 
-export const createSession = (presetId: string) =>
-  api.post('/v1/interview-session', { interviewPresetId: presetId });
+export const createSession = (presetId: string, options?: RequestOptions) =>
+  api.post(
+    '/v1/interview-session',
+    { interviewPresetId: presetId },
+    { skipErrorToast: options?.skipErrorToast },
+  );
 
 export const getCurrentSession = (options?: RequestOptions) =>
   api

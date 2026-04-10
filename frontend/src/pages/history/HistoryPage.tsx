@@ -1,11 +1,15 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
 import {
+  getCurrentSession,
   getHistory,
-  type HistoryItem,
   InterviewStatus,
+  type CurrentSession,
+  type HistoryItem,
 } from '../../features/interview/api';
 import { Button } from '../../shared/components/ui/Button';
+import type { ApiError } from '../../shared/lib/apiError';
 
 const statusLabel: Record<InterviewStatus, string> = {
   [InterviewStatus.InProgress]: 'В процессе',
@@ -24,15 +28,41 @@ function formatDate(dateStr: string) {
   });
 }
 
+function formatTimeLeft(plannedEndAt: string) {
+  const ms = new Date(plannedEndAt).getTime() - Date.now();
+  if (ms <= 0) return 'время истекло';
+
+  const totalMinutes = Math.ceil(ms / 60000);
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+  return hours > 0 ? `${hours} ч ${minutes} мин` : `${minutes} мин`;
+}
+
 export function HistoryPage() {
   const navigate = useNavigate();
   const [items, setItems] = useState<HistoryItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [currentSession, setCurrentSession] = useState<CurrentSession | null>(
+    null,
+  );
+  const [isLoadingCurrentSession, setIsLoadingCurrentSession] = useState(true);
 
   useEffect(() => {
     getHistory()
       .then(setItems)
       .finally(() => setIsLoading(false));
+
+    getCurrentSession({ skipErrorToast: true })
+      .then(setCurrentSession)
+      .catch((e) => {
+        const apiError = e as ApiError;
+        if (apiError.code === 'SESSION_NOT_FOUND') {
+          setCurrentSession(null);
+          return;
+        }
+        toast.error(apiError.message);
+      })
+      .finally(() => setIsLoadingCurrentSession(false));
   }, []);
 
   return (
@@ -41,10 +71,40 @@ export function HistoryPage() {
         <h1 className='text-2xl font-semibold text-gray-900'>
           Мои собеседования
         </h1>
-        <Button variant='primary' onClick={() => navigate('/presets')}>
-          Начать новое собеседование
-        </Button>
+        {!currentSession && (
+          <Button
+            variant='primary'
+            onClick={() => navigate(currentSession ? '/interview' : '/presets')}
+          >
+            Начать новое собеседование
+          </Button>
+        )}
       </div>
+
+      {!isLoadingCurrentSession && currentSession && (
+        <section className='border border-indigo-200 bg-indigo-50 rounded-xl p-4 mb-8'>
+          <div className='flex items-center justify-between'>
+            <div>
+              <div className='text-lg font-semibold text-gray-900 mb-1'>
+                Есть активная сессия
+              </div>
+              <div className='text-sm text-gray-700'>
+                Старт: {formatDate(currentSession.startedAt)}
+              </div>
+              <div className='text-sm text-gray-700'>
+                Прогресс: {currentSession.answeredQuestions}/
+                {currentSession.totalQuestions}
+              </div>
+              <div className='text-sm text-gray-700'>
+                Осталось времени: {formatTimeLeft(currentSession.plannedEndAt)}
+              </div>
+            </div>
+            <Button variant='primary' onClick={() => navigate('/interview')}>
+              Продолжить
+            </Button>
+          </div>
+        </section>
+      )}
 
       {isLoading ? (
         <div className='text-gray-400 text-sm'>Загрузка...</div>
@@ -53,9 +113,11 @@ export function HistoryPage() {
           <div className='text-gray-400 text-sm mb-4'>
             У вас пока нет собеседований
           </div>
-          <Button variant='primary' onClick={() => navigate('/presets')}>
-            Начать первое собеседование
-          </Button>
+          {!currentSession && (
+            <Button variant='primary' onClick={() => navigate('/presets')}>
+              Начать первое собеседование
+            </Button>
+          )}
         </div>
       ) : (
         <div>

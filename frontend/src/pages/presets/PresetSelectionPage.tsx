@@ -10,6 +10,7 @@ import {
 import { createSession } from '../../features/interview/api';
 import { Button } from '../../shared/components/ui/Button';
 import { Tag } from '../../shared/components/ui/Tag';
+import type { ApiError } from '../../shared/lib/apiError';
 
 export function PresetSelectionPage() {
   const navigate = useNavigate();
@@ -71,10 +72,16 @@ export function PresetSelectionPage() {
 
     try {
       setIsStarting(true);
-      await createSession(selectedPresetId);
+      await createSession(selectedPresetId, { skipErrorToast: true });
       navigate('/interview');
-    } catch {
-      toast.error('Не удалось создать сессию');
+    } catch (e) {
+      const apiError = e as ApiError;
+      if (apiError.code === 'ACTIVE_SESSION_EXISTS') {
+        toast('У тебя уже есть активная сессия. Продолжаем ее.');
+        navigate('/interview');
+        return;
+      }
+      toast.error(apiError.message ?? 'Не удалось создать сессию');
     } finally {
       setIsStarting(false);
     }
