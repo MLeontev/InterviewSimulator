@@ -82,6 +82,7 @@ export function LandingPage() {
             <Button
               variant='primary'
               className='px-8 py-3 text-base rounded-xl'
+              onClick={() => navigate('/register')}
             >
               Начать подготовку
             </Button>
