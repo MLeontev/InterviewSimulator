@@ -34,11 +34,10 @@ internal class GetInterviewSessionReportQueryHandler(IDbContext dbContext) : IRe
             .OrderBy(q => q.OrderIndex)
             .Select(MapQuestion)
             .ToList();
-        
-        var questionScores = questionItems
-            .Where(x => x.AiScore.HasValue)
-            .Select(x => (double)x.AiScore!.Value)
-            .ToList();
+
+        var averageQuestionScore = session.Questions.Count > 0
+            ? Math.Round(session.Questions.Average(GetQuestionScoreForSessionAverage), 2)
+            : 0;
 
         var totalQuestions = session.Questions.Count;
         var answeredQuestions = session.Questions.Count(q => q.Status == QuestionStatus.EvaluatedAi);
@@ -61,9 +60,7 @@ internal class GetInterviewSessionReportQueryHandler(IDbContext dbContext) : IRe
             TotalQuestions = totalQuestions,
             AnsweredQuestions = answeredQuestions,
 
-            AverageQuestionAiScore = questionScores.Count != 0
-                ? Math.Round(questionScores.Average(), 2)
-                : null,
+            AverageQuestionAiScore = averageQuestionScore,
 
             SessionSummary = sessionSummary,
             SessionStrengths = sessionStrengths,
@@ -74,6 +71,26 @@ internal class GetInterviewSessionReportQueryHandler(IDbContext dbContext) : IRe
         };
 
         return Result.Success(report);
+    }
+
+    private double GetQuestionScoreForSessionAverage(InterviewQuestion q)
+    {
+        var (aiScore, _) = ParseQuestionAiFeedback(q.AiFeedbackJson);
+        if (aiScore is >= 0 and <= 10)
+            return aiScore.Value;
+
+        return q.Status switch
+        {
+            QuestionStatus.NotStarted => 0d,
+            QuestionStatus.Skipped => 0d,
+            _ => q.QuestionVerdict switch
+            {
+                QuestionVerdict.Correct => 8d,
+                QuestionVerdict.PartiallyCorrect => 5d,
+                QuestionVerdict.Incorrect => 2d,
+                _ => 0d
+            }
+        };
     }
 
     private InterviewSessionReportQuestionDto MapQuestion(InterviewQuestion q)
@@ -184,7 +201,7 @@ public record InterviewSessionReportDto
     public int TotalQuestions { get; init; }
     public int AnsweredQuestions { get; init; }
 
-    public double? AverageQuestionAiScore { get; init; }
+    public double AverageQuestionAiScore { get; init; }
 
     public string? SessionSummary { get; init; }
     public IReadOnlyList<string> SessionStrengths { get; init; } = [];

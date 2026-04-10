@@ -22,7 +22,10 @@ internal class GetCurrentInterviewSessionQueryHandler(IDbContext dbContext) : IR
                 StartedAt = s.StartedAt,
                 PlannedEndAt = s.PlannedEndAt,
                 TotalQuestions = s.Questions.Count,
-                AnsweredQuestions = s.Questions.Count(q => q.Status >= QuestionStatus.Skipped)
+                AnsweredQuestions = s.Questions.Count(q =>
+                    q.Status == QuestionStatus.Submitted ||
+                    q.Status == QuestionStatus.EvaluatingAi ||
+                    q.Status == QuestionStatus.EvaluatedAi)
             })
             .SingleOrDefaultAsync(ct);
 

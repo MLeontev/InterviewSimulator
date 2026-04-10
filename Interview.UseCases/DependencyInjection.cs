@@ -21,6 +21,8 @@ public static class DependencyInjection
         services.AddScoped<ICurrentSessionResolver, CurrentSessionResolver>();
         services.AddScoped<ICurrentQuestionResolver, CurrentQuestionResolver>();
         
+        services.AddScoped<IInterviewSessionFinalizer, InterviewSessionFinalizer>();
+        
         return services;
     }
 }

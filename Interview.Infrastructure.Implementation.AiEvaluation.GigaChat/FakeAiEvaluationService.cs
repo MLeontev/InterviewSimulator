@@ -33,7 +33,7 @@ internal class FakeAiEvaluationService : IAiEvaluationService
         SessionEvaluationRequest request,
         CancellationToken ct = default)
     {
-        await Task.Delay(500, ct);
+        await Task.Delay(5000, ct);
         return new SessionEvaluationResult(
             Summary: "Mocked session summary",
             Strengths: ["Good understanding"],

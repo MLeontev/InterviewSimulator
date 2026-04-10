@@ -20,7 +20,8 @@ internal class SubmitTheoryAnswerCommandValidator : AbstractValidator<SubmitTheo
 
 internal class SubmitTheoryAnswerCommandHandler(
     IDbContext dbContext,
-    ICurrentQuestionResolver currentQuestionResolver) : IRequestHandler<SubmitTheoryAnswerCommand, Result>
+    ICurrentQuestionResolver currentQuestionResolver,
+    IInterviewSessionFinalizer interviewSessionFinalizer) : IRequestHandler<SubmitTheoryAnswerCommand, Result>
 {
     public async Task<Result> Handle(SubmitTheoryAnswerCommand request, CancellationToken cancellationToken)
     {
@@ -47,6 +48,7 @@ internal class SubmitTheoryAnswerCommandHandler(
         question.Status = QuestionStatus.Submitted;
         
         await dbContext.SaveChangesAsync(cancellationToken);
+        await interviewSessionFinalizer.TryFinishIfNoActiveQuestionsAsync(question.InterviewSessionId, cancellationToken);
         return Result.Success();
     }
 }

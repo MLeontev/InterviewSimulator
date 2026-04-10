@@ -10,7 +10,8 @@ public record SkipQuestionCommand(Guid CandidateId) : IRequest<Result>;
 
 internal class SkipQuestionCommandHandler(
     IDbContext dbContext, 
-    ICurrentQuestionResolver currentQuestionResolver) : IRequestHandler<SkipQuestionCommand, Result>
+    ICurrentQuestionResolver currentQuestionResolver,
+    IInterviewSessionFinalizer interviewSessionFinalizer) : IRequestHandler<SkipQuestionCommand, Result>
 {
     public async Task<Result> Handle(SkipQuestionCommand request, CancellationToken cancellationToken)
     {
@@ -19,7 +20,7 @@ internal class SkipQuestionCommandHandler(
         if (question is null)
             return Result.Failure(Error.NotFound("QUESTION_NOT_FOUND", "Текущее задание не найдено"));
 
-        if (question.Status is not (QuestionStatus.NotStarted or QuestionStatus.InProgress))
+        if (question.Status is not (QuestionStatus.NotStarted or QuestionStatus.InProgress or QuestionStatus.EvaluatedCode))
             return Result.Failure(Error.Business("QUESTION_CANNOT_BE_SKIPPED", "Это задание сейчас нельзя пропустить"));
 
         question.Status = QuestionStatus.Skipped;
@@ -41,6 +42,7 @@ internal class SkipQuestionCommandHandler(
         }
 
         await dbContext.SaveChangesAsync(cancellationToken);
+        await interviewSessionFinalizer.TryFinishIfNoActiveQuestionsAsync(question.InterviewSessionId, cancellationToken);
         return Result.Success();
     }
 }

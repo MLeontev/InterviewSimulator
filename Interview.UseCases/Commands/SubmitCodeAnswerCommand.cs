@@ -10,7 +10,8 @@ public record SubmitCodeAnswerCommand(Guid CandidateId) : IRequest<Result>;
 
 internal sealed class SubmitCodeAnswerCommandHandler(
     IDbContext dbContext,
-    ICurrentQuestionResolver currentQuestionResolver) : IRequestHandler<SubmitCodeAnswerCommand, Result>
+    ICurrentQuestionResolver currentQuestionResolver,
+    IInterviewSessionFinalizer interviewSessionFinalizer) : IRequestHandler<SubmitCodeAnswerCommand, Result>
 {
     public async Task<Result> Handle(SubmitCodeAnswerCommand request, CancellationToken cancellationToken)
     {
@@ -30,8 +31,9 @@ internal sealed class SubmitCodeAnswerCommandHandler(
 
         question.Status = QuestionStatus.Submitted;
         question.SubmittedAt = DateTime.UtcNow;
+        
         await dbContext.SaveChangesAsync(cancellationToken);
-
+        await interviewSessionFinalizer.TryFinishIfNoActiveQuestionsAsync(question.InterviewSessionId, cancellationToken);
         return Result.Success();
     }
 }
