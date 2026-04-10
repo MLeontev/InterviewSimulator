@@ -1,7 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { z } from 'zod';
 import { registerUser } from '../../features/auth/api';
@@ -24,7 +23,6 @@ const registerSchema = z
 type RegisterFormValues = z.infer<typeof registerSchema>;
 
 export function RegisterPage() {
-  const navigate = useNavigate();
   const { login } = useAuth();
   const [serverError, setServerError] = useState<string | null>(null);
 
@@ -125,7 +123,9 @@ export function RegisterPage() {
             </div>
 
             {serverError && (
-              <p className='text-sm text-red-600'>{serverError}</p>
+              <div className='text-sm text-red-700 bg-red-50 border border-red-200 rounded-lg p-3'>
+                {serverError}
+              </div>
             )}
 
             <Button
@@ -137,14 +137,16 @@ export function RegisterPage() {
               {isSubmitting ? 'Создание...' : 'Создать аккаунт'}
             </Button>
 
-            <Button
-              variant='outline'
-              className='w-full'
-              type='button'
-              onClick={() => navigate('/')}
-            >
-              Назад
-            </Button>
+            <div className='text-sm text-center text-gray-600'>
+              Уже есть аккаунт?{' '}
+              <button
+                type='button'
+                className='text-indigo-600 hover:underline'
+                onClick={() => void login()}
+              >
+                Войти
+              </button>
+            </div>
           </form>
         </div>
       </main>
