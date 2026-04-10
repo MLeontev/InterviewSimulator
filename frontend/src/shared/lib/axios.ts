@@ -1,7 +1,7 @@
 import axios from 'axios';
-import { keycloak } from './keycloak';
-import { toApiError } from './apiError';
 import { toast } from 'sonner';
+import { toApiError } from './apiError';
+import { keycloak } from './keycloak';
 
 export const api = axios.create({
   baseURL: '/api',
@@ -32,3 +32,5 @@ api.interceptors.response.use(
     return Promise.reject(apiError);
   },
 );
+
+export type RequestOptions = { skipErrorToast?: boolean };

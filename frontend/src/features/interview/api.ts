@@ -1,4 +1,4 @@
-import { api } from '../../shared/lib/axios';
+import { api, type RequestOptions } from '../../shared/lib/axios';
 
 export const InterviewStatus = {
   InProgress: 'InProgress',
@@ -143,7 +143,7 @@ export interface InterviewSessionReport {
   finishedAt: string | null;
   totalQuestions: number;
   answeredQuestions: number;
-  averageQuestionAiScore: number | null;
+  averageQuestionAiScore: number;
   sessionSummary: string | null;
   sessionStrengths: string[];
   sessionWeaknesses: string[];
@@ -154,12 +154,18 @@ export interface InterviewSessionReport {
 export const createSession = (presetId: string) =>
   api.post('/v1/interview-session', { interviewPresetId: presetId });
 
-export const getCurrentSession = () =>
-  api.get<CurrentSession>('/v1/interview-session').then((r) => r.data);
-
-export const getCurrentQuestion = () =>
+export const getCurrentSession = (options?: RequestOptions) =>
   api
-    .get<CurrentQuestion>('/v1/interview-session/question')
+    .get<CurrentSession>('/v1/interview-session', {
+      skipErrorToast: options?.skipErrorToast,
+    })
+    .then((r) => r.data);
+
+export const getCurrentQuestion = (options?: RequestOptions) =>
+  api
+    .get<CurrentQuestion>('/v1/interview-session/question', {
+      skipErrorToast: options?.skipErrorToast,
+    })
     .then((r) => r.data);
 
 export const startQuestion = () =>

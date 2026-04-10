@@ -21,7 +21,26 @@ export function InterviewPage() {
     handleSkip,
     handleFinish,
     reloadQuestion,
+    lastKnownSessionId,
   } = useInterview();
+
+  const reportSessionId = lastKnownSessionId ?? session?.sessionId ?? null;
+
+  const handleFinishClick = async () => {
+    await handleFinish();
+    if (session?.sessionId) {
+      navigate(`/interview/result/${session.sessionId}`);
+    }
+  };
+
+  useEffect(() => {
+    if (isLoading) return;
+    if (!reportSessionId) return;
+
+    if (!session || !question) {
+      navigate(`/interview/result/${reportSessionId}`, { replace: true });
+    }
+  }, [isLoading, question, reportSessionId, session, navigate]);
 
   useEffect(() => {
     const questionId = question?.questionId;
@@ -69,7 +88,7 @@ export function InterviewPage() {
         currentIndex={question.orderIndex}
         totalQuestions={session.totalQuestions}
         plannedEndAt={session.plannedEndAt}
-        onFinish={handleFinish}
+        onFinish={handleFinishClick}
       />
 
       <div className='w-full max-w-4xl mx-auto'>

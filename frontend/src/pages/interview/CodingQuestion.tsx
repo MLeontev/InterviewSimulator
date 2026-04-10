@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import Editor from '@monaco-editor/react';
+import { useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import {
   QuestionStatus,
@@ -45,6 +46,20 @@ export function CodingQuestion({
   onSkip,
 }: Props) {
   const [code, setCode] = useState(question.answer ?? '');
+
+  const editorOptions = useMemo(
+    () => ({
+      minimap: { enabled: false },
+      fontSize: 14,
+      lineNumbers: 'on' as const,
+      insertSpaces: true,
+      automaticLayout: true,
+      scrollBeyondLastLine: false,
+      wordWrap: 'on' as const,
+      padding: { top: 12, bottom: 12 },
+    }),
+    [],
+  );
 
   const normalizedCode = code.trim();
   const lastCheckedCode = (question.answer ?? '').trim();
@@ -140,12 +155,16 @@ export function CodingQuestion({
         </div>
       )}
 
-      <textarea
-        value={code}
-        onChange={(e) => setCode(e.target.value)}
-        placeholder='Введите решение...'
-        className='w-full min-h-72 border border-gray-300 rounded-xl px-5 py-4 font-mono text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-indigo-200 focus:border-indigo-300'
-      />
+      <div className='border border-gray-300 rounded-xl overflow-hidden mb-3 bg-white'>
+        <Editor
+          height='440px'
+          language={question.programmingLanguageCode ?? 'plaintext'}
+          value={code}
+          onChange={(value) => setCode(value ?? '')}
+          theme='vs'
+          options={editorOptions}
+        />
+      </div>
 
       {question.status === QuestionStatus.EvaluatedCode &&
         !isCodeSyncedWithLastRun && (
@@ -164,7 +183,7 @@ export function CodingQuestion({
         )}
 
       {lastRunVerdict.text !== '—' && (
-        <div className='mb-4'>
+        <div className='mb-3'>
           <div className='inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-gray-200 bg-gray-50 text-sm'>
             <span className='text-gray-600'>Вердикт последнего запуска:</span>
             <span className={lastRunVerdict.className}>

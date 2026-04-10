@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+import type { ApiError } from '../../../shared/lib/apiError';
 import {
   finishSession,
   getCurrentQuestion,
@@ -13,6 +14,10 @@ import {
 } from '../api';
 
 export function useInterview() {
+  const [lastKnownSessionId, setLastKnownSessionId] = useState<string | null>(
+    null,
+  );
+
   const [session, setSession] = useState<CurrentSession | null>(null);
   const [question, setQuestion] = useState<CurrentQuestion | null>(null);
 
@@ -20,13 +25,36 @@ export function useInterview() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const loadQuestion = useCallback(async () => {
-    const q = await getCurrentQuestion();
-    setQuestion(q);
+    try {
+      const q = await getCurrentQuestion({ skipErrorToast: true });
+      setQuestion(q);
+    } catch (e) {
+      const apiError = e as ApiError;
+      if (
+        apiError.code === 'QUESTION_NOT_FOUND' ||
+        apiError.code === 'SESSION_NOT_FOUND'
+      ) {
+        setQuestion(null);
+        return;
+      }
+      throw e;
+    }
   }, []);
 
   const loadSession = useCallback(async () => {
-    const s = await getCurrentSession();
-    setSession(s);
+    try {
+      const s = await getCurrentSession({ skipErrorToast: true });
+      setSession(s);
+      setLastKnownSessionId(s.sessionId);
+    } catch (e) {
+      const apiError = e as ApiError;
+      if (apiError.code === 'SESSION_NOT_FOUND') {
+        setSession(null);
+        setQuestion(null);
+        return;
+      }
+      throw e;
+    }
   }, []);
 
   useEffect(() => {
@@ -102,5 +130,6 @@ export function useInterview() {
     handleSkip,
     handleFinish,
     reloadQuestion: loadQuestion,
+    lastKnownSessionId,
   };
 }

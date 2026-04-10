@@ -33,12 +33,15 @@ function formatDuration(startedAt: string, finishedAt: string | null) {
   return h > 0 ? `${h} ч ${m} мин` : `${m} мин`;
 }
 
-function sessionVerdictView(v: SessionVerdict) {
+function sessionVerdictView(v: SessionVerdict | null) {
   switch (v) {
     case SessionVerdict.Passed:
       return { text: 'Пройдено', className: 'text-green-700 bg-green-50' };
     case SessionVerdict.Borderline:
-      return { text: 'Погранично', className: 'text-amber-700 bg-amber-50' };
+      return {
+        text: 'Средний результат',
+        className: 'text-amber-700 bg-amber-50',
+      };
     case SessionVerdict.Failed:
       return { text: 'Не пройдено', className: 'text-red-700 bg-red-50' };
     default:
@@ -85,6 +88,7 @@ export function InterviewResultPage() {
 
         const apiError = e as ApiError;
         if (apiError.code === 'SESSION_NOT_FINISHED') {
+          setErrorText(null);
           setIsPolling(true);
           timerId = window.setTimeout(() => {
             void load(false);
@@ -119,12 +123,10 @@ export function InterviewResultPage() {
     );
   }
 
-  if (errorText || !report) {
+  if (errorText) {
     return (
       <div className='flex flex-col items-center justify-center gap-4 py-12'>
-        <div className='text-gray-400 text-sm text-center'>
-          {errorText ?? 'Не удалось загрузить отчет'}
-        </div>
+        <div className='text-gray-400 text-sm text-center'>{errorText}</div>
         <Button variant='outline' onClick={() => navigate('/history')}>
           К списку сессий
         </Button>
@@ -132,7 +134,7 @@ export function InterviewResultPage() {
     );
   }
 
-  const verdict = sessionVerdictView(report.sessionVerdict);
+  const verdict = sessionVerdictView(report?.sessionVerdict ?? null);
 
   return (
     <div className='max-w-5xl mx-auto py-10'>
@@ -151,87 +153,99 @@ export function InterviewResultPage() {
         </div>
       )}
 
-      <section className='border border-indigo-200 bg-indigo-50 rounded-xl p-4 mb-4'>
-        <h2 className='text-xl font-semibold mb-2'>
-          {report.interviewPresetName}
-        </h2>
+      {report ? (
+        <>
+          <section className='border border-indigo-200 bg-indigo-50 rounded-xl p-4 mb-4'>
+            <h2 className='text-xl font-semibold mb-2'>
+              {report.interviewPresetName}
+            </h2>
 
-        <div className='flex gap-3 mb-3 text-sm text-gray-800'>
-          <div className='flex-1 bg-white/70 rounded-lg px-3 py-2 text-center'>
-            Старт: {formatDate(report.startedAt)}
+            <div className='flex gap-3 mb-3 text-sm text-gray-800'>
+              <div className='flex-1 bg-white/70 rounded-lg px-3 py-2 text-center'>
+                Старт: {formatDate(report.startedAt)}
+              </div>
+              <div className='flex-1 bg-white/70 rounded-lg px-3 py-2 text-center'>
+                Завершение: {formatDate(report.finishedAt)}
+              </div>
+              <div className='flex-1 bg-white/70 rounded-lg px-3 py-2 text-center'>
+                Длительность:{' '}
+                {formatDuration(report.startedAt, report.finishedAt)}
+              </div>
+              <div className='flex-1 bg-white/70 rounded-lg px-3 py-2 text-center'>
+                Выполнено заданий: {report.answeredQuestions}/
+                {report.totalQuestions}
+              </div>
+            </div>
+
+            <div className='flex items-center gap-2 flex-wrap'>
+              <span
+                className={`px-3 py-1 rounded-lg text-sm ${verdict.className}`}
+              >
+                Итог: {verdict.text}
+              </span>
+              {report.averageQuestionAiScore != null && (
+                <Tag>Средний балл: {report.averageQuestionAiScore}/10</Tag>
+              )}
+            </div>
+          </section>
+
+          <div className='flex gap-4 mb-4'>
+            <section className='flex-1 border border-green-200 rounded-xl bg-green-50 p-4'>
+              <h3 className='text-xl font-semibold mb-2'>Сильные темы</h3>
+              {report.sessionStrengths.length === 0 ? (
+                <div className='text-sm text-gray-500'>Пока нет данных</div>
+              ) : (
+                <ul className='list-disc list-outside pl-4 text-gray-800'>
+                  {report.sessionStrengths.map((x, i) => (
+                    <li key={`${x}-${i}`}>{x}</li>
+                  ))}
+                </ul>
+              )}
+            </section>
+            <section className='flex-1 border border-red-200 rounded-xl bg-red-50 p-4'>
+              <h3 className='text-xl font-semibold mb-2'>Слабые темы</h3>
+              {report.sessionWeaknesses.length === 0 ? (
+                <div className='text-sm text-gray-500'>Пока нет данных</div>
+              ) : (
+                <ul className='list-disc list-outside pl-4 text-gray-800'>
+                  {report.sessionWeaknesses.map((x, i) => (
+                    <li key={`${x}-${i}`}>{x}</li>
+                  ))}
+                </ul>
+              )}
+            </section>
           </div>
-          <div className='flex-1 bg-white/70 rounded-lg px-3 py-2 text-center'>
-            Завершение: {formatDate(report.finishedAt)}
-          </div>
-          <div className='flex-1 bg-white/70 rounded-lg px-3 py-2 text-center'>
-            Длительность: {formatDuration(report.startedAt, report.finishedAt)}
-          </div>
-          <div className='flex-1 bg-white/70 rounded-lg px-3 py-2 text-center'>
-            Выполнено заданий: {report.answeredQuestions}/
-            {report.totalQuestions}
-          </div>
-        </div>
 
-        <div className='flex items-center gap-2 flex-wrap'>
-          <span className={`px-3 py-1 rounded-lg text-sm ${verdict.className}`}>
-            Итог: {verdict.text}
-          </span>
-          {report.averageQuestionAiScore != null && (
-            <Tag>Средний балл: {report.averageQuestionAiScore}/10</Tag>
-          )}
-        </div>
-      </section>
+          <section className='border border-amber-200 rounded-xl bg-amber-50 p-4 mb-6'>
+            <h3 className='text-xl font-semibold mb-2'>Рекомендации</h3>
 
-      <div className='flex gap-4 mb-4'>
-        <section className='flex-1 border border-green-200 rounded-xl bg-green-50 p-4'>
-          <h3 className='text-xl font-semibold mb-2'>Сильные темы</h3>
-          {report.sessionStrengths.length === 0 ? (
-            <div className='text-sm text-gray-500'>Пока нет данных</div>
-          ) : (
-            <ul className='list-disc list-outside pl-4 text-gray-800'>
-              {report.sessionStrengths.map((x, i) => (
-                <li key={`${x}-${i}`}>{x}</li>
-              ))}
-            </ul>
-          )}
-        </section>
-        <section className='flex-1 border border-red-200 rounded-xl bg-red-50 p-4'>
-          <h3 className='text-xl font-semibold mb-2'>Слабые темы</h3>
-          {report.sessionWeaknesses.length === 0 ? (
-            <div className='text-sm text-gray-500'>Пока нет данных</div>
-          ) : (
-            <ul className='list-disc list-outside pl-4 text-gray-800'>
-              {report.sessionWeaknesses.map((x, i) => (
-                <li key={`${x}-${i}`}>{x}</li>
-              ))}
-            </ul>
-          )}
-        </section>
-      </div>
+            {!report.sessionSummary &&
+              report.sessionRecommendations.length === 0 && (
+                <div className='text-sm text-gray-500'>Пока нет данных</div>
+              )}
 
-      <section className='border border-amber-200 rounded-xl bg-amber-50 p-4 mb-6'>
-        <h3 className='text-xl font-semibold mb-2'>Рекомендации</h3>
+            {report.sessionSummary && (
+              <p className='text-gray-900 whitespace-pre-wrap mb-2'>
+                {report.sessionSummary}
+              </p>
+            )}
 
-        {report.sessionSummary && (
-          <p className='text-gray-900 whitespace-pre-wrap mb-2'>
-            {report.sessionSummary}
-          </p>
-        )}
+            {report.sessionRecommendations.length > 0 && (
+              <ul className='list-disc list-outside pl-4 text-gray-800'>
+                {report.sessionRecommendations.map((x, i) => (
+                  <li key={`${x}-${i}`}>{x}</li>
+                ))}
+              </ul>
+            )}
+          </section>
 
-        {report.sessionRecommendations.length > 0 && (
-          <ul className='list-disc list-outside pl-4 text-gray-800'>
-            {report.sessionRecommendations.map((x, i) => (
-              <li key={`${x}-${i}`}>{x}</li>
+          <div className='flex flex-col gap-4'>
+            {report.questions.map((q) => (
+              <QuestionCard key={q.questionId} question={q} />
             ))}
-          </ul>
-        )}
-      </section>
-
-      <div className='flex flex-col gap-4'>
-        {report.questions.map((q) => (
-          <QuestionCard key={q.questionId} question={q} />
-        ))}
-      </div>
+          </div>
+        </>
+      ) : null}
     </div>
   );
 }
