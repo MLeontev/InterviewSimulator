@@ -46,6 +46,7 @@ internal class AiSessionEvaluationWorker(
                             SELECT s2."Id"
                             FROM "Interview"."InterviewSessions" s2
                             WHERE s2."Status" = 'Finished'
+                              AND (s2."AiNextRetryAt" IS NULL OR s2."AiNextRetryAt" <= NOW())
                               AND NOT EXISTS (
                                   SELECT 1
                                   FROM "Interview"."InterviewQuestions" q

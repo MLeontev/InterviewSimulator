@@ -25,6 +25,9 @@ public class InterviewQuestion
     public string? AiFeedbackJson { get; set; }
     public string? ErrorMessage { get; set; }
     
+    public int AiRetryCount { get; set; } = 0;
+    public DateTime? AiNextRetryAt { get; set; }
+    
     public Guid? LastSubmissionId { get; set; }
     public string? ProgrammingLanguageCode { get; set; }
     public QuestionVerdict QuestionVerdict { get; set; } = QuestionVerdict.None;

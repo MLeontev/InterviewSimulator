@@ -46,6 +46,8 @@ internal class SubmitTheoryAnswerCommandHandler(
         question.ErrorMessage = null;
         question.QuestionVerdict = QuestionVerdict.None;
         question.Status = QuestionStatus.Submitted;
+        question.AiRetryCount = 0;
+        question.AiNextRetryAt = null;
         
         await dbContext.SaveChangesAsync(cancellationToken);
         await interviewSessionFinalizer.TryFinishIfNoActiveQuestionsAsync(question.InterviewSessionId, cancellationToken);

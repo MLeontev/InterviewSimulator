@@ -3,6 +3,7 @@ using System.Text.Json.Serialization;
 using Framework.Domain;
 using Interview.Domain;
 using Interview.Infrastructure.Interfaces.DataAccess;
+using Interview.UseCases.Services;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Verdict = Interview.Domain.Verdict;
@@ -36,7 +37,7 @@ internal class GetInterviewSessionReportQueryHandler(IDbContext dbContext) : IRe
             .ToList();
 
         var averageQuestionScore = session.Questions.Count > 0
-            ? Math.Round(session.Questions.Average(GetQuestionScoreForSessionAverage), 2)
+            ? Math.Round(session.Questions.Average(InterviewQuestionScoreResolver.Resolve), 2)
             : 0;
 
         var totalQuestions = session.Questions.Count;
@@ -71,26 +72,6 @@ internal class GetInterviewSessionReportQueryHandler(IDbContext dbContext) : IRe
         };
 
         return Result.Success(report);
-    }
-
-    private double GetQuestionScoreForSessionAverage(InterviewQuestion q)
-    {
-        var (aiScore, _) = ParseQuestionAiFeedback(q.AiFeedbackJson);
-        if (aiScore is >= 0 and <= 10)
-            return aiScore.Value;
-
-        return q.Status switch
-        {
-            QuestionStatus.NotStarted => 0d,
-            QuestionStatus.Skipped => 0d,
-            _ => q.QuestionVerdict switch
-            {
-                QuestionVerdict.Correct => 8d,
-                QuestionVerdict.PartiallyCorrect => 5d,
-                QuestionVerdict.Incorrect => 2d,
-                _ => 0d
-            }
-        };
     }
 
     private InterviewSessionReportQuestionDto MapQuestion(InterviewQuestion q)
@@ -135,53 +116,25 @@ internal class GetInterviewSessionReportQueryHandler(IDbContext dbContext) : IRe
         };
     }
     
-    private (int? Score, string? Feedback) ParseQuestionAiFeedback(string? rawJson)
+    private static (int? Score, string? Feedback) ParseQuestionAiFeedback(string? rawJson)
     {
-        if (string.IsNullOrWhiteSpace(rawJson)) 
+        if (!AiFeedbackJsonParser.TryParseQuestion(rawJson, out var score, out var feedback))
             return (null, null);
 
-        try
-        {
-            var result = JsonSerializer.Deserialize<QuestionAiFeedback>(rawJson);
-            var score = result?.Score is >= 0 and <= 10 ? result.Score : null;
-            return (score, result?.Feedback);
-        }
-        catch
-        {
-            return (null, null);
-        }
+        return (score, feedback);
     }
 
-    private (string? Summary, IReadOnlyList<string> Strengths, IReadOnlyList<string> Weaknesses, IReadOnlyList<string> Recommendations) ParseSessionAiFeedback(string? rawJson)
+    private static (
+        string? Summary, 
+        IReadOnlyList<string> Strengths, 
+        IReadOnlyList<string> Weaknesses, 
+        IReadOnlyList<string> Recommendations) ParseSessionAiFeedback(string? rawJson)
     {
-        if (string.IsNullOrWhiteSpace(rawJson)) 
+        if (!AiFeedbackJsonParser.TryParseSession(rawJson, out var summary, out var strengths, out var weaknesses, out var recommendations))
             return (null, [], [], []);
 
-        try
-        {
-            var result = JsonSerializer.Deserialize<SessionAiFeedback>(rawJson);
-            
-            return (
-                result?.Summary,
-                result?.Strengths ?? [],
-                result?.Weaknesses ?? [],
-                result?.Recommendations ?? []);
-        }
-        catch
-        {
-            return (null, [], [], []);
-        }
+        return (summary, strengths, weaknesses, recommendations);
     }
-    
-    private record QuestionAiFeedback(
-        [property: JsonPropertyName("score")] int? Score,
-        [property: JsonPropertyName("feedback")] string? Feedback);
-
-    private record SessionAiFeedback(
-        [property: JsonPropertyName("summary")] string? Summary,
-        [property: JsonPropertyName("strengths")] List<string>? Strengths,
-        [property: JsonPropertyName("weaknesses")] List<string>? Weaknesses,
-        [property: JsonPropertyName("recommendations")] List<string>? Recommendations);
 }
 
 public record InterviewSessionReportDto

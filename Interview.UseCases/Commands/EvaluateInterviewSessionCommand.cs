@@ -4,9 +4,11 @@ using Interview.Domain;
 using Interview.Infrastructure.Interfaces.AiEvaluation;
 using Interview.Infrastructure.Interfaces.AiEvaluation.Session;
 using Interview.Infrastructure.Interfaces.DataAccess;
+using Interview.UseCases.Services;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using QuestionBank.ModuleContract;
 using QuestionType = Interview.Domain.QuestionType;
 
@@ -18,8 +20,11 @@ internal class EvaluateInterviewSessionCommandHandler(
     IDbContext dbContext,
     IAiEvaluationService aiEvaluationService,
     IQuestionBankApi questionBankApi,
+    IOptions<InterviewAiRetryOptions> retryOptions,
     ILogger<EvaluateInterviewSessionCommandHandler> logger) : IRequestHandler<EvaluateInterviewSessionCommand, Result>
 {
+    private readonly InterviewAiRetryOptions _retry = retryOptions.Value;
+    
     public async Task<Result> Handle(EvaluateInterviewSessionCommand request, CancellationToken cancellationToken)
     {
         var session = await dbContext.InterviewSessions
@@ -62,9 +67,7 @@ internal class EvaluateInterviewSessionCommandHandler(
 
             var competencyResults = BuildCompetencyResults(session.Questions, preset.Competencies);
 
-            var overallScore = questionResults.Count > 0
-                ? Math.Round(questionResults.Average(x => x.Score), 2)
-                : 0;
+            var overallScore = CalculateOverallScore(session.Questions);
 
             var technologyStack = preset.Technologies.Count == 0
                 ? "Не указан"
@@ -83,21 +86,52 @@ internal class EvaluateInterviewSessionCommandHandler(
             session.SessionVerdict = MapSessionVerdict(overallScore);
             session.Status = InterviewStatus.Evaluated;
             session.FinishedAt ??= DateTime.UtcNow;
+            session.AiRetryCount = 0;
+            session.AiNextRetryAt = null;
 
             await dbContext.SaveChangesAsync(cancellationToken);
             return Result.Success();
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            throw;
         }
         catch (Exception ex)
         {
             logger.LogError(ex, "Ошибка AI-оценки сессии {SessionId}", session.Id);
 
-            session.Status = InterviewStatus.Finished;
+            var nextRetry = session.AiRetryCount + 1;
+
+            if (nextRetry <= _retry.MaxRetries)
+            {
+                session.AiRetryCount = nextRetry;
+                session.AiNextRetryAt = AiRetryBackoff.NextRetryAtUtc(nextRetry, _retry);
+                session.Status = InterviewStatus.Finished;
+
+                await dbContext.SaveChangesAsync(cancellationToken);
+
+                return Result.Failure(Error.External(
+                    "SESSION_AI_EVALUATION_RETRY_SCHEDULED",
+                    $"Запланирован повтор AI-оценки ({nextRetry}/{_retry.MaxRetries})"));
+            }
+            
+            var fallbackOverallScore = CalculateOverallScore(session.Questions);
+
+            session.AiRetryCount = nextRetry;
+            session.AiNextRetryAt = null;
+            session.Status = InterviewStatus.Evaluated;
+            session.FinishedAt ??= DateTime.UtcNow;
+            session.SessionVerdict = MapSessionVerdict(fallbackOverallScore);
+            session.AiFeedbackJson ??= BuildFallbackSessionAiFeedbackJson();
+
             await dbContext.SaveChangesAsync(cancellationToken);
 
-            return Result.Failure(Error.External("SESSION_AI_EVALUATION_FAILED", "Не удалось выполнить AI-оценку сессии"));
+            return Result.Failure(Error.External(
+                "SESSION_AI_EVALUATION_FAILED",
+                "Не удалось выполнить AI-оценку сессии после нескольких попыток"));
         }
     }
-    
+
     private SessionQuestionResult MapQuestionResult(InterviewQuestion q)
     {
         var questionType = q.Type switch
@@ -109,104 +143,23 @@ internal class EvaluateInterviewSessionCommandHandler(
         
         var questionTitle = string.IsNullOrWhiteSpace(q.Title) ? "Без названия" : q.Title;
         var title = $"{q.OrderIndex}. {questionType}: {questionTitle}";
-        
         var status = MapQuestionStatusForLlm(q);
 
-        if (TryParseQuestionAiJson(q.AiFeedbackJson, out var score, out var feedback))
+        if (AiFeedbackJsonParser.TryParseQuestion(q.AiFeedbackJson, out var aiScore, out var aiFeedback))
         {
-            return new SessionQuestionResult(
-                Title: title,
-                Status: status,
-                Score: score,
-                Feedback: feedback);
+            return new SessionQuestionResult(title, status, aiScore, aiFeedback);
         }
 
-        var (fallbackScore, fallbackFeedback) = q.Status switch
-        {
-            QuestionStatus.NotStarted => (0, "Ответ на это задание не был дан"),
-            QuestionStatus.Skipped => (0, "Это задание было пропущено"),
-            _ => (
-                q.QuestionVerdict switch
-                {
-                    QuestionVerdict.Correct => 8,
-                    QuestionVerdict.PartiallyCorrect => 5,
-                    QuestionVerdict.Incorrect => 2,
-                    _ => 0
-                },
-                string.IsNullOrWhiteSpace(q.ErrorMessage)
-                    ? "Оценка сформирована по итоговому вердикту"
-                    : q.ErrorMessage!
-            )
-        };
-
-        return new SessionQuestionResult(
-            Title: title,
-            Status: status,
-            Score: fallbackScore,
-            Feedback: fallbackFeedback);
+        return new SessionQuestionResult(title, status, InterviewQuestionScoreResolver.Resolve(q), ResolveQuestionFeedbackFallback(q));
     }
-    
-    private bool TryParseQuestionAiJson(string? rawJson, out int score, out string feedback)
-    {
-        score = 0;
-        feedback = string.Empty;
 
-        if (string.IsNullOrWhiteSpace(rawJson))
-            return false;
-
-        try
-        {
-            using var doc = JsonDocument.Parse(rawJson);
-            var root = doc.RootElement;
-
-            if (!root.TryGetProperty("score", out var scoreNode))
-                return false;
-
-            score = scoreNode.GetInt32();
-            if (score is < 0 or > 10)
-                return false;
-
-            feedback = root.TryGetProperty("feedback", out var feedbackNode)
-                ? feedbackNode.GetString() ?? string.Empty
-                : string.Empty;
-
-            return true;
-        }
-        catch
-        {
-            return false;
-        }
-    }
-    
-    private static string MapQuestionStatusForLlm(InterviewQuestion q) =>
-        q.Status switch
-        {
-            QuestionStatus.NotStarted => "без ответа",
-            QuestionStatus.Skipped => "пропущено",
-            _ => "оценено"
-        };
-    
     private IReadOnlyList<SessionCompetencyResult> BuildCompetencyResults(
         IReadOnlyCollection<InterviewQuestion> questions,
         IReadOnlyCollection<PresetCompetencyApiDto> presetCompetencies)
     {
         var scoredQuestions = questions
-            .Select(q =>
-            {
-                if (TryParseQuestionAiJson(q.AiFeedbackJson, out var parsedScore, out _))
-                    return new { q.CompetencyId, Score = (double)parsedScore };
-
-                var fallback = q.QuestionVerdict switch
-                {
-                    QuestionVerdict.Correct => 8d,
-                    QuestionVerdict.PartiallyCorrect => 5d,
-                    QuestionVerdict.Incorrect => 2d,
-                    _ => 0d
-                };
-
-                return new { q.CompetencyId, Score = fallback };
-            })
-            .Where(x => x.CompetencyId.HasValue)
+            .Where(q => q.CompetencyId.HasValue)
+            .Select(q => new { q.CompetencyId, Score = (double)InterviewQuestionScoreResolver.Resolve(q) })
             .ToList();
 
         var avgByCompetencyId = scoredQuestions
@@ -220,6 +173,31 @@ internal class EvaluateInterviewSessionCommandHandler(
                 AverageScore: avgByCompetencyId.GetValueOrDefault(c.CompetencyId, 0)))
             .ToList();
     }
+    
+    private double CalculateOverallScore(IReadOnlyCollection<InterviewQuestion> questions)
+    {
+        if (questions.Count == 0) return 0;
+        return Math.Round(questions.Average(InterviewQuestionScoreResolver.Resolve), 2);
+    }
+    
+    private string ResolveQuestionFeedbackFallback(InterviewQuestion q) =>
+        q.Status switch
+        {
+            QuestionStatus.NotStarted => "Ответ на это задание не был дан",
+            QuestionStatus.Skipped => "Это задание было пропущено",
+            _ => string.IsNullOrWhiteSpace(q.ErrorMessage)
+                ? "Оценка сформирована по итоговому вердикту"
+                : q.ErrorMessage!
+        };
+    
+    private string BuildFallbackSessionAiFeedbackJson() =>
+        JsonSerializer.Serialize(new
+        {
+            summary = "Не удалось получить итоговую AI-оценку сессии: сервис временно недоступен.",
+            strengths = Array.Empty<string>(),
+            weaknesses = Array.Empty<string>(),
+            recommendations = Array.Empty<string>()
+        });
 
     private SessionVerdict MapSessionVerdict(double overallScore) =>
         overallScore switch
@@ -227,5 +205,13 @@ internal class EvaluateInterviewSessionCommandHandler(
             >= 7 => SessionVerdict.Passed,
             >= 4 => SessionVerdict.Borderline,
             _ => SessionVerdict.Failed
+        };
+    
+    private static string MapQuestionStatusForLlm(InterviewQuestion q) =>
+        q.Status switch
+        {
+            QuestionStatus.NotStarted => "без ответа",
+            QuestionStatus.Skipped => "пропущено",
+            _ => "оценено"
         };
 }

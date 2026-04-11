@@ -102,7 +102,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Interview.Infrastructure.In
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Interview.Infrastructure.Implementation.AiEvaluation.GigaChat", "Interview.Infrastructure.Implementation.AiEvaluation.GigaChat\Interview.Infrastructure.Implementation.AiEvaluation.GigaChat.csproj", "{0FC114B6-573F-44C0-9398-74EB19AC5AFC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "interview.Infrastructure.Workers", "interview.Infrastructure.Workers\interview.Infrastructure.Workers.csproj", "{B33B2217-9414-449F-8BA4-0376C9099CA9}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Interview.Infrastructure.Workers", "Interview.Infrastructure.Workers\Interview.Infrastructure.Workers.csproj", "{B33B2217-9414-449F-8BA4-0376C9099CA9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

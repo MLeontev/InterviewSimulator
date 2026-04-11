@@ -3,8 +3,10 @@ using Interview.Domain;
 using Interview.Infrastructure.Interfaces.AiEvaluation;
 using Interview.Infrastructure.Interfaces.AiEvaluation.Theory;
 using Interview.Infrastructure.Interfaces.DataAccess;
+using Interview.UseCases.Services;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 
 namespace Interview.UseCases.Commands;
 
@@ -12,8 +14,11 @@ public record EvaluateTheoryAnswerCommand(Guid QuestionId) :  IRequest<Result>;
 
 internal class EvaluateTheoryQuestionCommandHandler(
     IDbContext dbContext,
-    IAiEvaluationService aiEvaluationService) : IRequestHandler<EvaluateTheoryAnswerCommand, Result>
+    IAiEvaluationService aiEvaluationService,
+    IOptions<InterviewAiRetryOptions> retryOptions) : IRequestHandler<EvaluateTheoryAnswerCommand, Result>
 {
+    private readonly InterviewAiRetryOptions _retry = retryOptions.Value;
+    
     public async Task<Result> Handle(EvaluateTheoryAnswerCommand request, CancellationToken cancellationToken)
     {
         var question = await dbContext.InterviewQuestions
@@ -42,15 +47,39 @@ internal class EvaluateTheoryQuestionCommandHandler(
             question.QuestionVerdict = MapVerdict(aiResult.Score);
             question.Status = QuestionStatus.EvaluatedAi;
             question.ErrorMessage = null;
+            question.AiRetryCount = 0;
+            question.AiNextRetryAt = null;
 
             await dbContext.SaveChangesAsync(cancellationToken);
             return Result.Success();
         }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            throw;
+        }
         catch (Exception ex)
         {
-            question.Status = QuestionStatus.Submitted;
-            question.ErrorMessage = $"Ошибка AI-оценки теории: {ex.Message}";
+            var nextRetry = question.AiRetryCount + 1;
+
+            if (nextRetry <= _retry.MaxRetries)
+            {
+                question.AiRetryCount = nextRetry;
+                question.AiNextRetryAt = AiRetryBackoff.NextRetryAtUtc(nextRetry, _retry);
+                question.Status = QuestionStatus.Submitted;
+                question.ErrorMessage = $"AI временно недоступен. Повтор {nextRetry}/{_retry.MaxRetries}.";
+
+                await dbContext.SaveChangesAsync(cancellationToken);
+                
+                return Result.Failure(Error.External("AI_EVALUATION_RETRY_SCHEDULED", "Запланирован повтор AI-оценки"));
+            }
+
+            question.Status = QuestionStatus.EvaluatedAi;
+            question.EvaluatedAt = DateTime.UtcNow;
+            question.AiNextRetryAt = null;
+            question.ErrorMessage = "AI-оценка недоступна после нескольких попыток.";
+            
             await dbContext.SaveChangesAsync(cancellationToken);
+            
             return Result.Failure(Error.External("AI_EVALUATION_FAILED", "Не удалось выполнить AI-оценку"));
         }
     }

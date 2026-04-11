@@ -15,8 +15,7 @@ internal class FinishInterviewSessionCommandHandler(IDbContext dbContext) : IReq
     {
         var session = await dbContext.InterviewSessions
             .Where(s => s.CandidateId == request.CandidateId
-                        && s.Status == InterviewStatus.InProgress
-                        && s.PlannedEndAt > DateTime.UtcNow)
+                        && s.Status == InterviewStatus.InProgress)
             .FirstOrDefaultAsync(ct);
 
         if (session == null)

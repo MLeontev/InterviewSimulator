@@ -24,7 +24,7 @@ COPY ["Interview.Infrastructure.Interfaces.AiEvaluation/Interview.Infrastructure
 COPY ["Interview.Infrastructure.Implementation.DataAccess/Interview.Infrastructure.Implementation.DataAccess.csproj", "Interview.Infrastructure.Implementation.DataAccess/"]
 COPY ["Interview.Infrastructure.Interfaces.DataAccess/Interview.Infrastructure.Interfaces.DataAccess.csproj", "Interview.Infrastructure.Interfaces.DataAccess/"]
 COPY ["Interview.Domain/Interview.Domain.csproj", "Interview.Domain/"]
-COPY ["interview.Infrastructure.Workers/interview.Infrastructure.Workers.csproj", "interview.Infrastructure.Workers/"]
+COPY ["Interview.Infrastructure.Workers/Interview.Infrastructure.Workers.csproj", "Interview.Infrastructure.Workers/"]
 COPY ["Interview.UseCases/Interview.UseCases.csproj", "Interview.UseCases/"]
 COPY ["QuestionBank.ModuleContract/QuestionBank.ModuleContract.csproj", "QuestionBank.ModuleContract/"]
 COPY ["Interview.Presentation/Interview.Presentation.csproj", "Interview.Presentation/"]

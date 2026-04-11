@@ -48,6 +48,7 @@ internal class AiAnswerEvaluationWorker(
                             FROM "Interview"."InterviewQuestions" q2
                             WHERE "Status" = 'Submitted'
                               AND q2."Answer" IS NOT NULL
+                              AND (q2."AiNextRetryAt" IS NULL OR q2."AiNextRetryAt" <= NOW())
                               AND btrim(q2."Answer") <> ''
                             ORDER BY q2."SubmittedAt" NULLS FIRST
                             FOR UPDATE SKIP LOCKED

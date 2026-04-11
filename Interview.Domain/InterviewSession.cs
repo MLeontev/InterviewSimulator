@@ -17,6 +17,8 @@ public class InterviewSession
     public SessionVerdict SessionVerdict { get; set; } = SessionVerdict.None;
     
     public string? AiFeedbackJson { get; set; }
+    public int AiRetryCount { get; set; } = 0;
+    public DateTime? AiNextRetryAt { get; set; }
 
     public List<InterviewQuestion> Questions { get; set; } = [];
 }
