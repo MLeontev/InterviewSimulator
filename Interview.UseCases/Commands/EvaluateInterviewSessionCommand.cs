@@ -123,7 +123,7 @@ internal class EvaluateInterviewSessionCommandHandler(
 
             session.AiRetryCount = nextRetry;
             session.AiNextRetryAt = null;
-            session.Status = InterviewStatus.Evaluated;
+            session.Status = InterviewStatus.AiEvaluationFailed;
             session.FinishedAt ??= DateTime.UtcNow;
             session.SessionVerdict = MapSessionVerdict(fallbackOverallScore);
             session.AiFeedbackJson ??= BuildFallbackSessionAiFeedbackJson();
@@ -216,6 +216,7 @@ internal class EvaluateInterviewSessionCommandHandler(
         {
             QuestionStatus.NotStarted => "без ответа",
             QuestionStatus.Skipped => "пропущено",
+            QuestionStatus.AiEvaluationFailed => "ошибка AI-оценки",
             _ => "оценено"
         };
 }

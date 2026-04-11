@@ -18,7 +18,8 @@ internal class GetCurrentInterviewQuestionQueryHandler(
         QuestionStatus.Skipped,
         QuestionStatus.Submitted,
         QuestionStatus.EvaluatingAi,
-        QuestionStatus.EvaluatedAi
+        QuestionStatus.EvaluatedAi,
+        QuestionStatus.AiEvaluationFailed
     ];
     
     public async Task<Result<CurrentInterviewQuestion>> Handle(GetCurrentInterviewQuestionQuery request, CancellationToken ct)

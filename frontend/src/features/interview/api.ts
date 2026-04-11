@@ -5,6 +5,7 @@ export const InterviewStatus = {
   Finished: 'Finished',
   EvaluatingAi: 'EvaluatingAi',
   Evaluated: 'Evaluated',
+  AiEvaluationFailed: 'AiEvaluationFailed',
 } as const;
 
 export type InterviewStatus =
@@ -35,6 +36,7 @@ export const QuestionStatus = {
   Submitted: 'Submitted',
   EvaluatingAi: 'EvaluatingAi',
   EvaluatedAi: 'EvaluatedAi',
+  AiEvaluationFailed: 'AiEvaluationFailed',
 } as const;
 export type QuestionStatus =
   (typeof QuestionStatus)[keyof typeof QuestionStatus];

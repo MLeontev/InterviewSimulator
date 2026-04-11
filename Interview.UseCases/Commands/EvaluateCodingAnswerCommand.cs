@@ -92,7 +92,8 @@ internal class EvaluateCodingAnswerCommandHandler(
                 return Result.Failure(Error.External("AI_EVALUATION_RETRY_SCHEDULED", "Запланирован повтор AI-оценки"));
             }
 
-            question.Status = QuestionStatus.EvaluatedAi;
+            question.AiRetryCount = nextRetry;
+            question.Status = QuestionStatus.AiEvaluationFailed;
             question.EvaluatedAt = DateTime.UtcNow;
             question.AiNextRetryAt = null;
             question.ErrorMessage = "AI-оценка недоступна после нескольких попыток.";

@@ -18,7 +18,8 @@ internal class CurrentQuestionResolver(
         QuestionStatus.Skipped,
         QuestionStatus.Submitted,
         QuestionStatus.EvaluatingAi,
-        QuestionStatus.EvaluatedAi
+        QuestionStatus.EvaluatedAi,
+        QuestionStatus.AiEvaluationFailed
     ];
     
     public async Task<InterviewQuestion?> GetCurrentQuestionAsync(Guid candidateId, CancellationToken ct)

@@ -28,7 +28,8 @@ public enum InterviewStatus
     InProgress,
     Finished,
     EvaluatingAi,
-    Evaluated
+    Evaluated,
+    AiEvaluationFailed
 }
 
 public enum SessionVerdict

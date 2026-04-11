@@ -27,7 +27,7 @@ internal class GetInterviewSessionReportQueryHandler(IDbContext dbContext) : IRe
             return Result.Failure<InterviewSessionReportDto>(
                 Error.NotFound("SESSION_NOT_FOUND", "Сессия не найдена"));
 
-        if (session.Status != InterviewStatus.Evaluated)
+        if (session.Status is not (InterviewStatus.Evaluated or InterviewStatus.AiEvaluationFailed))
             return Result.Failure<InterviewSessionReportDto>(
                 Error.Business("SESSION_NOT_FINISHED", "Сессия еще не оценена"));
         

@@ -16,6 +16,7 @@ const statusLabel: Record<InterviewStatus, string> = {
   [InterviewStatus.Finished]: 'Завершено',
   [InterviewStatus.EvaluatingAi]: 'Оценивается',
   [InterviewStatus.Evaluated]: 'Оценено',
+  [InterviewStatus.AiEvaluationFailed]: 'Ошибка AI-оценки',
 };
 
 function formatDate(dateStr: string) {
