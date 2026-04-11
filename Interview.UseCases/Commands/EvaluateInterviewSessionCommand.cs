@@ -114,7 +114,6 @@ internal class EvaluateInterviewSessionCommandHandler(
                 session.Status = InterviewStatus.Finished;
 
                 await dbContext.SaveChangesAsync(cancellationToken);
-
                 return Result.Failure(Error.External(
                     "SESSION_AI_EVALUATION_RETRY_SCHEDULED",
                     $"Запланирован повтор AI-оценки ({nextRetry}/{_retry.MaxRetries})"));

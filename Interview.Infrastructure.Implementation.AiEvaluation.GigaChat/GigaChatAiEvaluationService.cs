@@ -25,13 +25,8 @@ internal class GigaChatAiEvaluationService(
         var systemPrompt = GigaChatPromptFactory.BuildTheorySystemPrompt();
         var userPrompt = GigaChatPromptFactory.BuildTheoryUserPrompt(request);
         
-        var result = await SendAndParseTheoryAsync(systemPrompt, userPrompt, ct);
-        if (result is not null) return result;
-        
-        var retry = userPrompt + "\n\nВерни строго валидный JSON";
-        result = await SendAndParseTheoryAsync(systemPrompt, retry, ct);
-
-        return result ?? throw new InvalidOperationException("Invalid theory JSON from GigaChat.");
+        return await SendAndParseTheoryAsync(systemPrompt, userPrompt, ct)
+               ?? throw new InvalidOperationException("Invalid theory JSON from GigaChat.");
     }
 
     public async Task<CodingEvaluationResult> EvaluateCodingAsync(CodingEvaluationRequest request, CancellationToken ct = default)

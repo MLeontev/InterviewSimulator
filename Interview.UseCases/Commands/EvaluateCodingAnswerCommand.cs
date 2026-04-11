@@ -89,7 +89,6 @@ internal class EvaluateCodingAnswerCommandHandler(
                 question.ErrorMessage = $"AI временно недоступен. Повтор {nextRetry}/{_retry.MaxRetries}.";
 
                 await dbContext.SaveChangesAsync(cancellationToken);
-                
                 return Result.Failure(Error.External("AI_EVALUATION_RETRY_SCHEDULED", "Запланирован повтор AI-оценки"));
             }
 
