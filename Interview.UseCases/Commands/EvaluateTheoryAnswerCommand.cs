@@ -1,4 +1,5 @@
 using Framework.Domain;
+using Framework.UseCases.Resilience;
 using Interview.Domain;
 using Interview.Infrastructure.Interfaces.AiEvaluation;
 using Interview.Infrastructure.Interfaces.AiEvaluation.Theory;
@@ -64,7 +65,11 @@ internal class EvaluateTheoryQuestionCommandHandler(
             if (nextRetry <= _retry.MaxRetries)
             {
                 question.AiRetryCount = nextRetry;
-                question.AiNextRetryAt = AiRetryBackoff.NextRetryAtUtc(nextRetry, _retry);
+                question.AiNextRetryAt = RetryBackoff.NextRetryAtUtc(
+                    nextRetry,
+                    _retry.BaseDelaySeconds,
+                    _retry.MaxDelaySeconds,
+                    _retry.JitterSeconds);
                 question.Status = QuestionStatus.Submitted;
                 question.ErrorMessage = $"AI временно недоступен. Повтор {nextRetry}/{_retry.MaxRetries}.";
 

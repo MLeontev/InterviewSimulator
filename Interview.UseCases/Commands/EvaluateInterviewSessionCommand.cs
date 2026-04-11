@@ -1,5 +1,6 @@
 using System.Text.Json;
 using Framework.Domain;
+using Framework.UseCases.Resilience;
 using Interview.Domain;
 using Interview.Infrastructure.Interfaces.AiEvaluation;
 using Interview.Infrastructure.Interfaces.AiEvaluation.Session;
@@ -105,7 +106,11 @@ internal class EvaluateInterviewSessionCommandHandler(
             if (nextRetry <= _retry.MaxRetries)
             {
                 session.AiRetryCount = nextRetry;
-                session.AiNextRetryAt = AiRetryBackoff.NextRetryAtUtc(nextRetry, _retry);
+                session.AiNextRetryAt = RetryBackoff.NextRetryAtUtc(
+                    nextRetry,
+                    _retry.BaseDelaySeconds,
+                    _retry.MaxDelaySeconds,
+                    _retry.JitterSeconds);
                 session.Status = InterviewStatus.Finished;
 
                 await dbContext.SaveChangesAsync(cancellationToken);
