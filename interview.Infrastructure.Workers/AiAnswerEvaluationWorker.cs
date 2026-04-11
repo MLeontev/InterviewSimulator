@@ -7,7 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
-namespace interview.Infrastructure.Workers;
+namespace Interview.Infrastructure.Workers;
 
 internal class AiAnswerEvaluationWorker(
     IServiceProvider serviceProvider,

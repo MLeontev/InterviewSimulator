@@ -1,6 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
 
-namespace interview.Infrastructure.Workers;
+namespace Interview.Infrastructure.Workers;
 
 public static class DependencyInjection
 {
