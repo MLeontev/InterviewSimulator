@@ -1,4 +1,5 @@
 using CodeExecution.Infrastructure.Interfaces.DataAccess;
+using Framework.Infrastructure.Outbox;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -20,6 +21,8 @@ public static class DependencyInjection
         });
         
         services.AddScoped<IDbContext>(sp => sp.GetRequiredService<AppDbContext>());
+        
+        services.AddOutboxProcessor<AppDbContext>("CodeExecution:Outbox");
         
         return services;
     }

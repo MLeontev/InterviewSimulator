@@ -1,3 +1,4 @@
+using Framework.Infrastructure.Outbox;
 using Interview.Infrastructure.Interfaces.DataAccess;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -20,6 +21,8 @@ public static class DependencyInjection
         });
         
         services.AddScoped<IDbContext>(sp => sp.GetRequiredService<AppDbContext>());
+        
+        services.AddOutboxProcessor<AppDbContext>("Interview:Outbox");
         
         return services;
     }

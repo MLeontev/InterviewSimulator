@@ -1,12 +1,15 @@
 using CodeExecution.Domain.Entities;
 using CodeExecution.Infrastructure.Interfaces.DataAccess;
+using Framework.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 
 namespace CodeExecution.Infrastructure.Implementation.DataAccess;
 
-public class AppDbContext : DbContext, IDbContext
+public class AppDbContext : ModuleDbContext, IDbContext
 {
+    protected override string Schema => Schemas.CodeExecution;
+    
     public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
     {
     }
@@ -16,6 +19,8 @@ public class AppDbContext : DbContext, IDbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        base.OnModelCreating(modelBuilder);
+        
         modelBuilder.HasDefaultSchema(Schemas.CodeExecution);
 
         modelBuilder.Entity<CodeSubmission>()

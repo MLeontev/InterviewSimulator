@@ -1,8 +1,10 @@
 using CodeExecution.Domain.Entities;
 using CodeExecution.Infrastructure.Interfaces.CodeExecution;
 using CodeExecution.Infrastructure.Interfaces.DataAccess;
+using CodeExecution.IntegrationEvents;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using Verdict = CodeExecution.Domain.Entities.Verdict;
 
 namespace CodeExecution.UseCases.Commands;
 
@@ -36,11 +38,11 @@ internal class CheckSubmissionCommandHandler(
             }
             catch (KeyNotFoundException)
             {
-                submission.Status = ExecutionStatus.Failed;
-                submission.OverallVerdict = Verdict.FailedSystem;
-                submission.ErrorMessage = "Конфигурация для языка программирования не найдена";
-                submission.CompletedAt = DateTime.UtcNow;
-                await dbContext.SaveChangesAsync(cancellationToken);
+                await CompleteAsync(
+                    submission, 
+                    Verdict.FailedSystem, 
+                    "Конфигурация для языка программирования не найдена", 
+                    cancellationToken);
                 return;
             }
 
@@ -72,13 +74,7 @@ internal class CheckSubmissionCommandHandler(
             }
         }
 
-        submission.OverallVerdict = overallVerdict;
-        submission.CompletedAt = DateTime.UtcNow;
-        submission.Status = overallVerdict == Verdict.FailedSystem
-            ? ExecutionStatus.Failed
-            : ExecutionStatus.Completed;
-
-        await dbContext.SaveChangesAsync(cancellationToken);
+        await CompleteAsync(submission, overallVerdict, submission.ErrorMessage, cancellationToken);
     }
 
     private static Verdict DetermineVerdict(
@@ -111,4 +107,74 @@ internal class CheckSubmissionCommandHandler(
 
         return Verdict.FailedSystem;
     }
+    
+    private async Task CompleteAsync(
+        CodeSubmission submission, 
+        Verdict overallVerdict, 
+        string? errorMessage, 
+        CancellationToken ct)
+    {
+        submission.OverallVerdict = overallVerdict;
+        submission.CompletedAt = DateTime.UtcNow;
+        submission.ErrorMessage = errorMessage;
+        submission.Status = overallVerdict == Verdict.FailedSystem
+            ? ExecutionStatus.Failed
+            : ExecutionStatus.Completed;
+
+        dbContext.AddOutboxMessage(ToIntegrationEvent(submission));
+        await dbContext.SaveChangesAsync(ct);
+    }
+    
+    private static CodeSubmissionCompleted ToIntegrationEvent(CodeSubmission submission)
+    {
+        var testCaseResults = new List<TestCaseResultDto>(submission.TestCases.Count);
+        var passedCount = 0;
+        
+        foreach (var testCase in submission.TestCases)
+        {
+            var verdict = MapVerdict(testCase.Verdict);
+
+            testCaseResults.Add(new TestCaseResultDto(
+                InterviewTestCaseId: testCase.InterviewTestCaseId,
+                OrderIndex: testCase.OrderIndex,
+                Input: testCase.Input,
+                ExpectedOutput: testCase.ExpectedOutput,
+                ActualOutput: testCase.ActualOutput ?? string.Empty,
+                Error: testCase.Error ?? string.Empty,
+                ExitCode: testCase.ExitCode ?? 0,
+                TimeElapsedMs: testCase.TimeElapsedMs ?? 0,
+                MemoryUsedMb: testCase.MemoryUsedMb ?? 0,
+                Verdict: verdict));
+
+            if (testCase.Verdict == Verdict.OK)
+                passedCount++;
+            else
+                break;
+        }
+        
+        var overallVerdict = submission.Status == ExecutionStatus.Failed
+            ? IntegrationEvents.Verdict.FailedSystem
+            : MapVerdict(submission.OverallVerdict);
+
+        return new CodeSubmissionCompleted(
+            SubmissionId: submission.Id,
+            InterviewQuestionId: submission.InterviewQuestionId,
+            TestCaseResults: testCaseResults,
+            OverallVerdict: overallVerdict,
+            PassedCount: passedCount,
+            TotalTests: submission.TestCases.Count,
+            ErrorMessage: submission.ErrorMessage);
+    }
+    
+    private static IntegrationEvents.Verdict MapVerdict(Verdict verdict) =>
+        verdict switch
+        {
+            Verdict.OK => IntegrationEvents.Verdict.OK,
+            Verdict.CE => IntegrationEvents.Verdict.CE,
+            Verdict.RE => IntegrationEvents.Verdict.RE,
+            Verdict.TLE => IntegrationEvents.Verdict.TLE,
+            Verdict.MLE => IntegrationEvents.Verdict.MLE,
+            Verdict.WA => IntegrationEvents.Verdict.WA,
+            _ => IntegrationEvents.Verdict.FailedSystem
+        };
 }

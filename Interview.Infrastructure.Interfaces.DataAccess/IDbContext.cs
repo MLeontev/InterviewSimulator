@@ -8,6 +8,8 @@ public interface IDbContext
     public DbSet<InterviewSession> InterviewSessions { get; set; }
     public DbSet<InterviewQuestion> InterviewQuestions { get; set; }
     public DbSet<TestCase> TestCases { get; set; }
+    
+    void AddOutboxMessage(object @event);
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }

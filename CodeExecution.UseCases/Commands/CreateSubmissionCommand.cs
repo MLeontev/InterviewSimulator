@@ -44,7 +44,6 @@ internal class CreateSubmissionCommandHandler(IDbContext dbContext) : IRequestHa
             CreatedAt = DateTime.UtcNow,
             StartedAt = null,
             CompletedAt = null,
-            IsEventPublished = false,
             TestCases = request.TestCases
                 .OrderBy(x => x.OrderIndex)
                 .Select(x => new CodeSubmissionTestCase

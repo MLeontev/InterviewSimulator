@@ -45,7 +45,7 @@ internal class GigaChatAiEvaluationService(
         var retry = userPrompt + "\n\nВерни строго валидный JSON";
         result = await SendAndParseCodingAsync(systemPrompt, retry, ct);
 
-        return result ?? throw new InvalidOperationException("Invalid theory JSON from GigaChat.");
+        return result ?? throw new InvalidOperationException("Invalid coding JSON from GigaChat.");
     }
 
     public async Task<SessionEvaluationResult> EvaluateSessionAsync(SessionEvaluationRequest request, CancellationToken ct = default)
@@ -60,7 +60,6 @@ internal class GigaChatAiEvaluationService(
         result = await SendAndParseSessionAsync(systemPrompt, retry, ct);
 
         return result ?? throw new InvalidOperationException("Invalid session JSON from GigaChat.");
-
     }
 
     private async Task<string?> SendAsync(string model, string systemPrompt, string userPrompt, int maxTokens, CancellationToken ct)

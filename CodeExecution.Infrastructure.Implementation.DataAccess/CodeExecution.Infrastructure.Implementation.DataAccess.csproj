@@ -9,6 +9,7 @@
     <ItemGroup>
       <ProjectReference Include="..\CodeExecution.Domain\CodeExecution.Domain.csproj" />
       <ProjectReference Include="..\CodeExecution.Infrastructure.Interfaces.DataAccess\CodeExecution.Infrastructure.Interfaces.DataAccess.csproj" />
+      <ProjectReference Include="..\Framework.Infrastructure\Framework.Infrastructure.csproj" />
     </ItemGroup>
 
     <ItemGroup>

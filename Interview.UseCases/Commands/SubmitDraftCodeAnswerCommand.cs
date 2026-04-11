@@ -4,7 +4,6 @@ using Interview.Domain;
 using Interview.Infrastructure.Interfaces.DataAccess;
 using Interview.IntegrationEvents;
 using Interview.UseCases.Services;
-using MassTransit;
 using MediatR;
 
 namespace Interview.UseCases.Commands;
@@ -22,7 +21,6 @@ internal class SubmitDraftCodeAnswerCommandValidator : AbstractValidator<SubmitD
 
 internal sealed class SubmitDraftCodeAnswerCommandHandler(
     IDbContext dbContext, 
-    IBus bus,
     ICurrentQuestionResolver currentQuestionResolver) : IRequestHandler<SubmitDraftCodeAnswerCommand, Result>
 {
     public async Task<Result> Handle(SubmitDraftCodeAnswerCommand request, CancellationToken ct)
@@ -86,10 +84,9 @@ internal sealed class SubmitDraftCodeAnswerCommandHandler(
                 .ToArray(),
             TimeLimitMs: question.TimeLimitMs,
             MemoryLimitMb: question.MemoryLimitMb);
-
+        
+        dbContext.AddOutboxMessage(eventPayload);
         await dbContext.SaveChangesAsync(ct);
-        await bus.Publish(eventPayload, ct);
-
         return Result.Success();
     }
 }

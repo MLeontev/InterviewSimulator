@@ -1,11 +1,14 @@
-﻿using Interview.Domain;
+﻿using Framework.Infrastructure;
+using Interview.Domain;
 using Interview.Infrastructure.Interfaces.DataAccess;
 using Microsoft.EntityFrameworkCore;
 
 namespace Interview.Infrastructure.Implementation.DataAccess;
 
-public class AppDbContext : DbContext, IDbContext
+public class AppDbContext : ModuleDbContext, IDbContext
 {
+    protected override string Schema => Schemas.Interview;
+    
     public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
     {
     }
@@ -13,7 +16,7 @@ public class AppDbContext : DbContext, IDbContext
     public DbSet<InterviewSession> InterviewSessions { get; set; }
     public DbSet<InterviewQuestion> InterviewQuestions { get; set; }
     public DbSet<TestCase> TestCases { get; set; }
-    
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.HasDefaultSchema(Schemas.Interview);
@@ -60,5 +63,7 @@ public class AppDbContext : DbContext, IDbContext
         modelBuilder.Entity<TestCase>()
             .HasIndex(x => new { x.InterviewQuestionId, x.OrderIndex })
             .IsUnique();
+        
+        base.OnModelCreating(modelBuilder);
     }
 }

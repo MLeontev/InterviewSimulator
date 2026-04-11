@@ -15,6 +15,7 @@
       <ProjectReference Include="..\CodeExecution.Domain\CodeExecution.Domain.csproj" />
       <ProjectReference Include="..\CodeExecution.Infrastructure.Interfaces.CodeExecution\CodeExecution.Infrastructure.Interfaces.CodeExecution.csproj" />
       <ProjectReference Include="..\CodeExecution.Infrastructure.Interfaces.DataAccess\CodeExecution.Infrastructure.Interfaces.DataAccess.csproj" />
+      <ProjectReference Include="..\CodeExecution.IntegrationEvents\CodeExecution.IntegrationEvents.csproj" />
       <ProjectReference Include="..\Framework.Domain\Framework.Domain.csproj" />
     </ItemGroup>
 

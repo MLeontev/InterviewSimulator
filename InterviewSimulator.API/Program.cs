@@ -4,6 +4,7 @@ using CodeExecution.Infrastructure.Implementation.CodeExecution;
 using CodeExecution.Infrastructure.Implementation.DataAccess;
 using CodeExecution.Infrastructure.Workers;
 using CodeExecution.UseCases;
+using Framework.Infrastructure.Outbox;
 using Interview.Infrastructure.Implementation.AiEvaluation.GigaChat;
 using Interview.Infrastructure.Implementation.DataAccess;
 using Interview.Infrastructure.Workers;
@@ -76,6 +77,8 @@ builder.Services.AddMassTransit(configure =>
         cfg.ConfigureEndpoints(context);
     });
 });
+
+builder.Services.AddScoped<IEventPublisher, MassTransitEventPublisher>();
 
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();

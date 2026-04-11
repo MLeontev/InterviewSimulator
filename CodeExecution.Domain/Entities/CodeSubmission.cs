@@ -21,8 +21,6 @@ public class CodeSubmission
     public DateTime CreatedAt { get; set; }
     public DateTime? StartedAt { get; set; }
     public DateTime? CompletedAt { get; set; }
-    
-    public bool IsEventPublished { get; set; }
 }
 
 public enum ExecutionStatus
