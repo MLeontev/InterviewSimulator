@@ -3,6 +3,8 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'sonner';
 import {
   getSessionReport,
+  InterviewStatus,
+  retrySessionAiEvaluation,
   SessionVerdict,
   type InterviewSessionReport,
 } from '../../features/interview/api';
@@ -56,7 +58,9 @@ export function InterviewResultPage() {
   const [report, setReport] = useState<InterviewSessionReport | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isPolling, setIsPolling] = useState(false);
+  const [isRetryingAi, setIsRetryingAi] = useState(false);
   const [errorText, setErrorText] = useState<string | null>(null);
+  const [reloadKey, setReloadKey] = useState(0);
 
   useEffect(() => {
     if (!sessionId) {
@@ -113,7 +117,26 @@ export function InterviewResultPage() {
         window.clearTimeout(timerId);
       }
     };
-  }, [sessionId]);
+  }, [sessionId, reloadKey]);
+
+  const handleRetryAi = async () => {
+    if (!sessionId) return;
+
+    setIsRetryingAi(true);
+    setErrorText(null);
+    try {
+      await retrySessionAiEvaluation(sessionId, { skipErrorToast: true });
+      toast.success('Повторная ИИ-оценка запущена');
+      setIsPolling(true);
+      setReloadKey((x) => x + 1);
+    } catch (e) {
+      const apiError = e as ApiError;
+      setErrorText(apiError.message);
+      toast.error(apiError.message);
+    } finally {
+      setIsRetryingAi(false);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -150,6 +173,19 @@ export function InterviewResultPage() {
       {isPolling && (
         <div className='mb-4 text-sm text-indigo-700 bg-indigo-50 border border-indigo-200 rounded-xl px-4 py-3'>
           Сессия еще оценивается ИИ. Обновляю...
+        </div>
+      )}
+
+      {report?.status === InterviewStatus.AiEvaluationFailed && !isPolling && (
+        <div className='mb-4 text-sm text-red-700 bg-red-50 border border-red-200 rounded-xl px-4 py-3 flex items-center justify-between gap-4'>
+          <span>ИИ-оценка сессии завершилась с ошибкой</span>
+          <Button
+            variant='outline'
+            disabled={isRetryingAi}
+            onClick={() => void handleRetryAi()}
+          >
+            {isRetryingAi ? 'Запускаю...' : 'Повторить ИИ-оценку'}
+          </Button>
         </div>
       )}
 

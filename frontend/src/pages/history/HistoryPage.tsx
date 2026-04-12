@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import {
@@ -10,6 +10,8 @@ import {
 } from '../../features/interview/api';
 import { Button } from '../../shared/components/ui/Button';
 import type { ApiError } from '../../shared/lib/apiError';
+
+const REFRESH_MS = 5000;
 
 const statusLabel: Record<InterviewStatus, string> = {
   [InterviewStatus.InProgress]: 'В процессе',
@@ -47,24 +49,67 @@ export function HistoryPage() {
     null,
   );
   const [isLoadingCurrentSession, setIsLoadingCurrentSession] = useState(true);
+  const isRefreshingRef = useRef(false);
+
+  const loadData = useCallback(async (silent: boolean) => {
+    if (isRefreshingRef.current) return;
+    isRefreshingRef.current = true;
+
+    if (!silent) {
+      setIsLoading(true);
+      setIsLoadingCurrentSession(true);
+    }
+
+    try {
+      const [history, current] = await Promise.all([
+        getHistory(),
+        getCurrentSession({ skipErrorToast: true }).catch((e) => {
+          const apiError = e as ApiError;
+          if (apiError.code === 'SESSION_NOT_FOUND') {
+            return null;
+          }
+          throw e;
+        }),
+      ]);
+
+      setItems(history);
+      setCurrentSession(current);
+    } catch (e) {
+      if (!silent) {
+        const apiError = e as ApiError;
+        toast.error(apiError.message);
+      }
+    } finally {
+      if (!silent) {
+        setIsLoading(false);
+        setIsLoadingCurrentSession(false);
+      }
+      isRefreshingRef.current = false;
+    }
+  }, []);
 
   useEffect(() => {
-    getHistory()
-      .then(setItems)
-      .finally(() => setIsLoading(false));
+    void loadData(false);
+  }, [loadData]);
 
-    getCurrentSession({ skipErrorToast: true })
-      .then(setCurrentSession)
-      .catch((e) => {
-        const apiError = e as ApiError;
-        if (apiError.code === 'SESSION_NOT_FOUND') {
-          setCurrentSession(null);
-          return;
-        }
-        toast.error(apiError.message);
-      })
-      .finally(() => setIsLoadingCurrentSession(false));
-  }, []);
+  useEffect(() => {
+    const intervalId = window.setInterval(() => {
+      if (document.visibilityState === 'visible') {
+        void loadData(true);
+      }
+    }, REFRESH_MS);
+
+    const onFocus = () => {
+      void loadData(true);
+    };
+
+    window.addEventListener('focus', onFocus);
+
+    return () => {
+      window.clearInterval(intervalId);
+      window.removeEventListener('focus', onFocus);
+    };
+  }, [loadData]);
 
   return (
     <div className='max-w-5xl mx-auto py-12'>

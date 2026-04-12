@@ -203,3 +203,11 @@ export const getSessionReport = (
       skipErrorToast: options?.skipErrorToast,
     })
     .then((r) => r.data);
+
+export const retrySessionAiEvaluation = (
+  sessionId: string,
+  options?: RequestOptions,
+) =>
+  api.post(`/v1/interview-sessions/${sessionId}/ai-retry`, undefined, {
+    skipErrorToast: options?.skipErrorToast,
+  });
