@@ -30,4 +30,13 @@ public class InterviewSessionsController(ISender sender) : ControllerBase
 
         return result.IsFailure ? result.ToProblem() : Ok(result.Value);
     }
+
+    [HttpPost("{sessionId:guid}/ai-retry")]
+    public async Task<IActionResult> RetryAiEvaluation(Guid sessionId, CancellationToken cancellationToken)
+    {
+        var command = new RetrySessionAiEvaluationCommand(HttpContext.GetCandidateId(), sessionId);
+        var result = await sender.Send(command, cancellationToken);
+
+        return result.IsFailure ? result.ToProblem() : Accepted();
+    }
 }
