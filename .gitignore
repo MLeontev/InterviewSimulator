@@ -5,6 +5,7 @@
 
 # dotenv files
 .env
+**/.code-exec-tmp/
 
 # User-specific files
 *.rsuser
@@ -31,7 +32,6 @@ x86/
 [Aa][Rr][Mm]64/
 bld/
 [Bb]in/
-[Bb]in\
 [Oo]bj/
 [Ll]og/
 [Ll]ogs/
@@ -508,3 +508,7 @@ frontend/dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+infra/env/.env.local
+infra/env/.env.prod
+**/.code-exec-tmp/

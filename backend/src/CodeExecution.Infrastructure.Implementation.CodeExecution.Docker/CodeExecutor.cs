@@ -6,6 +6,7 @@ namespace CodeExecution.Infrastructure.Implementation.CodeExecution;
 internal class CodeExecutor(IExecutorLanguageProvider languageProvider, IDockerRunner dockerRunner) : ICodeExecutor
 {
     private const string TempRootEnvVar = "CODE_EXECUTION_TEMP_ROOT";
+    private const string HostTempRootEnvVar = "CODE_EXECUTION_HOST_TEMP_ROOT";
 
     private const string StdOutFile = "stdout.txt";
     private const string StdErrFile = "stderr.txt";
@@ -67,7 +68,7 @@ internal class CodeExecutor(IExecutorLanguageProvider languageProvider, IDockerR
 
     private async Task<CodeExecutionResult> ExecuteCodeInternal(ExecuteCodeRequest request, CancellationToken cancellationToken)
     {
-        var tempDir = await PrepareTempFiles(request, cancellationToken);
+        var (containerTempDir, hostTempDir) = await PrepareTempFiles(request, cancellationToken);
 
         try
         {
@@ -75,15 +76,15 @@ internal class CodeExecutor(IExecutorLanguageProvider languageProvider, IDockerR
             {
                 var compileRunResult = await dockerRunner.RunAsync(
                     request.DockerImage,
-                    tempDir,
+                    hostTempDir,
                     request.CompileCommand,
                     request.DefaultTimeoutSeconds,
                     request.MaxMemoryMb,
                     request.MaxCpuCores,
                     cancellationToken);
 
-                var compileStdOut = await ReadTextIfExists(Path.Combine(tempDir, CompileStdOutFile), cancellationToken);
-                var compileStdErr = await ReadTextIfExists(Path.Combine(tempDir, CompileStdErrFile), cancellationToken);
+                var compileStdOut = await ReadTextIfExists(Path.Combine(containerTempDir, CompileStdOutFile), cancellationToken);
+                var compileStdErr = await ReadTextIfExists(Path.Combine(containerTempDir, CompileStdErrFile), cancellationToken);
                 compileStdErr = AppendError(compileStdErr, compileRunResult.ErrorMessage);
 
                 if (compileRunResult.ExitCode != 0 || compileRunResult.TimedOut)
@@ -102,18 +103,18 @@ internal class CodeExecutor(IExecutorLanguageProvider languageProvider, IDockerR
 
             var runResult = await dockerRunner.RunAsync(
                 request.DockerImage,
-                tempDir,
+                hostTempDir,
                 request.RunCommand,
                 request.DefaultTimeoutSeconds,
                 request.MaxMemoryMb,
                 request.MaxCpuCores,
                 cancellationToken);
 
-            var stdOut = await ReadTextIfExists(Path.Combine(tempDir, StdOutFile), cancellationToken);
-            var stdErr = await ReadTextIfExists(Path.Combine(tempDir, StdErrFile), cancellationToken);
+            var stdOut = await ReadTextIfExists(Path.Combine(containerTempDir, StdOutFile), cancellationToken);
+            var stdErr = await ReadTextIfExists(Path.Combine(containerTempDir, StdErrFile), cancellationToken);
             stdErr = AppendError(stdErr, runResult.ErrorMessage);
 
-            var (timeElapsed, memoryUsageMb) = await ParseTimeOutput(tempDir);
+            var (timeElapsed, memoryUsageMb) = await ParseTimeOutput(containerTempDir);
 
             return new CodeExecutionResult
             {
@@ -139,26 +140,31 @@ internal class CodeExecutor(IExecutorLanguageProvider languageProvider, IDockerR
         }
         finally
         {
-            if (Directory.Exists(tempDir))
-                Directory.Delete(tempDir, true);
+            if (Directory.Exists(containerTempDir))
+                Directory.Delete(containerTempDir, true);
         }
     }
 
-    private async Task<string> PrepareTempFiles(ExecuteCodeRequest request, CancellationToken cancellationToken)
+    private async Task<(string containerTempDir, string hostTempDir)> PrepareTempFiles(
+        ExecuteCodeRequest request,
+        CancellationToken cancellationToken)
     {
-        var tempRoot = ResolveTempRoot();
-        Directory.CreateDirectory(tempRoot);
+        var containerTempRoot = ResolveTempRoot();
+        var hostTempRoot = ResolveHostTempRoot();
+        Directory.CreateDirectory(containerTempRoot);
 
-        var tempDir = Path.Combine(tempRoot, Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(tempDir);
+        var tempFolderName = Guid.NewGuid().ToString("N");
+        var containerTempDir = Path.Combine(containerTempRoot, tempFolderName);
+        var hostTempDir = Path.Combine(hostTempRoot, tempFolderName);
+        Directory.CreateDirectory(containerTempDir);
 
-        var sourceFile = Path.Combine(tempDir, request.DefaultFileName);
+        var sourceFile = Path.Combine(containerTempDir, request.DefaultFileName);
         await File.WriteAllTextAsync(sourceFile, request.Code, cancellationToken);
 
-        var inputFile = Path.Combine(tempDir, InputFile);
+        var inputFile = Path.Combine(containerTempDir, InputFile);
         await File.WriteAllTextAsync(inputFile, request.Input, cancellationToken);
 
-        return tempDir;
+        return (containerTempDir, hostTempDir);
     }
 
     private async Task<(double timeElapsedMs, double memoryUsageMb)> ParseTimeOutput(string tempDir)
@@ -195,6 +201,15 @@ internal class CodeExecutor(IExecutorLanguageProvider languageProvider, IDockerR
             return configured;
 
         return Path.GetTempPath();
+    }
+
+    private static string ResolveHostTempRoot()
+    {
+        var configured = Environment.GetEnvironmentVariable(HostTempRootEnvVar);
+        if (!string.IsNullOrWhiteSpace(configured))
+            return configured;
+
+        return ResolveTempRoot();
     }
 
     private static async Task<string> ReadTextIfExists(string path, CancellationToken cancellationToken)
