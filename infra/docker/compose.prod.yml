@@ -1,0 +1,28 @@
+services:
+  frontend:
+    build:
+      args:
+        VITE_KEYCLOAK_URL: https://auth.siminterview.ru
+    ports:
+      - '127.0.0.1:3000:80'
+    
+  api:
+    ports:
+      - '127.0.0.1:8090:8080'
+    env_file:
+      - ../env/.env.prod
+    
+  db:
+    ports: []
+    
+  keycloak:
+    command:
+      - start
+      - --hostname=https://auth.siminterview.ru
+      - --http-enabled=true
+      - --proxy-headers=xforwarded
+    ports:
+      - '127.0.0.1:8082:8080'
+    env_file:
+      - ../env/.env.prod
+    
