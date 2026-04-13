@@ -1,7 +1,10 @@
 import Keycloak from 'keycloak-js';
 
+const keycloakUrl =
+  import.meta.env.VITE_KEYCLOAK_URL || 'http://localhost:8082';
+
 export const keycloak = new Keycloak({
-  url: 'http://localhost:8082',
+  url: keycloakUrl,
   realm: 'InterviewSimulator',
   clientId: 'interview-public-client',
 });

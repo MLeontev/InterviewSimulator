@@ -1,6 +1,10 @@
 # Build stage
 FROM node:22-alpine AS builder
 WORKDIR /app
+
+ARG VITE_KEYCLOAK_URL=http://localhost:8082
+ENV VITE_KEYCLOAK_URL=$VITE_KEYCLOAK_URL
+
 COPY package*.json ./
 RUN npm install
 COPY . .
