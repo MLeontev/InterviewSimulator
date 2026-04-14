@@ -1,5 +1,7 @@
 using Framework.Domain;
 using Interview.Domain;
+using Interview.Domain.Entities;
+using Interview.Domain.Enums;
 using Interview.Infrastructure.Interfaces.DataAccess;
 using Interview.UseCases.Services;
 using MediatR;
@@ -32,7 +34,7 @@ internal class FinishInterviewSessionCommandHandler(IDbContext dbContext) : IReq
             .ToListAsync(ct);
         
         foreach (var q in questionsToSkip)
-            q.Status = QuestionStatus.Skipped;
+            q.MarkSkippedWhenSessionFinishes();
 
         await dbContext.SaveChangesAsync(ct);
         return Result.Success();

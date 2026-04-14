@@ -1,9 +1,10 @@
 using Framework.Domain;
 using Interview.Domain;
+using Interview.Domain.Models;
 using Interview.Infrastructure.Interfaces.DataAccess;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using Verdict = Interview.Domain.Verdict;
+using Verdict = Interview.Domain.Enums.Verdict;
 
 namespace Interview.UseCases.Commands;
 
@@ -34,44 +35,24 @@ internal sealed class ApplyCodeSubmissionCompletedCommandHandler(IDbContext dbCo
         if (question == null)
             return Result.Failure(Error.NotFound("QUESTION_NOT_FOUND", "Задание для результата проверки не найдено"));
 
-        if (question.LastSubmissionId != request.SubmissionId 
-            || question.Status != QuestionStatus.EvaluatingCode)
-            return Result.Success();
-
-        question.OverallVerdict = request.OverallVerdict;
-        question.EvaluatedAt = DateTime.UtcNow;
-        question.Status = QuestionStatus.EvaluatedCode;
+        var result = question.ApplyCodeSubmissionResult(
+            submissionId: request.SubmissionId,
+            testCaseResults: request.TestCaseResults
+                .Select(x => new CodeCheckTestCaseResult(
+                    InterviewTestCaseId: x.InterviewTestCaseId,
+                    ActualOutput: x.ActualOutput,
+                    ErrorMessage: x.Error,
+                    TimeElapsedMs: x.TimeElapsedMs,
+                    MemoryUsedMb: x.MemoryUsedMb,
+                    Verdict: x.Verdict))
+                .ToList(),
+            overallVerdict: request.OverallVerdict,
+            nowUtc: DateTime.UtcNow,
+            errorMessage: request.ErrorMessage);
         
-        var total = request.TestCaseResults.Count;
-        var passed = request.TestCaseResults.Count(x => x.Verdict == Verdict.OK);
-
-        question.QuestionVerdict = total == 0
-            ? QuestionVerdict.Incorrect
-            : passed == total
-                ? QuestionVerdict.Correct
-                : passed > 0
-                    ? QuestionVerdict.PartiallyCorrect
-                    : QuestionVerdict.Incorrect;
-
+        if (result.IsFailure) return Result.Failure(result.Error);
         
-        question.ErrorMessage = request.OverallVerdict == Verdict.FailedSystem
-            ? string.IsNullOrWhiteSpace(request.ErrorMessage)
-                ? "Системная ошибка проверки кода"
-                : request.ErrorMessage
-            : null;
-
-        var testCasesById = question.TestCases.ToDictionary(tc => tc.Id);
-        foreach (var result in request.TestCaseResults)
-        {
-            if (!testCasesById.TryGetValue(result.InterviewTestCaseId, out var testCase))
-                continue;
-
-            testCase.ActualOutput = result.ActualOutput;
-            testCase.ExecutionTimeMs = result.TimeElapsedMs;
-            testCase.MemoryUsedMb = result.MemoryUsedMb;
-            testCase.Verdict = result.Verdict;
-            testCase.ErrorMessage = string.IsNullOrWhiteSpace(result.Error) ? null : result.Error;
-        }
+        if (!result.Value) return Result.Success();
 
         await dbContext.SaveChangesAsync(ct);
         return Result.Success();

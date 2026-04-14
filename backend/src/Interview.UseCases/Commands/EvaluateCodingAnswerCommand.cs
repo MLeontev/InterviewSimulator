@@ -1,6 +1,7 @@
 using Framework.Domain;
 using Framework.UseCases.Resilience;
 using Interview.Domain;
+using Interview.Domain.Enums;
 using Interview.Infrastructure.Interfaces.AiEvaluation;
 using Interview.Infrastructure.Interfaces.AiEvaluation.Coding;
 using Interview.Infrastructure.Interfaces.DataAccess;
@@ -58,13 +59,12 @@ internal class EvaluateCodingAnswerCommandHandler(
                         failedTest.ErrorMessage) : null),
                 cancellationToken);
 
-            question.AiFeedbackJson = aiResult.RawJson;
-            question.EvaluatedAt = DateTime.UtcNow;
-            question.QuestionVerdict = MapVerdict(aiResult.Score);
-            question.Status = QuestionStatus.EvaluatedAi;
-            question.ErrorMessage = null;
-            question.AiRetryCount = 0;
-            question.AiNextRetryAt = null;
+            var applyResult = question.ApplyAiEvaluationSuccess(
+                aiResult.RawJson,
+                aiResult.Score,
+                DateTime.UtcNow);
+
+            if (applyResult.IsFailure) return applyResult;
 
             await dbContext.SaveChangesAsync(cancellationToken);
             return Result.Success();
@@ -79,36 +79,31 @@ internal class EvaluateCodingAnswerCommandHandler(
 
             if (nextRetry <= _retry.MaxRetries)
             {
-                question.AiRetryCount = nextRetry;
-                question.AiNextRetryAt = RetryBackoff.NextRetryAtUtc(
+                var nextRetryAt = RetryBackoff.NextRetryAtUtc(
                     nextRetry,
                     _retry.BaseDelaySeconds,
                     _retry.MaxDelaySeconds,
                     _retry.JitterSeconds);
-                question.Status = QuestionStatus.Submitted;
-                question.ErrorMessage = $"AI временно недоступен. Повтор {nextRetry}/{_retry.MaxRetries}.";
+                
+                var retryResult = question.ScheduleAiEvaluationRetry(
+                    nextRetry,
+                    nextRetryAt,
+                    _retry.MaxRetries);
+
+                if (retryResult.IsFailure) return retryResult;
 
                 await dbContext.SaveChangesAsync(cancellationToken);
                 return Result.Failure(Error.External("AI_EVALUATION_RETRY_SCHEDULED", "Запланирован повтор AI-оценки"));
             }
 
-            question.AiRetryCount = nextRetry;
-            question.Status = QuestionStatus.AiEvaluationFailed;
-            question.EvaluatedAt = DateTime.UtcNow;
-            question.AiNextRetryAt = null;
-            question.ErrorMessage = "AI-оценка недоступна после нескольких попыток.";
+            var failResult = question.MarkAiEvaluationFailed(
+                nextRetry,
+                DateTime.UtcNow);
+
+            if (failResult.IsFailure) return failResult;
             
             await dbContext.SaveChangesAsync(cancellationToken);
-            
             return Result.Failure(Error.External("AI_EVALUATION_FAILED", "Не удалось выполнить AI-оценку"));
         }
     }
-    
-    private static QuestionVerdict MapVerdict(int score) =>
-        score switch
-        {
-            <= 3 => QuestionVerdict.Incorrect,
-            <= 6 => QuestionVerdict.PartiallyCorrect,
-            _ => QuestionVerdict.Correct
-        };
 }

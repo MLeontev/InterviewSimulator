@@ -1,4 +1,5 @@
 ﻿using Interview.Domain;
+using Interview.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace Interview.Infrastructure.Interfaces.DataAccess;

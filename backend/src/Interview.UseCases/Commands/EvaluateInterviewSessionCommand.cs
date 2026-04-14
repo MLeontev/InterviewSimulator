@@ -2,6 +2,9 @@ using System.Text.Json;
 using Framework.Domain;
 using Framework.UseCases.Resilience;
 using Interview.Domain;
+using Interview.Domain.Entities;
+using Interview.Domain.Enums;
+using Interview.Domain.Policies;
 using Interview.Infrastructure.Interfaces.AiEvaluation;
 using Interview.Infrastructure.Interfaces.AiEvaluation.Session;
 using Interview.Infrastructure.Interfaces.DataAccess;
@@ -11,7 +14,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using QuestionBank.ModuleContract;
-using QuestionType = Interview.Domain.QuestionType;
+using QuestionType = Interview.Domain.Enums.QuestionType;
 
 namespace Interview.UseCases.Commands;
 
@@ -39,10 +42,7 @@ internal class EvaluateInterviewSessionCommandHandler(
             return Result.Failure(Error.Business("SESSION_NOT_IN_EVALUATING_AI", "Сессия не готова к AI-оценке"));
 
         var hasPendingQuestions = session.Questions.Any(q =>
-            q.Status is QuestionStatus.Submitted
-                or QuestionStatus.EvaluatingCode
-                or QuestionStatus.EvaluatedCode
-                or QuestionStatus.EvaluatingAi);
+            InterviewQuestionStatusRules.PendingSessionEvaluation.Contains(q.Status));
 
         if (hasPendingQuestions)
         {

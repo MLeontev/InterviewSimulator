@@ -1,4 +1,6 @@
 using Interview.Domain;
+using Interview.Domain.Entities;
+using Interview.Domain.Policies;
 using Interview.Infrastructure.Interfaces.DataAccess;
 using Microsoft.EntityFrameworkCore;
 
@@ -11,14 +13,6 @@ internal interface IInterviewSessionFinalizer
 
 internal class InterviewSessionFinalizer(IDbContext dbContext) : IInterviewSessionFinalizer
 {
-    private static readonly HashSet<QuestionStatus> ActiveStatuses =
-    [
-        QuestionStatus.NotStarted,
-        QuestionStatus.InProgress,
-        QuestionStatus.EvaluatingCode,
-        QuestionStatus.EvaluatedCode
-    ];
-    
     public async Task TryFinishIfNoActiveQuestionsAsync(Guid sessionId, CancellationToken ct)
     {
         var now = DateTime.UtcNow;
@@ -26,7 +20,7 @@ internal class InterviewSessionFinalizer(IDbContext dbContext) : IInterviewSessi
         await dbContext.InterviewSessions
             .Where(x => x.Id == sessionId && x.Status == InterviewStatus.InProgress)
             .Where(x => !x.Questions
-                .Any(q => ActiveStatuses.Contains(q.Status)))
+                .Any(q => InterviewQuestionStatusRules.Active.Contains(q.Status)))
             .ExecuteUpdateAsync(setters => setters
                 .SetProperty(x => x.Status, InterviewStatus.Finished)
                 .SetProperty(x => x.FinishedAt, now), ct);

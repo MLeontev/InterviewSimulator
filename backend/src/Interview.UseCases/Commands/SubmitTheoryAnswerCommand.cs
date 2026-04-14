@@ -30,24 +30,11 @@ internal class SubmitTheoryAnswerCommandHandler(
         if (question is null)
             return Result.Failure(Error.NotFound("QUESTION_NOT_FOUND", "Задание не найдено"));
         
-        if (question.Type != QuestionType.Theory)
-            return Result.Failure(Error.Business("QUESTION_NOT_THEORY", "Задание не является теоретическим"));
-
         if (question.InterviewSession.PlannedEndAt <= DateTime.UtcNow)
             return Result.Failure(Error.Business("SESSION_EXPIRED", "Время сессии истекло"));
-        
-        if (question.Status >= QuestionStatus.Skipped)
-            return Result.Failure(Error.Business("QUESTION_COMPLETED", "Задание уже решено или пропущено"));
-        
-        question.Answer = request.Answer.Trim();
-        question.SubmittedAt = DateTime.UtcNow;
-        question.EvaluatedAt = null;
-        question.AiFeedbackJson = null;
-        question.ErrorMessage = null;
-        question.QuestionVerdict = QuestionVerdict.None;
-        question.Status = QuestionStatus.Submitted;
-        question.AiRetryCount = 0;
-        question.AiNextRetryAt = null;
+
+        var result = question.SubmitTheoryAnswer(request.Answer, DateTime.UtcNow);
+        if (result.IsFailure) return result;
         
         await dbContext.SaveChangesAsync(cancellationToken);
         await interviewSessionFinalizer.TryFinishIfNoActiveQuestionsAsync(question.InterviewSessionId, cancellationToken);

@@ -1,4 +1,5 @@
 ﻿using Interview.Domain;
+using Interview.Domain.Enums;
 using Interview.Infrastructure.Interfaces.DataAccess;
 using Interview.UseCases.Commands;
 using MediatR;

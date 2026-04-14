@@ -30,50 +30,20 @@ internal sealed class SubmitDraftCodeAnswerCommandHandler(
         if (question == null)
             return Result.Failure(Error.NotFound("QUESTION_NOT_FOUND", "Задание не найдено"));
 
-        if (question.Type != QuestionType.Coding)
-            return Result.Failure(Error.Business("QUESTION_NOT_CODING", "Задание не является задачей на написание кода"));
-
         if (question.InterviewSession.PlannedEndAt <= DateTime.UtcNow)
             return Result.Failure(Error.Business("SESSION_EXPIRED", "Время сессии истекло"));
 
-        if (string.IsNullOrWhiteSpace(question.ProgrammingLanguageCode))
-            return Result.Failure(Error.Business("LANGUAGE_NOT_SET", "Для задания не задан язык программирования"));
-
-        if (question.Status == QuestionStatus.EvaluatingCode)
-            return Result.Failure(Error.Business(
-                "CODE_CHECK_IN_PROGRESS",
-                "Проверка кода уже выполняется. Дождитесь результата текущего запуска"));
-
-        if (question.Status is not (QuestionStatus.InProgress or QuestionStatus.EvaluatedCode))
-            return Result.Failure(Error.Business(
-                "QUESTION_NOT_READY_FOR_DRAFT_SUBMIT",
-                "Черновую отправку можно выполнить только для начатого задания или после предыдущей проверки"));
-
+        var nowUtc = DateTime.UtcNow;
         var submissionId = Guid.NewGuid();
         
-        question.Answer = request.Code;
-        question.Status = QuestionStatus.EvaluatingCode;
-        question.SubmittedAt = DateTime.UtcNow;
-        question.EvaluatedAt = null;
-        question.AiFeedbackJson = null;
-        question.ErrorMessage = null;
-        question.QuestionVerdict = QuestionVerdict.None;
-        question.OverallVerdict = Verdict.None;
-        question.LastSubmissionId = submissionId;
-
-        foreach (var testCase in question.TestCases)
-        {
-            testCase.ActualOutput = null;
-            testCase.ExecutionTimeMs = null;
-            testCase.MemoryUsedMb = null;
-            testCase.Verdict = Verdict.None;
-        }
-
+        var result = question.SubmitDraftCode(request.Code, submissionId, nowUtc);
+        if (result.IsFailure) return result;
+        
         var eventPayload = new CodeSubmissionCreated(
             SubmissionId: submissionId,
             InterviewQuestionId: question.Id,
             Code: request.Code,
-            LanguageCode: question.ProgrammingLanguageCode,
+            LanguageCode: question.ProgrammingLanguageCode!,
             TestCases: question.TestCases
                 .OrderBy(tc => tc.OrderIndex)
                 .Select(tc => new CodeSubmissionCreatedTestCase(

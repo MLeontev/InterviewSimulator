@@ -1,5 +1,7 @@
 using Framework.Domain;
 using Interview.Domain;
+using Interview.Domain.Entities;
+using Interview.Domain.Policies;
 using Interview.Infrastructure.Interfaces.DataAccess;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -24,7 +26,8 @@ internal class GetCandidateSessionsQueryHandler(IDbContext dbContext) : IRequest
                 Status = s.Status.ToString(),
                 SessionVerdict = s.SessionVerdict,
                 TotalQuestions = s.Questions.Count,
-                AnsweredQuestions = s.Questions.Count(q => q.Status >= QuestionStatus.Submitted)
+                AnsweredQuestions = s.Questions.Count(q =>
+                    InterviewQuestionStatusRules.Answered.Contains(q.Status))
             })
             .ToListAsync(ct);
 

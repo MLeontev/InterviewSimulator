@@ -20,19 +20,11 @@ internal sealed class SubmitCodeAnswerCommandHandler(
         if (question == null)
             return Result.Failure(Error.NotFound("QUESTION_NOT_FOUND", "Задание не найдено"));
 
-        if (question.Type != QuestionType.Coding)
-            return Result.Failure(Error.Business("QUESTION_INVALID_TYPE", "Задание не является задачей на написание кода"));
-        
         if (question.InterviewSession.PlannedEndAt <= DateTime.UtcNow)
             return Result.Failure(Error.Business("SESSION_EXPIRED", "Время сессии истекло"));
         
-        if (question.Status != QuestionStatus.EvaluatedCode)
-            return Result.Failure(Error.Business("CODE_NOT_EVALUATED", "Сначала дождитесь результата проверки кода на тестах"));
-
-        question.Status = QuestionStatus.Submitted;
-        question.SubmittedAt = DateTime.UtcNow;
-        question.AiRetryCount = 0;
-        question.AiNextRetryAt = null;
+        var result = question.SubmitCode(DateTime.UtcNow);
+        if (result.IsFailure) return result;
         
         await dbContext.SaveChangesAsync(cancellationToken);
         await interviewSessionFinalizer.TryFinishIfNoActiveQuestionsAsync(question.InterviewSessionId, cancellationToken);

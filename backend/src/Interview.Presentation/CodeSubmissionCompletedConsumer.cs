@@ -2,7 +2,7 @@ using CodeExecution.IntegrationEvents;
 using Interview.UseCases.Commands;
 using MassTransit;
 using MediatR;
-using Verdict = Interview.Domain.Verdict;
+using Verdict = Interview.Domain.Enums.Verdict;
 
 namespace Interview.Presentation;
 

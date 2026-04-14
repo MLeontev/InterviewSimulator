@@ -1,4 +1,6 @@
 using Interview.Domain;
+using Interview.Domain.Entities;
+using Interview.Domain.Enums;
 using Interview.Infrastructure.Interfaces.DataAccess;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -55,7 +57,7 @@ internal class SessionTimeoutWorker(
             .ToListAsync(ct);
 
         foreach (var q in questionsToSkip)
-            q.Status = QuestionStatus.Skipped;
+            q.MarkSkippedWhenSessionFinishes();
         
         await dbContext.SaveChangesAsync(ct);
         return true;

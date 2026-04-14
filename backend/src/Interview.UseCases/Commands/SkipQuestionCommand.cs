@@ -20,26 +20,8 @@ internal class SkipQuestionCommandHandler(
         if (question is null)
             return Result.Failure(Error.NotFound("QUESTION_NOT_FOUND", "Текущее задание не найдено"));
 
-        if (question.Status is not (QuestionStatus.NotStarted or QuestionStatus.InProgress or QuestionStatus.EvaluatedCode))
-            return Result.Failure(Error.Business("QUESTION_CANNOT_BE_SKIPPED", "Это задание сейчас нельзя пропустить"));
-
-        question.Status = QuestionStatus.Skipped;
-        question.Answer = null;
-        question.QuestionVerdict = QuestionVerdict.None;
-        question.OverallVerdict = Verdict.None;
-        question.AiFeedbackJson = null;
-        question.ErrorMessage = null;
-        question.SubmittedAt = null;
-        question.EvaluatedAt = null;
-
-        foreach (var testCase in question.TestCases)
-        {
-            testCase.ActualOutput = null;
-            testCase.ExecutionTimeMs = null;
-            testCase.MemoryUsedMb = null;
-            testCase.Verdict = Verdict.None;
-            testCase.ErrorMessage = null;
-        }
+        var result = question.Skip();
+        if (result.IsFailure) return result;
 
         await dbContext.SaveChangesAsync(cancellationToken);
         await interviewSessionFinalizer.TryFinishIfNoActiveQuestionsAsync(question.InterviewSessionId, cancellationToken);

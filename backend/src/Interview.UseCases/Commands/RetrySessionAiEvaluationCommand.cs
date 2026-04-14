@@ -1,5 +1,7 @@
 using Framework.Domain;
 using Interview.Domain;
+using Interview.Domain.Entities;
+using Interview.Domain.Enums;
 using Interview.Infrastructure.Interfaces.DataAccess;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -31,19 +33,11 @@ internal class RetrySessionAiEvaluationCommandHandler(
         foreach (var q in session.Questions
                      .Where(x => x.Status == QuestionStatus.AiEvaluationFailed))
         {
-            if (string.IsNullOrWhiteSpace(q.Answer))
-                continue;
-            
-            q.Status = QuestionStatus.Submitted;
-            q.SubmittedAt = now;
-            q.EvaluatedAt = null;
-            q.AiRetryCount = 0;
-            q.AiNextRetryAt = null;
-            q.AiFeedbackJson = null;
-            q.ErrorMessage = null;
-            q.QuestionVerdict = QuestionVerdict.None;
-            
-            retriedQuestions++;
+            var retryResult = q.ResetForAiRetry(now);
+            if (retryResult.IsFailure) return Result.Failure(retryResult.Error);
+
+            if (retryResult.Value)
+                retriedQuestions++;
         }
         
         if (retriedQuestions == 0)

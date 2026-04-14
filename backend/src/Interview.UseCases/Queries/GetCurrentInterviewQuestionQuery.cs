@@ -1,5 +1,7 @@
 using Framework.Domain;
 using Interview.Domain;
+using Interview.Domain.Enums;
+using Interview.Domain.Policies;
 using Interview.Infrastructure.Interfaces.DataAccess;
 using Interview.UseCases.Services;
 using MediatR;
@@ -13,15 +15,6 @@ internal class GetCurrentInterviewQuestionQueryHandler(
     IDbContext dbContext,
     ICurrentSessionResolver currentSessionResolver) : IRequestHandler<GetCurrentInterviewQuestionQuery, Result<CurrentInterviewQuestion>>
 {
-    private static readonly HashSet<QuestionStatus> TerminalStatuses =
-    [
-        QuestionStatus.Skipped,
-        QuestionStatus.Submitted,
-        QuestionStatus.EvaluatingAi,
-        QuestionStatus.EvaluatedAi,
-        QuestionStatus.AiEvaluationFailed
-    ];
-    
     public async Task<Result<CurrentInterviewQuestion>> Handle(GetCurrentInterviewQuestionQuery request, CancellationToken ct)
     {
         var sessionId = await currentSessionResolver.GetCurrentSessionIdAsync(request.CandidateId, ct);
@@ -32,7 +25,7 @@ internal class GetCurrentInterviewQuestionQueryHandler(
         var question = await dbContext.InterviewQuestions
             .AsNoTracking()
             .Where(x => x.InterviewSessionId == sessionId)
-            .Where(x => !TerminalStatuses.Contains(x.Status))
+            .Where(x => !InterviewQuestionStatusRules.Terminal.Contains(x.Status))
             .OrderBy(x => x.OrderIndex)
             .Select(x => new CurrentInterviewQuestion
             {

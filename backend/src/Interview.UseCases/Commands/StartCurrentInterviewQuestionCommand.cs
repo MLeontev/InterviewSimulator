@@ -22,14 +22,8 @@ internal class StartCurrentInterviewQuestionCommandHandler(
         if (question.InterviewSession.PlannedEndAt <= DateTime.UtcNow)
             return Result.Failure(Error.Business("SESSION_EXPIRED", "Время сессии истекло"));
 
-        if (question.Status == QuestionStatus.InProgress)
-            return Result.Success();
-
-        if (question.Status != QuestionStatus.NotStarted)
-            return Result.Failure(Error.Business("QUESTION_CANNOT_BE_STARTED", "Это задание нельзя запустить в текущем статусе"));
-
-        question.Status = QuestionStatus.InProgress;
-        question.StartedAt = DateTime.UtcNow;
+        var result = question.Start(DateTime.UtcNow);
+        if (result.IsFailure) return result;
 
         await dbContext.SaveChangesAsync(cancellationToken);
         return Result.Success();

@@ -1,4 +1,6 @@
 using Interview.Domain;
+using Interview.Domain.Entities;
+using Interview.Domain.Policies;
 
 namespace Interview.UseCases.Services;
 
@@ -9,17 +11,6 @@ internal static class InterviewQuestionScoreResolver
         if (AiFeedbackJsonParser.TryParseQuestion(q.AiFeedbackJson, out var aiScore, out _))
             return aiScore;
 
-        if (q.Status is QuestionStatus.NotStarted or QuestionStatus.Skipped)
-            return 0;
-
-        return FromVerdict(q.QuestionVerdict);
+        return InterviewQuestionScoringPolicy.Resolve(q);
     }
-
-    public static int FromVerdict(QuestionVerdict verdict) => verdict switch
-    {
-        QuestionVerdict.Correct => 8,
-        QuestionVerdict.PartiallyCorrect => 5,
-        QuestionVerdict.Incorrect => 2,
-        _ => 0
-    };
 }

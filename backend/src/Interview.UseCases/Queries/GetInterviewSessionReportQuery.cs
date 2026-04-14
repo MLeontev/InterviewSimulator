@@ -2,11 +2,13 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using Framework.Domain;
 using Interview.Domain;
+using Interview.Domain.Entities;
+using Interview.Domain.Enums;
 using Interview.Infrastructure.Interfaces.DataAccess;
 using Interview.UseCases.Services;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using Verdict = Interview.Domain.Verdict;
+using Verdict = Interview.Domain.Enums.Verdict;
 
 namespace Interview.UseCases.Queries;
 

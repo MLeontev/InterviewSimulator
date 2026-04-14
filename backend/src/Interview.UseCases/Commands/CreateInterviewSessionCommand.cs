@@ -1,11 +1,12 @@
 using Framework.Domain;
 using MediatR;
 using Interview.Domain;
+using Interview.Domain.Entities;
 using Interview.Infrastructure.Interfaces.DataAccess;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using QuestionBank.ModuleContract;
-using QuestionType = Interview.Domain.QuestionType;
+using QuestionType = Interview.Domain.Enums.QuestionType;
 
 namespace Interview.UseCases.Commands;
 
@@ -71,29 +72,26 @@ internal class CreateInterviewSessionCommandHandler(
 
         var interviewQuestions = questionSet.Questions
             .OrderBy(x => x.OrderIndex)
-            .Select(question =>
-            {
-                var interviewQuestionId = Guid.NewGuid();
-
-                return new InterviewQuestion
-                {
-                    Id = interviewQuestionId,
-                    InterviewSessionId = sessionId,
-                    Title = question.Title,
-                    Text = question.Text,
-                    Type = MapQuestionType(question.Type),
-                    CompetencyId = question.CompetencyId,
-                    CompetencyName = question.CompetencyName,
-                    ProgrammingLanguageCode = question.ProgrammingLanguageCode,
-                    OrderIndex = question.OrderIndex,
-                    ReferenceSolution = question.ReferenceSolution,
-                    Status = QuestionStatus.NotStarted,
-                    OverallVerdict = Verdict.None,
-                    TimeLimitMs = question.TimeLimitMs,
-                    MemoryLimitMb = question.MemoryLimitMb,
-                    TestCases = MapTestCases(question.TestCases, interviewQuestionId)
-                };
-            })
+            .Select(q => InterviewQuestion.Create(
+                sessionId: session.Id,
+                title: q.Title,
+                text: q.Text,
+                type: MapQuestionType(q.Type),
+                orderIndex: q.OrderIndex,
+                referenceSolution: q.ReferenceSolution,
+                competencyId: q.CompetencyId,
+                competencyName: q.CompetencyName,
+                programmingLanguageCode: q.ProgrammingLanguageCode,
+                timeLimitMs: q.TimeLimitMs,
+                memoryLimitMb: q.MemoryLimitMb,
+                testCases: q.TestCases
+                    .OrderBy(tc => tc.OrderIndex)
+                    .Select(tc => TestCase.Create(
+                        tc.Input,
+                        tc.ExpectedOutput,
+                        tc.IsHidden,
+                        tc.OrderIndex))
+                    .ToList()))
             .ToList();
 
         session.Questions = interviewQuestions;
@@ -111,24 +109,4 @@ internal class CreateInterviewSessionCommandHandler(
             QuestionBank.ModuleContract.QuestionType.Theory => QuestionType.Theory,
             _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
         };
-
-    private static List<TestCase> MapTestCases(IReadOnlyCollection<GeneratedTestCase> testCases, Guid interviewQuestionId)
-    {
-        return testCases
-            .OrderBy(tc => tc.OrderIndex)
-            .Select(tc => new TestCase
-            {
-                Id = Guid.NewGuid(),
-                InterviewQuestionId = interviewQuestionId,
-                Input = tc.Input,
-                ExpectedOutput = tc.ExpectedOutput,
-                IsHidden = tc.IsHidden,
-                OrderIndex = tc.OrderIndex,
-                ActualOutput = null,
-                ExecutionTimeMs = null,
-                MemoryUsedMb = null,
-                Verdict = Verdict.None
-            })
-            .ToList();
-    }
 }

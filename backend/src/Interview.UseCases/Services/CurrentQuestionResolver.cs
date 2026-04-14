@@ -1,4 +1,6 @@
 using Interview.Domain;
+using Interview.Domain.Entities;
+using Interview.Domain.Policies;
 using Interview.Infrastructure.Interfaces.DataAccess;
 using Microsoft.EntityFrameworkCore;
 
@@ -13,15 +15,6 @@ internal class CurrentQuestionResolver(
     IDbContext dbContext, 
     ICurrentSessionResolver currentSessionResolver) : ICurrentQuestionResolver
 {
-    private static readonly HashSet<QuestionStatus> TerminalStatuses =
-    [
-        QuestionStatus.Skipped,
-        QuestionStatus.Submitted,
-        QuestionStatus.EvaluatingAi,
-        QuestionStatus.EvaluatedAi,
-        QuestionStatus.AiEvaluationFailed
-    ];
-    
     public async Task<InterviewQuestion?> GetCurrentQuestionAsync(Guid candidateId, CancellationToken ct)
     {
         var sessionId = await currentSessionResolver.GetCurrentSessionIdAsync(candidateId, ct);
@@ -32,7 +25,7 @@ internal class CurrentQuestionResolver(
             .Include(q => q.InterviewSession)
             .Include(q => q.TestCases)
             .Where(q => q.InterviewSessionId == sessionId.Value)
-            .Where(q => !TerminalStatuses.Contains(q.Status))
+            .Where(q => !InterviewQuestionStatusRules.Terminal.Contains(q.Status))
             .OrderBy(q => q.OrderIndex)
             .FirstOrDefaultAsync(ct);
     }

@@ -1,5 +1,7 @@
 using Framework.Domain;
 using Interview.Domain;
+using Interview.Domain.Entities;
+using Interview.Domain.Policies;
 using Interview.Infrastructure.Interfaces.DataAccess;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -23,9 +25,7 @@ internal class GetCurrentInterviewSessionQueryHandler(IDbContext dbContext) : IR
                 PlannedEndAt = s.PlannedEndAt,
                 TotalQuestions = s.Questions.Count,
                 AnsweredQuestions = s.Questions.Count(q =>
-                    q.Status == QuestionStatus.Submitted ||
-                    q.Status == QuestionStatus.EvaluatingAi ||
-                    q.Status == QuestionStatus.EvaluatedAi)
+                    InterviewQuestionStatusRules.Answered.Contains(q.Status))
             })
             .SingleOrDefaultAsync(ct);
 
