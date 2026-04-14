@@ -506,7 +506,6 @@ frontend/dist-ssr
 *.suo
 *.ntvs*
 *.njsproj
-*.sln
 *.sw?
 
 infra/env/.env.local
