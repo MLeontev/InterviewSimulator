@@ -1,4 +1,4 @@
-namespace CodeExecution.Domain.Entities;
+namespace CodeExecution.Domain.Enums;
 
 public enum Verdict
 {

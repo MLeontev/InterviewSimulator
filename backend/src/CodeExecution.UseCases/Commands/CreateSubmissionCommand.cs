@@ -30,38 +30,22 @@ internal class CreateSubmissionCommandHandler(IDbContext dbContext) : IRequestHa
         if (exist)
             return;
         
-        var submission = new CodeSubmission
-        {
-            Id = request.SubmissionId,
-            InterviewQuestionId = request.InterviewQuestionId,
-            Code = request.Code,
-            LanguageCode = request.LanguageCode,
-            TimeLimitMs = request.TimeLimitMs ?? 5_000,
-            MemoryLimitMb = request.MemoryLimitMb ?? 64,
-            Status = ExecutionStatus.Pending,
-            OverallVerdict = Verdict.None,
-            ErrorMessage = null,
-            CreatedAt = DateTime.UtcNow,
-            StartedAt = null,
-            CompletedAt = null,
-            TestCases = request.TestCases
+        var submission = CodeSubmission.Create(
+            request.SubmissionId,
+            request.InterviewQuestionId,
+            request.Code,
+            request.LanguageCode,
+            DateTime.UtcNow,
+            request.TimeLimitMs,
+            request.MemoryLimitMb,
+            request.TestCases
                 .OrderBy(x => x.OrderIndex)
-                .Select(x => new CodeSubmissionTestCase
-                {
-                    Id = Guid.NewGuid(),
-                    InterviewTestCaseId = x.InterviewTestCaseId,
-                    OrderIndex = x.OrderIndex,
-                    Input = x.Input,
-                    ExpectedOutput = x.ExpectedOutput,
-                    ActualOutput = null,
-                    Error = null,
-                    ExitCode = null,
-                    TimeElapsedMs = null,
-                    MemoryUsedMb = null,
-                    Verdict = Verdict.None
-                })
-                .ToList()
-        };
+                .Select(x => CodeSubmissionTestCase.Create(
+                    x.InterviewTestCaseId,
+                    x.OrderIndex,
+                    x.Input,
+                    x.ExpectedOutput))
+                .ToList());
 
         await dbContext.CodeSubmissions.AddAsync(submission, cancellationToken);
         await dbContext.SaveChangesAsync(cancellationToken);

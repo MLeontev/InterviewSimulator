@@ -1,10 +1,14 @@
 using CodeExecution.Domain.Entities;
+using CodeExecution.Domain.Enums;
+using CodeExecution.Domain.Policies;
 using CodeExecution.Infrastructure.Interfaces.CodeExecution;
 using CodeExecution.Infrastructure.Interfaces.DataAccess;
 using CodeExecution.IntegrationEvents;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using Verdict = CodeExecution.Domain.Entities.Verdict;
+using ExecutionStage = CodeExecution.Domain.Enums.ExecutionStage;
+using InfrastructureExecutionStage = CodeExecution.Infrastructure.Interfaces.CodeExecution.ExecutionStage;
+using Verdict = CodeExecution.Domain.Enums.Verdict;
 
 namespace CodeExecution.UseCases.Commands;
 
@@ -24,9 +28,10 @@ internal class CheckSubmissionCommandHandler(
         if (submission is not { Status: ExecutionStatus.Running })
             return;
 
-        submission.StartedAt ??= DateTime.UtcNow;
+        submission.MarkStarted(DateTime.UtcNow);
 
         var overallVerdict = Verdict.OK;
+        string? errorMessage = null;
         
         foreach (var testCase in submission.TestCases)
         {
@@ -49,23 +54,30 @@ internal class CheckSubmissionCommandHandler(
             var actualOutput = executionResult.Output.Trim();
             var expectedOutput = testCase.ExpectedOutput.Trim();
             
-            var verdict = DetermineVerdict(
-                executionResult, actualOutput, expectedOutput,
-                submission.TimeLimitMs, submission.MemoryLimitMb);
+            var verdict = CodeSubmissionVerdictPolicy.Resolve(
+                MapExecutionStage(executionResult.Stage),
+                executionResult.ExitCode,
+                executionResult.TimeElapsedMs,
+                executionResult.MemoryUsageMb,
+                actualOutput,
+                expectedOutput,
+                submission.TimeLimitMs,
+                submission.MemoryLimitMb);
 
-            testCase.ActualOutput = actualOutput;
-            testCase.Error = executionResult.Error.Trim();
-            testCase.ExitCode = executionResult.ExitCode;
-            testCase.TimeElapsedMs = executionResult.TimeElapsedMs;
-            testCase.MemoryUsedMb = executionResult.MemoryUsageMb;
-            testCase.Verdict = verdict;
+            testCase.ApplyExecutionResult(
+                actualOutput,
+                executionResult.Error.Trim(),
+                executionResult.ExitCode,
+                executionResult.TimeElapsedMs,
+                executionResult.MemoryUsageMb,
+                verdict);
 
             if (verdict != Verdict.OK)
             {
                 overallVerdict = verdict;
                 if (verdict == Verdict.FailedSystem)
                 {
-                    submission.ErrorMessage = string.IsNullOrWhiteSpace(executionResult.Error)
+                    errorMessage = string.IsNullOrWhiteSpace(executionResult.Error)
                         ? "Ошибка инфраструктуры выполнения кода"
                         : executionResult.Error;
                 }
@@ -74,52 +86,16 @@ internal class CheckSubmissionCommandHandler(
             }
         }
 
-        await CompleteAsync(submission, overallVerdict, submission.ErrorMessage, cancellationToken);
+        await CompleteAsync(submission, overallVerdict, errorMessage, cancellationToken);
     }
 
-    private static Verdict DetermineVerdict(
-        CodeExecutionResult executionResult,
-        string actualOutput,
-        string expectedOutput,
-        int? maxTimeMs = null,
-        int? maxMemoryMb = null)
-    {
-        if (executionResult.Stage == ExecutionStage.Compilation && executionResult.ExitCode != 0)
-            return Verdict.CE;
-
-        if (executionResult.Stage == ExecutionStage.Runtime)
-        {
-            if ((maxTimeMs.HasValue && executionResult.TimeElapsedMs > maxTimeMs.Value)
-                || executionResult.ExitCode == -1)
-                return Verdict.TLE;
-
-            if (maxMemoryMb.HasValue && executionResult.MemoryUsageMb > maxMemoryMb.Value)
-                return Verdict.MLE;
-
-            if (executionResult.ExitCode != 0)
-                return Verdict.RE;
-
-            if (actualOutput != expectedOutput)
-                return Verdict.WA;
-
-            return Verdict.OK;
-        }
-
-        return Verdict.FailedSystem;
-    }
-    
     private async Task CompleteAsync(
         CodeSubmission submission, 
         Verdict overallVerdict, 
         string? errorMessage, 
         CancellationToken ct)
     {
-        submission.OverallVerdict = overallVerdict;
-        submission.CompletedAt = DateTime.UtcNow;
-        submission.ErrorMessage = errorMessage;
-        submission.Status = overallVerdict == Verdict.FailedSystem
-            ? ExecutionStatus.Failed
-            : ExecutionStatus.Completed;
+        submission.Complete(overallVerdict, errorMessage, DateTime.UtcNow);
 
         dbContext.AddOutboxMessage(ToIntegrationEvent(submission));
         await dbContext.SaveChangesAsync(ct);
@@ -165,6 +141,14 @@ internal class CheckSubmissionCommandHandler(
             TotalTests: submission.TestCases.Count,
             ErrorMessage: submission.ErrorMessage);
     }
+
+    private static ExecutionStage MapExecutionStage(InfrastructureExecutionStage stage) =>
+        stage switch
+        {
+            InfrastructureExecutionStage.Compilation => ExecutionStage.Compilation,
+            InfrastructureExecutionStage.Runtime => ExecutionStage.Runtime,
+            _ => ExecutionStage.None
+        };
     
     private static IntegrationEvents.Verdict MapVerdict(Verdict verdict) =>
         verdict switch

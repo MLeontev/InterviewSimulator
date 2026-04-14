@@ -12,7 +12,6 @@ public static class DependencyInjection
         services.AddSingleton<LanguageProvider>();
         services.AddSingleton<IDockerRunner, DockerRunner>();
         
-        services.AddSingleton<ILanguageProvider>(sp => sp.GetRequiredService<LanguageProvider>());
         services.AddSingleton<IExecutorLanguageProvider>(sp => sp.GetRequiredService<LanguageProvider>());
 
         services.AddScoped<ICodeExecutor, CodeExecutor>();
