@@ -1,7 +1,5 @@
 using Framework.Domain;
-using Interview.Domain;
 using Interview.Domain.Entities;
-using Interview.Domain.Enums;
 using Interview.Infrastructure.Interfaces.DataAccess;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -24,29 +22,9 @@ internal class RetrySessionAiEvaluationCommandHandler(
         if (session is null)
             return Result.Failure(Error.NotFound("SESSION_NOT_FOUND", "Сессия не найдена"));
 
-        if (session.Status != InterviewStatus.AiEvaluationFailed)
-            return Result.Failure(Error.Business("SESSION_NOT_FAILED", "ИИ-оценка сессии не была завершена с ошибкой"));
-
-        var now = DateTime.UtcNow;
-        var retriedQuestions = 0;
-
-        foreach (var q in session.Questions
-                     .Where(x => x.Status == QuestionStatus.AiEvaluationFailed))
-        {
-            var retryResult = q.ResetForAiRetry(now);
-            if (retryResult.IsFailure) return Result.Failure(retryResult.Error);
-
-            if (retryResult.Value)
-                retriedQuestions++;
-        }
-        
-        if (retriedQuestions == 0)
-            return Result.Failure(Error.Business("NO_FAILED_AI_QUESTIONS", "Нет заданий с ошибкой ИИ-оценки"));
-        
-        session.Status = InterviewStatus.Finished;
-        session.AiRetryCount = 0;
-        session.AiNextRetryAt = null;
-        session.AiFeedbackJson = null;
+        var retryResult = session.ResetForAiRetry(DateTime.UtcNow);
+        if (retryResult.IsFailure)
+            return Result.Failure(retryResult.Error);
         
         await dbContext.SaveChangesAsync(cancellationToken);
         return Result.Success();

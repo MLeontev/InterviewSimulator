@@ -1,7 +1,6 @@
 using System.Text.Json;
 using Framework.Domain;
 using Framework.UseCases.Resilience;
-using Interview.Domain;
 using Interview.Domain.Entities;
 using Interview.Domain.Enums;
 using Interview.Domain.Policies;
@@ -41,12 +40,12 @@ internal class EvaluateInterviewSessionCommandHandler(
         if (session.Status != InterviewStatus.EvaluatingAi)
             return Result.Failure(Error.Business("SESSION_NOT_IN_EVALUATING_AI", "Сессия не готова к AI-оценке"));
 
-        var hasPendingQuestions = session.Questions.Any(q =>
-            InterviewQuestionStatusRules.PendingSessionEvaluation.Contains(q.Status));
-
-        if (hasPendingQuestions)
+        if (session.HasPendingQuestionsForAiEvaluation())
         {
-            session.Status = InterviewStatus.Finished;
+            var cancelResult = session.CancelAiEvaluation();
+            if (cancelResult.IsFailure)
+                return Result.Failure(cancelResult.Error);
+
             await dbContext.SaveChangesAsync(cancellationToken);
             return Result.Failure(Error.Business("SESSION_HAS_PENDING_QUESTIONS", "Есть задания, которые еще не оценены"));
         }
@@ -56,7 +55,10 @@ internal class EvaluateInterviewSessionCommandHandler(
             var preset = await questionBankApi.GetPresetDetailsAsync(session.InterviewPresetId, cancellationToken);
             if (preset is null)
             {
-                session.Status = InterviewStatus.Finished;
+                var cancelResult = session.CancelAiEvaluation();
+                if (cancelResult.IsFailure)
+                    return Result.Failure(cancelResult.Error);
+
                 await dbContext.SaveChangesAsync(cancellationToken);
                 return Result.Failure(Error.NotFound("PRESET_NOT_FOUND", "Пресет интервью не найден"));
             }
@@ -68,7 +70,11 @@ internal class EvaluateInterviewSessionCommandHandler(
 
             var competencyResults = BuildCompetencyResults(session.Questions, preset.Competencies);
 
-            var overallScore = CalculateOverallScore(session.Questions);
+            var questionScores = session.Questions
+                .Select(InterviewQuestionScoreResolver.Resolve)
+                .ToList();
+
+            var overallScore = InterviewSessionScoringPolicy.CalculateOverallScore(questionScores);
 
             var technologyStack = preset.Technologies.Count == 0
                 ? "Не указан"
@@ -83,12 +89,12 @@ internal class EvaluateInterviewSessionCommandHandler(
                     OverallScore: overallScore),
                 cancellationToken);
 
-            session.AiFeedbackJson = aiResult.RawJson;
-            session.SessionVerdict = MapSessionVerdict(overallScore);
-            session.Status = InterviewStatus.Evaluated;
-            session.FinishedAt ??= DateTime.UtcNow;
-            session.AiRetryCount = 0;
-            session.AiNextRetryAt = null;
+            var applyResult = session.ApplyAiEvaluationSuccess(
+                aiResult.RawJson,
+                overallScore);
+            
+            if (applyResult.IsFailure)
+                return Result.Failure(applyResult.Error);
 
             await dbContext.SaveChangesAsync(cancellationToken);
             return Result.Success();
@@ -105,13 +111,15 @@ internal class EvaluateInterviewSessionCommandHandler(
 
             if (nextRetry <= _retry.MaxRetries)
             {
-                session.AiRetryCount = nextRetry;
-                session.AiNextRetryAt = RetryBackoff.NextRetryAtUtc(
+                var nextRetryAt = RetryBackoff.NextRetryAtUtc(
                     nextRetry,
                     _retry.BaseDelaySeconds,
                     _retry.MaxDelaySeconds,
                     _retry.JitterSeconds);
-                session.Status = InterviewStatus.Finished;
+
+                var scheduleRetryResult = session.ScheduleAiEvaluationRetry(nextRetry, nextRetryAt);
+                if (scheduleRetryResult.IsFailure)
+                    return Result.Failure(scheduleRetryResult.Error);
 
                 await dbContext.SaveChangesAsync(cancellationToken);
                 return Result.Failure(Error.External(
@@ -119,14 +127,19 @@ internal class EvaluateInterviewSessionCommandHandler(
                     $"Запланирован повтор AI-оценки ({nextRetry}/{_retry.MaxRetries})"));
             }
             
-            var fallbackOverallScore = CalculateOverallScore(session.Questions);
+            var fallbackQuestionScores = session.Questions
+                .Select(InterviewQuestionScoreResolver.Resolve)
+                .ToList();
 
-            session.AiRetryCount = nextRetry;
-            session.AiNextRetryAt = null;
-            session.Status = InterviewStatus.AiEvaluationFailed;
-            session.FinishedAt ??= DateTime.UtcNow;
-            session.SessionVerdict = MapSessionVerdict(fallbackOverallScore);
-            session.AiFeedbackJson ??= BuildFallbackSessionAiFeedbackJson();
+            var fallbackOverallScore = InterviewSessionScoringPolicy.CalculateOverallScore(fallbackQuestionScores);
+
+            var failResult = session.MarkAiEvaluationFailed(
+                nextRetry,
+                fallbackOverallScore,
+                BuildFallbackSessionAiFeedbackJson());
+            
+            if (failResult.IsFailure)
+                return Result.Failure(failResult.Error);
 
             await dbContext.SaveChangesAsync(cancellationToken);
 
@@ -178,12 +191,6 @@ internal class EvaluateInterviewSessionCommandHandler(
             .ToList();
     }
     
-    private double CalculateOverallScore(IReadOnlyCollection<InterviewQuestion> questions)
-    {
-        if (questions.Count == 0) return 0;
-        return Math.Round(questions.Average(InterviewQuestionScoreResolver.Resolve), 2);
-    }
-    
     private string ResolveQuestionFeedbackFallback(InterviewQuestion q) =>
         q.Status switch
         {
@@ -202,14 +209,6 @@ internal class EvaluateInterviewSessionCommandHandler(
             weaknesses = Array.Empty<string>(),
             recommendations = Array.Empty<string>()
         });
-
-    private SessionVerdict MapSessionVerdict(double overallScore) =>
-        overallScore switch
-        {
-            >= 7 => SessionVerdict.Passed,
-            >= 4 => SessionVerdict.Borderline,
-            _ => SessionVerdict.Failed
-        };
     
     private static string MapQuestionStatusForLlm(InterviewQuestion q) =>
         q.Status switch

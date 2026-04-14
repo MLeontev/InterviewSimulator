@@ -1,4 +1,3 @@
-using Interview.Domain;
 using Interview.Domain.Entities;
 using Interview.Domain.Policies;
 

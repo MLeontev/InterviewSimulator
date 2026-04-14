@@ -2,6 +2,7 @@ using Framework.Domain;
 using MediatR;
 using Interview.Domain;
 using Interview.Domain.Entities;
+using Interview.Domain.Enums;
 using Interview.Infrastructure.Interfaces.DataAccess;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
@@ -58,22 +59,10 @@ internal class CreateInterviewSessionCommandHandler(
         var sessionId = Guid.NewGuid();
         var now = DateTime.UtcNow;
 
-        var session = new InterviewSession
-        {
-            Id = sessionId,
-            CandidateId = request.CandidateId,
-            InterviewPresetId = request.InterviewPresetId,
-            InterviewPresetName = presetInfo.Name,
-            StartedAt = now,
-            PlannedEndAt = now.AddHours(1),
-            Status = InterviewStatus.InProgress,
-            Questions = []
-        };
-
         var interviewQuestions = questionSet.Questions
             .OrderBy(x => x.OrderIndex)
             .Select(q => InterviewQuestion.Create(
-                sessionId: session.Id,
+                sessionId: sessionId,
                 title: q.Title,
                 text: q.Text,
                 type: MapQuestionType(q.Type),
@@ -94,7 +83,14 @@ internal class CreateInterviewSessionCommandHandler(
                     .ToList()))
             .ToList();
 
-        session.Questions = interviewQuestions;
+        var session = InterviewSession.Create(
+            sessionId,
+            request.CandidateId,
+            request.InterviewPresetId,
+            presetInfo.Name,
+            now,
+            now.AddHours(1),
+            interviewQuestions);
         
         await dbContext.InterviewSessions.AddAsync(session, ct);
         await dbContext.SaveChangesAsync(ct);

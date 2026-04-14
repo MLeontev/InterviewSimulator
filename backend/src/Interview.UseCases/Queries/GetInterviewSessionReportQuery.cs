@@ -1,9 +1,7 @@
-using System.Text.Json;
-using System.Text.Json.Serialization;
 using Framework.Domain;
-using Interview.Domain;
 using Interview.Domain.Entities;
 using Interview.Domain.Enums;
+using Interview.Domain.Policies;
 using Interview.Infrastructure.Interfaces.DataAccess;
 using Interview.UseCases.Services;
 using MediatR;
@@ -38,9 +36,11 @@ internal class GetInterviewSessionReportQueryHandler(IDbContext dbContext) : IRe
             .Select(MapQuestion)
             .ToList();
 
-        var averageQuestionScore = session.Questions.Count > 0
-            ? Math.Round(session.Questions.Average(InterviewQuestionScoreResolver.Resolve), 2)
-            : 0;
+        var questionScores = session.Questions
+            .Select(InterviewQuestionScoreResolver.Resolve)
+            .ToList();
+
+        var averageQuestionScore = InterviewSessionScoringPolicy.CalculateOverallScore(questionScores);
 
         var totalQuestions = session.Questions.Count;
         var answeredQuestions = session.Questions.Count(q => q.Status == QuestionStatus.EvaluatedAi);

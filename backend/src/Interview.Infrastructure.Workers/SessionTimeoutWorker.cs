@@ -1,4 +1,3 @@
-using Interview.Domain;
 using Interview.Domain.Entities;
 using Interview.Domain.Enums;
 using Interview.Infrastructure.Interfaces.DataAccess;
@@ -39,6 +38,7 @@ internal class SessionTimeoutWorker(
         var dbContext = scope.ServiceProvider.GetRequiredService<IDbContext>();
         
         var session = await dbContext.InterviewSessions
+            .Include(s => s.Questions)
             .Where(s => s.Status == InterviewStatus.InProgress && s.PlannedEndAt <= DateTime.UtcNow)
             .OrderBy(s => s.PlannedEndAt)
             .FirstOrDefaultAsync(ct);
@@ -46,18 +46,7 @@ internal class SessionTimeoutWorker(
         if (session is null)
             return false;
 
-        session.Status = InterviewStatus.Finished;
-        session.FinishedAt = DateTime.UtcNow;
-        
-        var questionsToSkip = await dbContext.InterviewQuestions
-            .Where(q => q.InterviewSessionId == session.Id &&
-                        (q.Status == QuestionStatus.InProgress ||
-                         q.Status == QuestionStatus.EvaluatingCode ||
-                         q.Status == QuestionStatus.EvaluatedCode))
-            .ToListAsync(ct);
-
-        foreach (var q in questionsToSkip)
-            q.MarkSkippedWhenSessionFinishes();
+        session.Finish(DateTime.UtcNow);
         
         await dbContext.SaveChangesAsync(ct);
         return true;
