@@ -23,9 +23,19 @@ public sealed class GetMeTests : BaseIntegrationTest
         var payload = await response.Content.ReadFromJsonAsync<GetMeResponse>();
 
         payload.Should().NotBeNull();
-        payload!.Id.Should().Be(user.UserId);
+        payload.Id.Should().Be(user.UserId);
         payload.Email.Should().Be(user.Email);
         payload.IdentityId.Should().Be(user.IdentityId);
+    }
+
+    [Fact]
+    public async Task GetMe_ShouldReturnUnauthorized_WhenRequestIsNotAuthenticated()
+    {
+        using var client = CreateApiClient();
+
+        using var response = await client.GetAsync("/api/v1/users/me");
+
+        response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
     }
 
     private sealed record GetMeResponse(

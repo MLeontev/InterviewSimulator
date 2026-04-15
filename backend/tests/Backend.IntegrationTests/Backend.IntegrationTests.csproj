@@ -34,6 +34,10 @@
         <ProjectReference Include="..\..\src\Interview.Infrastructure.Implementation.DataAccess\Interview.Infrastructure.Implementation.DataAccess.csproj" />
         <ProjectReference Include="..\..\src\Interview.Domain\Interview.Domain.csproj" />
         <ProjectReference Include="..\..\src\CodeExecution.Infrastructure.Interfaces.CodeExecution\CodeExecution.Infrastructure.Interfaces.CodeExecution.csproj" />
+        <ProjectReference Include="..\..\src\Users.ModuleContract\Users.ModuleContract.csproj" />
+        <ProjectReference Include="..\..\src\Users.Infrastructure.Implementation.DataAccess\Users.Infrastructure.Implementation.DataAccess.csproj" />
+        <ProjectReference Include="..\..\src\QuestionBank.ModuleContract\QuestionBank.ModuleContract.csproj" />
+        <ProjectReference Include="..\..\src\QuestionBank.Infrastructure.Implementation.DataAccess\QuestionBank.Infrastructure.Implementation.DataAccess.csproj" />
     </ItemGroup>
 
 </Project>
