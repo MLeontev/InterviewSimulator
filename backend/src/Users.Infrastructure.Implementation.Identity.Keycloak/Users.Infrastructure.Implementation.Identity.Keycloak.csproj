@@ -17,4 +17,8 @@
       <PackageReference Include="Microsoft.Extensions.Options" Version="10.0.5" />
     </ItemGroup>
 
+    <ItemGroup>
+      <InternalsVisibleTo Include="Backend.IntegrationTests" />
+    </ItemGroup>
+
 </Project>
