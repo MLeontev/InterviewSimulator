@@ -32,7 +32,7 @@ internal class CodeExecutionWorker(
         }
     }
 
-    private async Task<bool> ProcessPendingSubmissionAsync(CancellationToken stoppingToken)
+    internal async Task<bool> ProcessPendingSubmissionAsync(CancellationToken stoppingToken)
     {
         using var scope = serviceProvider.CreateScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<IDbContext>();

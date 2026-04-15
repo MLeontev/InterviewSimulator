@@ -7,6 +7,13 @@ public sealed class FakeCodeExecutor : ICodeExecutor
 {
     private readonly ConcurrentQueue<Func<CodeExecutionResult>> _queuedResults = new();
 
+    public void Reset()
+    {
+        while (_queuedResults.TryDequeue(out _))
+        {
+        }
+    }
+
     public void EnqueueResult(CodeExecutionResult result)
     {
         _queuedResults.Enqueue(() => result);
