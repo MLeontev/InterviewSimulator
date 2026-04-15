@@ -140,16 +140,11 @@ public class InterviewQuestion
                 "QUESTION_NOT_THEORY",
                 "Задание не является теоретическим"));
 
-        if (Status is
-            QuestionStatus.Skipped
-            or QuestionStatus.Submitted
-            or QuestionStatus.EvaluatingAi
-            or QuestionStatus.EvaluatedAi
-            or QuestionStatus.AiEvaluationFailed)
+        if (Status != QuestionStatus.InProgress)
         {
             return Result.Failure(Error.Business(
-                "QUESTION_COMPLETED",
-                "Задание уже решено или пропущено"));
+                "QUESTION_NOT_IN_PROGRESS",
+                "Теоретический ответ можно отправить только для начатого задания"));
         }
 
         Answer = answer.Trim();

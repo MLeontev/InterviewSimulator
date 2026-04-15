@@ -24,8 +24,8 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="InterviewQuestion\" />
-      <Folder Include="InterviewSession\" />
+      <Folder Include="InterviewQuestionTests\" />
+      <Folder Include="InterviewSessionTests\" />
     </ItemGroup>
 
 </Project>
