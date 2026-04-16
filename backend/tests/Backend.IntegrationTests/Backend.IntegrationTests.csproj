@@ -30,6 +30,7 @@
 
     <ItemGroup>
         <ProjectReference Include="..\..\src\InterviewSimulator.API\InterviewSimulator.API.csproj" />
+        <ProjectReference Include="..\..\src\CodeExecution.Infrastructure.Implementation.CodeExecution.Docker\CodeExecution.Infrastructure.Implementation.CodeExecution.Docker.csproj" />
         <ProjectReference Include="..\..\src\Interview.UseCases\Interview.UseCases.csproj" />
         <ProjectReference Include="..\..\src\Interview.Infrastructure.Implementation.DataAccess\Interview.Infrastructure.Implementation.DataAccess.csproj" />
         <ProjectReference Include="..\..\src\Interview.Infrastructure.Interfaces.AiEvaluation\Interview.Infrastructure.Interfaces.AiEvaluation.csproj" />
