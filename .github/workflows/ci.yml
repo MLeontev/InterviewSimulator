@@ -5,8 +5,8 @@ on:
   pull_request:
 
 jobs:
-  build-backend:
-    name: Build Backend
+  backend:
+    name: Build Backend And Test
     runs-on: ubuntu-latest
 
     defaults:
@@ -27,6 +27,9 @@ jobs:
 
       - name: Build backend
         run: dotnet build InterviewSimulator.sln --configuration Release --no-restore
+
+      - name: Run backend tests
+        run: dotnet test InterviewSimulator.sln --configuration Release --no-build
 
   frontend-build:
     name: Frontend Build
