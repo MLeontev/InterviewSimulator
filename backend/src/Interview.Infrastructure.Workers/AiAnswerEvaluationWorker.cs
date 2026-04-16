@@ -34,7 +34,7 @@ internal class AiAnswerEvaluationWorker(
         }
     }
 
-    private async Task<bool> ProcessAnswerAsync(CancellationToken ct)
+    internal async Task<bool> ProcessAnswerAsync(CancellationToken ct)
     {
         using var scope = serviceProvider.CreateScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<IDbContext>();

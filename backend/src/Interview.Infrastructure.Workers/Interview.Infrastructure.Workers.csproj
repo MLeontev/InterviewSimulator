@@ -13,6 +13,10 @@
     </ItemGroup>
 
     <ItemGroup>
+      <InternalsVisibleTo Include="Backend.IntegrationTests" />
+    </ItemGroup>
+
+    <ItemGroup>
       <ProjectReference Include="..\Interview.Infrastructure.Interfaces.DataAccess\Interview.Infrastructure.Interfaces.DataAccess.csproj" />
       <ProjectReference Include="..\Interview.UseCases\Interview.UseCases.csproj" />
     </ItemGroup>

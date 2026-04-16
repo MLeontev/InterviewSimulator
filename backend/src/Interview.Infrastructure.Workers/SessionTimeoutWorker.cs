@@ -32,7 +32,7 @@ internal class SessionTimeoutWorker(
         }
     }
 
-    private async Task<bool> ProcessTimedOutSessionAsync(CancellationToken ct)
+    internal async Task<bool> ProcessTimedOutSessionAsync(CancellationToken ct)
     {
         using var scope = serviceProvider.CreateScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<IDbContext>();

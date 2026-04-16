@@ -32,6 +32,8 @@
         <ProjectReference Include="..\..\src\InterviewSimulator.API\InterviewSimulator.API.csproj" />
         <ProjectReference Include="..\..\src\Interview.UseCases\Interview.UseCases.csproj" />
         <ProjectReference Include="..\..\src\Interview.Infrastructure.Implementation.DataAccess\Interview.Infrastructure.Implementation.DataAccess.csproj" />
+        <ProjectReference Include="..\..\src\Interview.Infrastructure.Interfaces.AiEvaluation\Interview.Infrastructure.Interfaces.AiEvaluation.csproj" />
+        <ProjectReference Include="..\..\src\Interview.Infrastructure.Workers\Interview.Infrastructure.Workers.csproj" />
         <ProjectReference Include="..\..\src\Interview.Domain\Interview.Domain.csproj" />
         <ProjectReference Include="..\..\src\Interview.IntegrationEvents\Interview.IntegrationEvents.csproj" />
         <ProjectReference Include="..\..\src\CodeExecution.Infrastructure.Interfaces.CodeExecution\CodeExecution.Infrastructure.Interfaces.CodeExecution.csproj" />

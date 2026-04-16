@@ -32,7 +32,7 @@ internal class AiSessionEvaluationWorker(
         }
     }
 
-    private async Task<bool> ProcessSessionAsync(CancellationToken ct)
+    internal async Task<bool> ProcessSessionAsync(CancellationToken ct)
     {
         using var scope = serviceProvider.CreateScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<IDbContext>();
