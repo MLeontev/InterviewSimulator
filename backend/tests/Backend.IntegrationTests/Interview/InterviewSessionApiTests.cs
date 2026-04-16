@@ -175,6 +175,32 @@ public sealed class InterviewSessionApiTests : InterviewIntegrationTestBase
     }
 
     [Fact]
+    public async Task SubmitTheoryAnswer_ShouldReturnBadRequest_WhenAnswerIsEmpty()
+    {
+        using var userContext = await CreateAuthorizedCandidateAsync();
+
+        await CreateSessionAsync(userContext);
+
+        using (var startResponse = await userContext.Client.PostAsync("/api/v1/interview-session/question/start", content: null))
+        {
+            startResponse.StatusCode.Should().Be(HttpStatusCode.NoContent);
+        }
+
+        using var response = await userContext.Client.PostAsJsonAsync(
+            "/api/v1/interview-session/question/submit-theory",
+            new SubmitTheoryRequest("   "));
+
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+
+        var payload = await response.Content.ReadFromJsonAsync<ValidationErrorResponse>(ApiJsonOptions);
+
+        payload.Should().NotBeNull();
+        payload!.Code.Should().Be("VALIDATION_ERROR");
+        payload.Errors.Should().ContainKey("Answer");
+        payload.Errors["Answer"].Should().Contain("Ответ не может быть пустым");
+    }
+
+    [Fact]
     public async Task SubmitDraftCodeAnswer_ShouldMoveQuestionToEvaluatingCode_AndWriteCodeSubmissionCreatedOutboxMessage()
     {
         using var userContext = await CreateAuthorizedCandidateAsync();
@@ -215,6 +241,33 @@ public sealed class InterviewSessionApiTests : InterviewIntegrationTestBase
         payload.TimeLimitMs.Should().Be(codingQuestion.TimeLimitMs);
         payload.MemoryLimitMb.Should().Be(codingQuestion.MemoryLimitMb);
         payload.TestCases.Select(x => x.OrderIndex).Should().Equal(codingQuestion.TestCases.Select(x => x.OrderIndex));
+    }
+
+    [Fact]
+    public async Task SubmitDraftCodeAnswer_ShouldReturnBadRequest_WhenCodeIsEmpty()
+    {
+        using var userContext = await CreateAuthorizedCandidateAsync();
+
+        var sessionId = await CreateSessionAsync(userContext);
+        await MakeCodingQuestionCurrentAsync(sessionId);
+
+        using (var startResponse = await userContext.Client.PostAsync("/api/v1/interview-session/question/start", content: null))
+        {
+            startResponse.StatusCode.Should().Be(HttpStatusCode.NoContent);
+        }
+
+        using var response = await userContext.Client.PostAsJsonAsync(
+            "/api/v1/interview-session/question/submit-draft-code",
+            new SubmitDraftCodeRequest("   "));
+
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+
+        var payload = await response.Content.ReadFromJsonAsync<ValidationErrorResponse>(ApiJsonOptions);
+
+        payload.Should().NotBeNull();
+        payload!.Code.Should().Be("VALIDATION_ERROR");
+        payload.Errors.Should().ContainKey("Code");
+        payload.Errors["Code"].Should().Contain("Код не может быть пустым");
     }
 
     [Fact]
@@ -329,6 +382,11 @@ public sealed class InterviewSessionApiTests : InterviewIntegrationTestBase
     private sealed record SubmitDraftCodeRequest(string Code);
 
     private sealed record ErrorResponse(string Code, string Description);
+
+    private sealed record ValidationErrorResponse(
+        string Code,
+        string Description,
+        Dictionary<string, string[]> Errors);
 
     private sealed record CurrentInterviewSessionResponse(
         Guid SessionId,

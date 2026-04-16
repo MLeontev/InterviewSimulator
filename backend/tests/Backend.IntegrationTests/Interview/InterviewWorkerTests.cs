@@ -79,6 +79,76 @@ public sealed class InterviewWorkerTests : InterviewIntegrationTestBase
     }
 
     [Fact]
+    public async Task ProcessAnswerAsync_ShouldScheduleTheoryRetry_WhenAiEvaluationThrows()
+    {
+        await ClearInterviewStateAsync();
+        var fakeAi = ResetFakeAiEvaluationService();
+        fakeAi.EnqueueTheoryException(new InvalidOperationException("AI unavailable"));
+
+        using var userContext = await CreateAuthorizedCandidateAsync();
+
+        var sessionId = await CreateSessionAsync(userContext);
+        await LeaveOnlyFirstQuestionActiveAsync(sessionId);
+
+        var startResult = await SendAsync(new StartCurrentInterviewQuestionCommand(userContext.UserId));
+        startResult.IsSuccess.Should().BeTrue();
+
+        var submitResult = await SendAsync(new SubmitTheoryAnswerCommand(userContext.UserId, "theory answer"));
+        submitResult.IsSuccess.Should().BeTrue();
+
+        var session = await GetSessionAsync(sessionId);
+        var theoryQuestionId = session!.Questions.OrderBy(x => x.OrderIndex).First().Id;
+
+        var processed = await CreateAiAnswerWorker().ProcessAnswerAsync(CancellationToken.None);
+
+        var savedQuestion = await GetQuestionAsync(theoryQuestionId);
+
+        processed.Should().BeTrue();
+        savedQuestion.Should().NotBeNull();
+        savedQuestion.Status.Should().Be(InterviewQuestionStatus.Submitted);
+        savedQuestion.AiRetryCount.Should().Be(1);
+        savedQuestion.AiNextRetryAt.Should().NotBeNull();
+        savedQuestion.AiNextRetryAt.Should().BeAfter(DateTime.UtcNow.AddSeconds(-5));
+        savedQuestion.ErrorMessage.Should().Be("AI временно недоступен. Повтор 1/3.");
+        savedQuestion.EvaluatedAt.Should().BeNull();
+    }
+
+    [Fact]
+    public async Task ProcessAnswerAsync_ShouldMarkTheoryQuestionAsFailed_WhenRetriesAreExhausted()
+    {
+        await ClearInterviewStateAsync();
+        var fakeAi = ResetFakeAiEvaluationService();
+        fakeAi.EnqueueTheoryException(new InvalidOperationException("AI unavailable"));
+
+        using var userContext = await CreateAuthorizedCandidateAsync();
+
+        var sessionId = await CreateSessionAsync(userContext);
+        await LeaveOnlyFirstQuestionActiveAsync(sessionId);
+
+        var startResult = await SendAsync(new StartCurrentInterviewQuestionCommand(userContext.UserId));
+        startResult.IsSuccess.Should().BeTrue();
+
+        var submitResult = await SendAsync(new SubmitTheoryAnswerCommand(userContext.UserId, "theory answer"));
+        submitResult.IsSuccess.Should().BeTrue();
+
+        var session = await GetSessionAsync(sessionId);
+        var theoryQuestionId = session!.Questions.OrderBy(x => x.OrderIndex).First().Id;
+        await SetQuestionAiRetryStateAsync(theoryQuestionId, retryCount: 3);
+
+        var processed = await CreateAiAnswerWorker().ProcessAnswerAsync(CancellationToken.None);
+
+        var savedQuestion = await GetQuestionAsync(theoryQuestionId);
+
+        processed.Should().BeTrue();
+        savedQuestion.Should().NotBeNull();
+        savedQuestion.Status.Should().Be(InterviewQuestionStatus.AiEvaluationFailed);
+        savedQuestion.AiRetryCount.Should().Be(4);
+        savedQuestion.AiNextRetryAt.Should().BeNull();
+        savedQuestion.ErrorMessage.Should().Be("AI-оценка недоступна после нескольких попыток.");
+        savedQuestion.EvaluatedAt.Should().NotBeNull();
+    }
+
+    [Fact]
     public async Task ProcessSessionAsync_ShouldEvaluateFinishedSession_WhenQuestionsAreReady()
     {
         await ClearInterviewStateAsync();
@@ -112,6 +182,48 @@ public sealed class InterviewWorkerTests : InterviewIntegrationTestBase
         savedSession.AiFeedbackJson.Should().Contain("Mocked session summary");
 
         var savedQuestion = await GetQuestionAsync(theoryQuestionId);
+        savedQuestion.Should().NotBeNull();
+        savedQuestion.Status.Should().Be(InterviewQuestionStatus.EvaluatedAi);
+    }
+
+    [Fact]
+    public async Task ProcessSessionAsync_ShouldMarkSessionAsAiEvaluationFailed_WhenRetriesAreExhausted()
+    {
+        await ClearInterviewStateAsync();
+        var fakeAi = ResetFakeAiEvaluationService();
+        fakeAi.EnqueueSessionException(new InvalidOperationException("AI unavailable"));
+
+        using var userContext = await CreateAuthorizedCandidateAsync();
+
+        var sessionId = await CreateSessionAsync(userContext);
+        await LeaveOnlyFirstQuestionActiveAsync(sessionId);
+
+        var startResult = await SendAsync(new StartCurrentInterviewQuestionCommand(userContext.UserId));
+        startResult.IsSuccess.Should().BeTrue();
+
+        var submitResult = await SendAsync(new SubmitTheoryAnswerCommand(userContext.UserId, "session answer"));
+        submitResult.IsSuccess.Should().BeTrue();
+
+        var sessionAfterSubmit = await GetSessionAsync(sessionId);
+        var theoryQuestionId = sessionAfterSubmit!.Questions.OrderBy(x => x.OrderIndex).First().Id;
+
+        var answerProcessed = await CreateAiAnswerWorker().ProcessAnswerAsync(CancellationToken.None);
+        answerProcessed.Should().BeTrue();
+
+        await SetSessionAiRetryStateAsync(sessionId, retryCount: 3);
+
+        var processed = await CreateAiSessionWorker().ProcessSessionAsync(CancellationToken.None);
+
+        var savedSession = await GetSessionAsync(sessionId);
+        var savedQuestion = await GetQuestionAsync(theoryQuestionId);
+
+        processed.Should().BeTrue();
+        savedSession.Should().NotBeNull();
+        savedSession.Status.Should().Be(InterviewStatus.AiEvaluationFailed);
+        savedSession.AiRetryCount.Should().Be(4);
+        savedSession.AiNextRetryAt.Should().BeNull();
+        savedSession.SessionVerdict.Should().NotBe(InterviewSessionVerdict.None);
+        savedSession.AiFeedbackJson.Should().Contain("Не удалось получить итоговую AI-оценку сессии");
         savedQuestion.Should().NotBeNull();
         savedQuestion.Status.Should().Be(InterviewQuestionStatus.EvaluatedAi);
     }

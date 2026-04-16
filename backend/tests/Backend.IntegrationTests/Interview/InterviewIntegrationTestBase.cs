@@ -301,6 +301,23 @@ public abstract class InterviewIntegrationTestBase : BaseIntegrationTest
               """);
     }
 
+    protected async Task SetQuestionAiRetryStateAsync(
+        Guid questionId,
+        int retryCount,
+        DateTime? nextRetryAtUtc = null)
+    {
+        using var scope = CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<InterviewAppDbContext>();
+
+        await db.Database.ExecuteSqlInterpolatedAsync(
+            $"""
+              UPDATE "Interview"."InterviewQuestions"
+              SET "AiRetryCount" = {retryCount},
+                  "AiNextRetryAt" = {nextRetryAtUtc}
+              WHERE "Id" = {questionId}
+              """);
+    }
+
     protected async Task MarkSessionAiEvaluationFailedAsync(
         Guid sessionId,
         int retryCount = 2,
@@ -316,6 +333,23 @@ public abstract class InterviewIntegrationTestBase : BaseIntegrationTest
                   "AiRetryCount" = {retryCount},
                   "AiNextRetryAt" = {(DateTime?)null},
                   "AiFeedbackJson" = CAST({aiFeedbackJson} AS jsonb)
+              WHERE "Id" = {sessionId}
+              """);
+    }
+
+    protected async Task SetSessionAiRetryStateAsync(
+        Guid sessionId,
+        int retryCount,
+        DateTime? nextRetryAtUtc = null)
+    {
+        using var scope = CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<InterviewAppDbContext>();
+
+        await db.Database.ExecuteSqlInterpolatedAsync(
+            $"""
+              UPDATE "Interview"."InterviewSessions"
+              SET "AiRetryCount" = {retryCount},
+                  "AiNextRetryAt" = {nextRetryAtUtc}
               WHERE "Id" = {sessionId}
               """);
     }
