@@ -13,4 +13,16 @@ public static class QuestionIds
     public static readonly Guid TwoSum = Guid.Parse("00000006-0000-0000-0000-000000000008");
     public static readonly Guid ValidAnagram = Guid.Parse("00000006-0000-0000-0000-000000000009");
     public static readonly Guid FirstUniqueCharacter = Guid.Parse("00000006-0000-0000-0000-000000000010");
+
+    public static readonly Guid CSharpClassVsStruct = Guid.Parse("00000006-0000-0000-0000-000000000011");
+    public static readonly Guid AspNetCoreMiddleware = Guid.Parse("00000006-0000-0000-0000-000000000012");
+    public static readonly Guid AspNetCoreServiceLifetimes = Guid.Parse("00000006-0000-0000-0000-000000000013");
+    public static readonly Guid EfCoreTrackingVsNoTracking = Guid.Parse("00000006-0000-0000-0000-000000000014");
+    public static readonly Guid EfCoreInclude = Guid.Parse("00000006-0000-0000-0000-000000000015");
+    public static readonly Guid CSharpIEnumerableVsList = Guid.Parse("00000006-0000-0000-0000-000000000016");
+    public static readonly Guid BackendValidationEdgeCases = Guid.Parse("00000006-0000-0000-0000-000000000017");
+
+    public static readonly Guid JuniorTwoSum = Guid.Parse("00000006-0000-0000-0000-000000000018");
+    public static readonly Guid JuniorValidAnagram = Guid.Parse("00000006-0000-0000-0000-000000000019");
+    public static readonly Guid JuniorFirstUniqueCharacter = Guid.Parse("00000006-0000-0000-0000-000000000020");
 }

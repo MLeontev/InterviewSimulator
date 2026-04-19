@@ -90,6 +90,51 @@ public sealed class DockerCodeExecutorTests : IDisposable
         result.Error.Should().Contain("timed out");
     }
 
+    [Fact]
+    public async Task ExecuteCode_ShouldRunCSharpCodeInDocker()
+    {
+        await using var services = CreateServices();
+        await using var scope = services.CreateAsyncScope();
+        var executor = scope.ServiceProvider.GetRequiredService<ICodeExecutor>();
+
+        var result = await executor.ExecuteCode(
+            """
+            using System;
+
+            var name = Console.ReadLine();
+            Console.WriteLine($"Hello, {name}!");
+            """,
+            "Test",
+            "csharp");
+
+        result.Stage.Should().Be(ExecutionStage.Runtime);
+        result.ExitCode.Should().Be(0);
+        result.Output.Trim().Should().Be("Hello, Test!");
+        result.Error.Should().BeEmpty();
+        result.TimeElapsedMs.Should().BePositive();
+        result.MemoryUsageMb.Should().BePositive();
+    }
+
+    [Fact]
+    public async Task ExecuteCode_ShouldReturnCompilationError_WhenCSharpCodeIsInvalid()
+    {
+        await using var services = CreateServices();
+        await using var scope = services.CreateAsyncScope();
+        var executor = scope.ServiceProvider.GetRequiredService<ICodeExecutor>();
+
+        var result = await executor.ExecuteCode(
+            """
+            using System;
+
+            Console.WriteLine("broken")
+            """,
+            string.Empty,
+            "csharp");
+
+        result.Stage.Should().Be(ExecutionStage.Compilation);
+        result.ExitCode.Should().NotBe(0);
+    }
+
     public void Dispose()
     {
         Environment.SetEnvironmentVariable(TempRootEnvVar, null);

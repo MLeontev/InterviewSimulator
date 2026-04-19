@@ -64,6 +64,25 @@ public sealed class QuestionBankApiTests : BaseIntegrationTest
     }
 
     [Fact]
+    public async Task GetPresetDetailsAsync_ShouldReturnDotNetBackendPresetDetails_WhenPresetExists()
+    {
+        using var scope = CreateScope();
+        var questionBankApi = scope.ServiceProvider.GetRequiredService<IQuestionBankApi>();
+
+        var preset = await questionBankApi.GetPresetDetailsAsync(TestData.CSharpJuniorPresetId);
+
+        preset.Should().NotBeNull();
+        preset.Id.Should().Be(TestData.CSharpJuniorPresetId);
+        preset.Name.Should().Be(TestData.CSharpJuniorPresetName);
+        preset.Technologies.Should().Contain("C#");
+        preset.Technologies.Should().Contain("ASP.NET Core");
+        preset.Technologies.Should().Contain("Entity Framework Core");
+        preset.Competencies.Should().NotBeEmpty();
+        preset.Competencies.Select(x => x.Weight).Should().BeInDescendingOrder();
+        preset.Competencies.Sum(x => x.Weight).Should().BeApproximately(1.0, 0.0001);
+    }
+
+    [Fact]
     public async Task GenerateInterviewQuestionsAsync_ShouldReturnOrderedTheoryAndCodingQuestions_WhenPresetExists()
     {
         using var scope = CreateScope();
@@ -114,5 +133,41 @@ public sealed class QuestionBankApiTests : BaseIntegrationTest
         await action.Should()
             .ThrowAsync<InvalidOperationException>()
             .WithMessage("PRESET_NOT_FOUND*");
+    }
+
+    [Fact]
+    public async Task GenerateInterviewQuestionsAsync_ShouldReturnCSharpQuestions_WhenCSharpPresetExists()
+    {
+        using var scope = CreateScope();
+        var questionBankApi = scope.ServiceProvider.GetRequiredService<IQuestionBankApi>();
+
+        var questionSet = await questionBankApi.GenerateInterviewQuestionsAsync(
+            TestData.CSharpJuniorPresetId,
+            theoryCount: 4,
+            codingCount: 2);
+
+        questionSet.PresetId.Should().Be(TestData.CSharpJuniorPresetId);
+        questionSet.Questions.Should().HaveCount(6);
+        questionSet.Questions.Select(x => x.OrderIndex).Should().Equal(1, 2, 3, 4, 5, 6);
+        questionSet.Questions.Count(x => x.Type == QuestionType.Theory).Should().Be(4);
+        questionSet.Questions.Count(x => x.Type == QuestionType.Coding).Should().Be(2);
+
+        questionSet.Questions
+            .Where(x => x.Type == QuestionType.Theory)
+            .Should()
+            .OnlyContain(x =>
+                x.ProgrammingLanguageCode == null &&
+                x.TimeLimitMs == null &&
+                x.MemoryLimitMb == null &&
+                x.TestCases.Count == 0);
+
+        questionSet.Questions
+            .Where(x => x.Type == QuestionType.Coding)
+            .Should()
+            .OnlyContain(x =>
+                x.ProgrammingLanguageCode == "csharp" &&
+                x.TimeLimitMs > 0 &&
+                x.MemoryLimitMb > 0 &&
+                x.TestCases.Count > 0);
     }
 }

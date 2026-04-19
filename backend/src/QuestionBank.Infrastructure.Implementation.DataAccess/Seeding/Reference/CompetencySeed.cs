@@ -11,6 +11,9 @@ public static class CompetencyIds
     public static readonly Guid DataStructures = Guid.Parse("00000004-0000-0000-0000-000000000003");
     public static readonly Guid CodingProblemSolving = Guid.Parse("00000004-0000-0000-0000-000000000004");
     public static readonly Guid TestingDebugging = Guid.Parse("00000004-0000-0000-0000-000000000005");
+    public static readonly Guid CSharpCore = Guid.Parse("00000004-0000-0000-0000-000000000006");
+    public static readonly Guid AspNetCoreBasics = Guid.Parse("00000004-0000-0000-0000-000000000007");
+    public static readonly Guid EfCoreBasics = Guid.Parse("00000004-0000-0000-0000-000000000008");
 }
 
 public class CompetencySeed : ISeed
@@ -55,6 +58,27 @@ public class CompetencySeed : ISeed
                 Code = "testing-debugging",
                 Name = "Тестирование и отладка",
                 Description = "Проверка корректности решения, анализ ошибок, работа с тестовыми и граничными сценариями"
+            },
+            new()
+            {
+                Id = CompetencyIds.CSharpCore,
+                Code = "csharp-core",
+                Name = "Основы C#",
+                Description = "Типы данных, class и struct, коллекции .NET, базовые конструкции языка и особенности платформы"
+            },
+            new()
+            {
+                Id = CompetencyIds.AspNetCoreBasics,
+                Code = "aspnet-core-basics",
+                Name = "Основы ASP.NET Core",
+                Description = "HTTP pipeline, middleware, DI-контейнер, lifetimes сервисов и построение Web API"
+            },
+            new()
+            {
+                Id = CompetencyIds.EfCoreBasics,
+                Code = "ef-core-basics",
+                Name = "Основы Entity Framework Core",
+                Description = "DbContext, отслеживание сущностей, загрузка связанных данных и базовые практики работы с ORM"
             }
         };
 

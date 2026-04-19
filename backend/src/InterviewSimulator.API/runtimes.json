@@ -27,6 +27,20 @@
       "DefaultTimeoutSeconds": 10,
       "MaxMemoryMb": 256,
       "MaxCpuCores": 1
+    },
+    {
+      "Code": "csharp",
+      "Name": "C# 8.0",
+      "Version": "8.0",
+      "IsActive": true,
+      "IsCompiled": true,
+      "DockerImage": "leontevma/csharp-with-time:8.0",
+      "RunCommandTemplate": "{output}",
+      "CompileCommandTemplate": "rm -rf /code/runner && dotnet new console --framework net8.0 --force -o /code/runner && cp {input} /code/runner/Program.cs && dotnet build /code/runner -c Release -o /code/runner/out && printf '#!/bin/sh\\ndotnet /code/runner/out/runner.dll\\n' > {output} && chmod +x {output}",
+      "DefaultFileName": "Program.cs",
+      "DefaultTimeoutSeconds": 15,
+      "MaxMemoryMb": 512,
+      "MaxCpuCores": 2
     }
   ]
 }
