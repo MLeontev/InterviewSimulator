@@ -1,7 +1,7 @@
 using Backend.IntegrationTests.Infrastructure;
 using FluentAssertions;
 using Interview.Infrastructure.Workers;
-using Interview.UseCases.Commands;
+using Interview.UseCases.InterviewQuestion.Commands;
 using Microsoft.Extensions.Logging.Abstractions;
 using InterviewQuestionStatus = Interview.Domain.Enums.QuestionStatus;
 using InterviewQuestionVerdict = Interview.Domain.Enums.QuestionVerdict;

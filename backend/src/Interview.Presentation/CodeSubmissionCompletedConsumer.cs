@@ -1,5 +1,5 @@
 using CodeExecution.IntegrationEvents;
-using Interview.UseCases.Commands;
+using Interview.UseCases.InterviewQuestion.Commands;
 using MassTransit;
 using MediatR;
 using Verdict = Interview.Domain.Enums.Verdict;

@@ -2,7 +2,7 @@ using System.Net;
 using System.Net.Http.Json;
 using Backend.IntegrationTests.Infrastructure;
 using FluentAssertions;
-using Interview.UseCases.Commands;
+using Interview.UseCases.InterviewQuestion.Commands;
 using InterviewQuestionStatus = Interview.Domain.Enums.QuestionStatus;
 using InterviewQuestionType = Interview.Domain.Enums.QuestionType;
 using InterviewQuestionVerdict = Interview.Domain.Enums.QuestionVerdict;

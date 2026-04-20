@@ -1,21 +1,20 @@
-using Interview.Domain;
-using Interview.Domain.Entities;
 using Interview.Domain.Policies;
 using Interview.Infrastructure.Interfaces.DataAccess;
 using Microsoft.EntityFrameworkCore;
+using InterviewQuestionEntity = Interview.Domain.Entities.InterviewQuestion;
 
 namespace Interview.UseCases.Services;
 
 internal interface ICurrentQuestionResolver
 {
-    Task<InterviewQuestion?> GetCurrentQuestionAsync(Guid candidateId, CancellationToken ct);
+    Task<InterviewQuestionEntity?> GetCurrentQuestionAsync(Guid candidateId, CancellationToken ct);
 }
 
 internal class CurrentQuestionResolver(
     IDbContext dbContext, 
     ICurrentSessionResolver currentSessionResolver) : ICurrentQuestionResolver
 {
-    public async Task<InterviewQuestion?> GetCurrentQuestionAsync(Guid candidateId, CancellationToken ct)
+    public async Task<InterviewQuestionEntity?> GetCurrentQuestionAsync(Guid candidateId, CancellationToken ct)
     {
         var sessionId = await currentSessionResolver.GetCurrentSessionIdAsync(candidateId, ct);
         if (sessionId is null)

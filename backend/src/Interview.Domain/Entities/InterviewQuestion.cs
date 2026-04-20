@@ -138,7 +138,7 @@ public class InterviewQuestion
         if (Type != QuestionType.Theory)
             return Result.Failure(Error.Business(
                 "QUESTION_NOT_THEORY",
-                "Задание не является теоретическим"));
+                "Задание не является теоретическим вопросом"));
 
         if (Status != QuestionStatus.InProgress)
         {

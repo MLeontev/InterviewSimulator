@@ -1,5 +1,5 @@
 ﻿using MediatR;
-using Users.UseCases.Queries;
+using Users.UseCases.User.Queries;
 
 namespace Users.ModuleContract.Implementation;
 

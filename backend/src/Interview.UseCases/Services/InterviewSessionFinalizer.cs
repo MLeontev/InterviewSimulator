@@ -1,5 +1,3 @@
-using Interview.Domain;
-using Interview.Domain.Entities;
 using Interview.Domain.Enums;
 using Interview.Domain.Policies;
 using Interview.Infrastructure.Interfaces.DataAccess;

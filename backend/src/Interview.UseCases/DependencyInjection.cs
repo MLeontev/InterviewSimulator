@@ -1,9 +1,9 @@
-using Microsoft.Extensions.DependencyInjection;
 using FluentValidation;
 using Framework.UseCases.Behaviors;
 using Interview.UseCases.Services;
 using MediatR;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Interview.UseCases;
 

@@ -1,7 +1,6 @@
-﻿using Interview.Domain;
-using Interview.Domain.Enums;
+﻿using Interview.Domain.Enums;
 using Interview.Infrastructure.Interfaces.DataAccess;
-using Interview.UseCases.Commands;
+using Interview.UseCases.InterviewQuestion.Commands;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;

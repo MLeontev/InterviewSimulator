@@ -8,9 +8,9 @@ using Framework.Infrastructure.Outbox;
 using Interview.Infrastructure.Implementation.AiEvaluation.GigaChat;
 using Interview.Infrastructure.Implementation.DataAccess;
 using Interview.Infrastructure.Workers;
+using Interview.Presentation;
 using Interview.UseCases;
 using InterviewSimulator.API.Extensions;
-using Interview.Presentation;
 using InterviewSimulator.API.Middleware;
 using MassTransit;
 using QuestionBank.Infrastructure.Implementation.DataAccess;
@@ -109,4 +109,7 @@ app.MapControllers();
 
 app.Run();
 
-public partial class Program;
+namespace InterviewSimulator.API
+{
+    public partial class Program;
+}

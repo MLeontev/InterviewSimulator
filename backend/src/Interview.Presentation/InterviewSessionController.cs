@@ -1,6 +1,8 @@
 using Framework.Controllers;
-using Interview.UseCases.Commands;
-using Interview.UseCases.Queries;
+using Interview.UseCases.InterviewQuestion.Commands;
+using Interview.UseCases.InterviewQuestion.Queries;
+using Interview.UseCases.InterviewSession.Commands;
+using Interview.UseCases.InterviewSession.Queries;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
