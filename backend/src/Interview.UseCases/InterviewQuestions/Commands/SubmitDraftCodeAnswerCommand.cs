@@ -44,8 +44,8 @@ internal sealed class SubmitDraftCodeAnswerCommandHandler(
             InterviewQuestionId: question.Id,
             Code: request.Code,
             LanguageCode: question.ProgrammingLanguageCode!,
-            TestCases: Enumerable
-                .OrderBy<TestCase, int>(question.TestCases, tc => tc.OrderIndex)
+            TestCases: question.TestCases
+                .OrderBy(tc => tc.OrderIndex)
                 .Select(tc => new CodeSubmissionCreatedTestCase(
                     InterviewTestCaseId: tc.Id,
                     OrderIndex: tc.OrderIndex,
