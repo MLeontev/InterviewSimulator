@@ -1,7 +1,7 @@
 using Framework.Controllers;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using QuestionBank.UseCases.InterviewPreset.Queries;
+using QuestionBank.UseCases.InterviewPresets.Queries;
 
 namespace QuestionBank.Presentation;
 

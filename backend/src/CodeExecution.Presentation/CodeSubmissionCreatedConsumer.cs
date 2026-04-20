@@ -1,4 +1,4 @@
-using CodeExecution.UseCases.CodeSubmission.Commands;
+using CodeExecution.UseCases.CodeSubmissions.Commands;
 using Interview.IntegrationEvents;
 using MassTransit;
 using MediatR;

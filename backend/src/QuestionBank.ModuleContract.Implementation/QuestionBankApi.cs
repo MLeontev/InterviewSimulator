@@ -1,7 +1,7 @@
 using Framework.Domain;
 using MediatR;
-using QuestionBank.UseCases.InterviewPreset.Queries;
-using QuestionBank.UseCases.InterviewQuestion.Queries;
+using QuestionBank.UseCases.InterviewPresets.Queries;
+using QuestionBank.UseCases.Questions.Queries;
 
 namespace QuestionBank.ModuleContract.Implementation;
 

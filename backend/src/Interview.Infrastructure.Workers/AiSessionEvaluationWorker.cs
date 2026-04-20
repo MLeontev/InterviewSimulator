@@ -1,5 +1,5 @@
 using Interview.Infrastructure.Interfaces.DataAccess;
-using Interview.UseCases.InterviewSession.Commands;
+using Interview.UseCases.InterviewSessions.Commands;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;

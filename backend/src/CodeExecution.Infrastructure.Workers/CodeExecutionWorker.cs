@@ -1,5 +1,5 @@
 using CodeExecution.Infrastructure.Interfaces.DataAccess;
-using CodeExecution.UseCases.CodeSubmission.Commands;
+using CodeExecution.UseCases.CodeSubmissions.Commands;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;

@@ -2,7 +2,7 @@ using Backend.IntegrationTests.Infrastructure;
 using Backend.IntegrationTests.Infrastructure.Fakes;
 using CodeExecution.Domain.Entities;
 using CodeExecution.Infrastructure.Workers;
-using CodeExecution.UseCases.CodeSubmission.Commands;
+using CodeExecution.UseCases.CodeSubmissions.Commands;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;

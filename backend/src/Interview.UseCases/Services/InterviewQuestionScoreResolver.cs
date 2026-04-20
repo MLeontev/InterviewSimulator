@@ -1,11 +1,11 @@
+using Interview.Domain.Entities;
 using Interview.Domain.Policies;
-using InterviewQuestionEntity = Interview.Domain.Entities.InterviewQuestion;
 
 namespace Interview.UseCases.Services;
 
 internal static class InterviewQuestionScoreResolver
 {
-    public static int Resolve(InterviewQuestionEntity q)
+    public static int Resolve(InterviewQuestion q)
     {
         if (AiFeedbackJsonParser.TryParseQuestion(q.AiFeedbackJson, out var aiScore, out _))
             return aiScore;

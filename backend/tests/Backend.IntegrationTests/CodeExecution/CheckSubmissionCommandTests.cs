@@ -3,7 +3,7 @@ using Backend.IntegrationTests.Infrastructure;
 using Backend.IntegrationTests.Infrastructure.Fakes;
 using CodeExecution.Domain.Entities;
 using CodeExecution.IntegrationEvents;
-using CodeExecution.UseCases.CodeSubmission.Commands;
+using CodeExecution.UseCases.CodeSubmissions.Commands;
 using FluentAssertions;
 using Framework.Infrastructure.Outbox;
 using Microsoft.EntityFrameworkCore;

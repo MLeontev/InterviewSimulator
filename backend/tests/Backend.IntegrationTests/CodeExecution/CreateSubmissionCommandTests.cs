@@ -1,6 +1,6 @@
 using Backend.IntegrationTests.Infrastructure;
 using CodeExecution.Domain.Entities;
-using CodeExecution.UseCases.CodeSubmission.Commands;
+using CodeExecution.UseCases.CodeSubmissions.Commands;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;

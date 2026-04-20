@@ -3,8 +3,8 @@ using Framework.Controllers;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Users.UseCases.User.Commands;
-using Users.UseCases.User.Queries;
+using Users.UseCases.Users.Commands;
+using Users.UseCases.Users.Queries;
 
 namespace Users.Presentation;
 
