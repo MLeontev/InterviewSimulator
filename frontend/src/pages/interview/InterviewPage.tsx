@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { QuestionStatus, QuestionType } from '../../features/interview/api';
 import { useInterview } from '../../features/interview/hooks/useInterview';
@@ -32,6 +32,20 @@ export function InterviewPage() {
       navigate(`/interview/result/${session.sessionId}`);
     }
   };
+
+  const handleTimerExpired = useCallback(() => {
+    if (!reportSessionId) return;
+
+    void (async () => {
+      try {
+        await handleFinish();
+      } catch {
+        return;
+      }
+
+      navigate(`/interview/result/${reportSessionId}`, { replace: true });
+    })();
+  }, [handleFinish, navigate, reportSessionId]);
 
   useEffect(() => {
     if (isLoading) return;
@@ -89,6 +103,7 @@ export function InterviewPage() {
         totalQuestions={session.totalQuestions}
         plannedEndAt={session.plannedEndAt}
         onFinish={handleFinishClick}
+        onExpired={handleTimerExpired}
       />
 
       <div className='w-full max-w-4xl mx-auto'>

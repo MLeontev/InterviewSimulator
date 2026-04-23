@@ -114,9 +114,19 @@ export function useInterview() {
     }
   };
 
-  const handleFinish = async () => {
-    await finishSession();
-  };
+  const handleFinish = useCallback(async () => {
+    try {
+      await finishSession();
+    } catch (e) {
+      const apiError = e as ApiError;
+      if (apiError.code === 'SESSION_NOT_FOUND') {
+        setSession(null);
+        setQuestion(null);
+        return;
+      }
+      throw e;
+    }
+  }, []);
 
   return {
     session,
