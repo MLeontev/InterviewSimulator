@@ -20,7 +20,7 @@
 
             <#if !usernameHidden??>
               <div class="is-field">
-                <label for="username" class="is-label">Email или логин</label>
+                <label for="username" class="is-label">Email</label>
                 <input
                   tabindex="1"
                   id="username"
@@ -30,6 +30,7 @@
                   type="text"
                   autofocus
                   autocomplete="username"
+                  placeholder="you@example.com"
                 />
               </div>
             <#else>
@@ -45,6 +46,7 @@
                 name="password"
                 type="password"
                 autocomplete="current-password"
+                placeholder="••••••••"
               />
               <#if loginError?has_content>
                 <div class="is-field-error">${kcSanitize(loginError)?no_esc}</div>
