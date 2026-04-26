@@ -25,4 +25,12 @@ public static class QuestionIds
     public static readonly Guid JuniorTwoSum = Guid.Parse("00000006-0000-0000-0000-000000000018");
     public static readonly Guid JuniorValidAnagram = Guid.Parse("00000006-0000-0000-0000-000000000019");
     public static readonly Guid JuniorFirstUniqueCharacter = Guid.Parse("00000006-0000-0000-0000-000000000020");
+    
+    public static readonly Guid CppReferenceVsPointer = Guid.Parse("00000006-0000-0000-0000-000000000021");
+    public static readonly Guid CppConst = Guid.Parse("00000006-0000-0000-0000-000000000022");
+    public static readonly Guid CppVectorVsArray = Guid.Parse("00000006-0000-0000-0000-000000000023");
+    public static readonly Guid CppPassingParameters = Guid.Parse("00000006-0000-0000-0000-000000000024");
+    public static readonly Guid CppComplexity = Guid.Parse("00000006-0000-0000-0000-000000000025");
+    public static readonly Guid CppUnorderedMapVsMap = Guid.Parse("00000006-0000-0000-0000-000000000026");
+    public static readonly Guid CppTestingEdgeCases = Guid.Parse("00000006-0000-0000-0000-000000000027");
 }

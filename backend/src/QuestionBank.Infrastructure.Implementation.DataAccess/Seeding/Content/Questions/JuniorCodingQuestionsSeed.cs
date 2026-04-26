@@ -34,7 +34,11 @@ public class JuniorCodingQuestionsSeed : QuestionSeedBase
                 new LanguageLimitDefinition(
                     LanguageId: TechnologyIds.CSharp,
                     TimeLimitMs: 3000,
-                    MemoryLimitMb: 256)
+                    MemoryLimitMb: 256),
+                new LanguageLimitDefinition(
+                    LanguageId: TechnologyIds.Cpp,
+                    TimeLimitMs: 2000,
+                    MemoryLimitMb: 128)
             ],
             TestCases:
             [
@@ -93,7 +97,11 @@ public class JuniorCodingQuestionsSeed : QuestionSeedBase
                 new LanguageLimitDefinition(
                     LanguageId: TechnologyIds.CSharp,
                     TimeLimitMs: 3000,
-                    MemoryLimitMb: 256)
+                    MemoryLimitMb: 256),
+                new LanguageLimitDefinition(
+                    LanguageId: TechnologyIds.Cpp,
+                    TimeLimitMs: 2000,
+                    MemoryLimitMb: 128)
             ],
             TestCases:
             [
@@ -151,7 +159,11 @@ public class JuniorCodingQuestionsSeed : QuestionSeedBase
                 new LanguageLimitDefinition(
                     LanguageId: TechnologyIds.CSharp,
                     TimeLimitMs: 3000,
-                    MemoryLimitMb: 256)
+                    MemoryLimitMb: 256),
+                new LanguageLimitDefinition(
+                    LanguageId: TechnologyIds.Cpp,
+                    TimeLimitMs: 2000,
+                    MemoryLimitMb: 128)
             ],
             TestCases:
             [

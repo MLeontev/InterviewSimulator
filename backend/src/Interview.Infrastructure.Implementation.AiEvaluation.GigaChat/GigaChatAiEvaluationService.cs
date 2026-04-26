@@ -85,25 +85,19 @@ internal class GigaChatAiEvaluationService(
             model,
             maxTokens,
             _options.Temperature);
-        
-        logger.LogInformation("GigaChat request payload: {Payload}", payloadJson);
-        
+
         using var response = await httpClient.SendAsync(request, ct);
         response.EnsureSuccessStatusCode();
         
         var body = await response.Content.ReadAsStringAsync(ct);
         
         logger.LogInformation(
-            "Received GigaChat HTTP response. StatusCode: {StatusCode}, Body: {Body}",
+            "Received GigaChat HTTP response. StatusCode: {StatusCode}, ResponseLength: {ResponseLength}",
             (int)response.StatusCode,
-            body);
+            body.Length);
         
         var completion = JsonSerializer.Deserialize<ChatCompletionResponse>(body);
         var content = completion?.Choices?.FirstOrDefault()?.Message?.Content;
-
-        logger.LogInformation(
-            "Extracted GigaChat content: {Content}",
-            content);
 
         return content;
     }

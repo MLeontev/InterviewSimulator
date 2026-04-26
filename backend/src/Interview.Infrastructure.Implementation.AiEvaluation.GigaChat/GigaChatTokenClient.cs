@@ -87,9 +87,9 @@ internal class GigaChatTokenClient(
         if (!response.IsSuccessStatusCode)
         {
             logger.LogWarning(
-                "GigaChat OAuth request failed. StatusCode: {StatusCode}, ResponseBody: {ResponseBody}",
+                "GigaChat OAuth request failed. StatusCode: {StatusCode}, ResponseLength: {ResponseLength}",
                 (int)response.StatusCode,
-                body);
+                body.Length);
 
             response.EnsureSuccessStatusCode();
         }

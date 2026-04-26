@@ -14,6 +14,7 @@ public static class CompetencyIds
     public static readonly Guid CSharpCore = Guid.Parse("00000004-0000-0000-0000-000000000006");
     public static readonly Guid AspNetCoreBasics = Guid.Parse("00000004-0000-0000-0000-000000000007");
     public static readonly Guid EfCoreBasics = Guid.Parse("00000004-0000-0000-0000-000000000008");
+    public static readonly Guid CppCore = Guid.Parse("00000004-0000-0000-0000-000000000009");
 }
 
 public class CompetencySeed : ISeed
@@ -79,6 +80,13 @@ public class CompetencySeed : ISeed
                 Code = "ef-core-basics",
                 Name = "Основы Entity Framework Core",
                 Description = "DbContext, отслеживание сущностей, загрузка связанных данных и базовые практики работы с ORM"
+            },
+            new()
+            {
+                Id = CompetencyIds.CppCore,
+                Code = "cpp-core",
+                Name = "Основы C++",
+                Description = "Ссылки и указатели, const-корректность, STL-контейнеры, передача параметров и базовые особенности языка C++"
             }
         };
 

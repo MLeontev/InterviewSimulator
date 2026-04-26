@@ -10,6 +10,7 @@ public static class TechnologyIds
     public static readonly Guid CSharp = Guid.Parse("00000003-0000-0000-0000-000000000002");
     public static readonly Guid AspNetCore = Guid.Parse("00000003-0000-0000-0000-000000000003");
     public static readonly Guid EfCore = Guid.Parse("00000003-0000-0000-0000-000000000004");
+    public static readonly Guid Cpp = Guid.Parse("00000003-0000-0000-0000-000000000005");
 }
 
 public class TechnologySeed : ISeed
@@ -51,6 +52,14 @@ public class TechnologySeed : ISeed
                 Name = "Entity Framework Core",
                 Category = TechnologyCategory.ORM,
                 Description = "ORM для работы с реляционными базами данных в приложениях .NET"
+            },
+            new()
+            {
+                Id = TechnologyIds.Cpp,
+                Code = "cpp",
+                Name = "C++",
+                Category = TechnologyCategory.ProgrammingLanguage,
+                Description = "Компилируемый язык программирования общего назначения, часто используемый в алгоритмических и системных задачах"
             }
         };
 
