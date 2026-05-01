@@ -1,14 +1,14 @@
 using System.Text.Json.Serialization;
-using CodeExecution.Controllers;
 using CodeExecution.Infrastructure.Implementation.CodeExecution;
 using CodeExecution.Infrastructure.Implementation.DataAccess;
 using CodeExecution.Infrastructure.Workers;
+using CodeExecution.Presentation.Consumers;
 using CodeExecution.UseCases;
 using Framework.Infrastructure.Outbox;
 using Interview.Infrastructure.Implementation.AiEvaluation.GigaChat;
 using Interview.Infrastructure.Implementation.DataAccess;
 using Interview.Infrastructure.Workers;
-using Interview.Presentation;
+using Interview.Presentation.Consumers;
 using Interview.UseCases;
 using InterviewSimulator.API.Extensions;
 using InterviewSimulator.API.Middleware;

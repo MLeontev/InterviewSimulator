@@ -3,7 +3,7 @@ using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using QuestionBank.UseCases.InterviewPresets.Queries;
 
-namespace QuestionBank.Presentation;
+namespace QuestionBank.Presentation.Controllers;
 
 [ApiController]
 [Route("api/v1/interview-presets")]

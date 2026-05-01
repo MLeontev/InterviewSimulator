@@ -1,4 +1,5 @@
 using Framework.Controllers;
+using Interview.Presentation.Requests;
 using Interview.UseCases.InterviewQuestions.Commands;
 using Interview.UseCases.InterviewQuestions.Queries;
 using Interview.UseCases.InterviewSessions.Commands;
@@ -7,7 +8,7 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Interview.Presentation;
+namespace Interview.Presentation.Controllers;
 
 [ApiController]
 [Authorize]

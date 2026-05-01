@@ -5,7 +5,7 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Interview.Presentation;
+namespace Interview.Presentation.Controllers;
 
 [ApiController]
 [Authorize]

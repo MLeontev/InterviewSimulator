@@ -4,7 +4,7 @@ using MassTransit;
 using MediatR;
 using Verdict = Interview.Domain.Enums.Verdict;
 
-namespace Interview.Presentation;
+namespace Interview.Presentation.Consumers;
 
 public sealed class CodeSubmissionCompletedConsumer(ISender sender) : IConsumer<CodeSubmissionCompleted>
 {

@@ -3,7 +3,7 @@ using Interview.IntegrationEvents;
 using MassTransit;
 using MediatR;
 
-namespace CodeExecution.Controllers;
+namespace CodeExecution.Presentation.Consumers;
 
 public sealed class CodeSubmissionCreatedConsumer(ISender sender) : IConsumer<CodeSubmissionCreated>
 {

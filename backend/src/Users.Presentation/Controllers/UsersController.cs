@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Users.UseCases.Users.Commands;
 using Users.UseCases.Users.Queries;
 
-namespace Users.Presentation;
+namespace Users.Presentation.Controllers;
 
 [ApiController]
 [Route("api/v1/users")]
