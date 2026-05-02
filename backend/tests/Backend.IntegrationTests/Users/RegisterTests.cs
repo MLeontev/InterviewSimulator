@@ -21,7 +21,7 @@ public sealed class RegisterTests : BaseIntegrationTest
         var password = TestData.DefaultPassword();
 
         using var client = CreateApiClient();
-        using var response = await client.PostAsJsonAsync("/api/v1/users/register", new RegisterRequest(email, password));
+        using var response = await client.PostAsJsonAsync("/api/v1/users", new RegisterRequest(email, password));
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
 
@@ -45,7 +45,7 @@ public sealed class RegisterTests : BaseIntegrationTest
     public async Task Register_ShouldReturnValidationError_WhenRequestIsInvalid()
     {
         using var client = CreateApiClient();
-        using var response = await client.PostAsJsonAsync("/api/v1/users/register", new RegisterRequest("not-an-email", string.Empty));
+        using var response = await client.PostAsJsonAsync("/api/v1/users", new RegisterRequest("not-an-email", string.Empty));
 
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
 
@@ -68,7 +68,7 @@ public sealed class RegisterTests : BaseIntegrationTest
         await RegisterUserAsync(email, password);
 
         using var client = CreateApiClient();
-        using var response = await client.PostAsJsonAsync("/api/v1/users/register", new RegisterRequest(email, password));
+        using var response = await client.PostAsJsonAsync("/api/v1/users", new RegisterRequest(email, password));
 
         response.StatusCode.Should().Be(HttpStatusCode.Conflict);
 

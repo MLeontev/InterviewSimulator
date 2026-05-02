@@ -155,44 +155,53 @@ export interface InterviewSessionReport {
 
 export const createSession = (presetId: string, options?: RequestOptions) =>
   api.post(
-    '/v1/interview-session',
+    '/v1/interview-sessions',
     { interviewPresetId: presetId },
     { skipErrorToast: options?.skipErrorToast },
   );
 
 export const getCurrentSession = (options?: RequestOptions) =>
   api
-    .get<CurrentSession>('/v1/interview-session', {
+    .get<CurrentSession>('/v1/interview-sessions/current', {
       skipErrorToast: options?.skipErrorToast,
     })
     .then((r) => r.data);
 
 export const getCurrentQuestion = (options?: RequestOptions) =>
   api
-    .get<CurrentQuestion>('/v1/interview-session/question', {
+    .get<CurrentQuestion>('/v1/interview-sessions/current/question', {
       skipErrorToast: options?.skipErrorToast,
     })
     .then((r) => r.data);
 
 export const startQuestion = () =>
-  api.post('/v1/interview-session/question/start');
+  api.patch('/v1/interview-sessions/current/question', {
+    status: 'InProgress',
+  });
 
 export const submitTheory = (answer: string) =>
-  api.post('/v1/interview-session/question/submit-theory', { answer });
+  api.post('/v1/interview-sessions/current/question/theory-answers', { answer });
 
 export const submitDraftCode = (code: string) =>
-  api.post('/v1/interview-session/question/submit-draft-code', { code });
+  api.post('/v1/interview-sessions/current/question/draft-code-submissions', {
+    code,
+  });
 
 export const submitCode = () =>
-  api.post('/v1/interview-session/question/submit-code');
+  api.post('/v1/interview-sessions/current/question/code-submissions');
 
 export const skipQuestion = () =>
-  api.post('/v1/interview-session/question/skip');
+  api.patch('/v1/interview-sessions/current/question', {
+    status: 'Skipped',
+  });
 
-export const finishSession = () => api.post('/v1/interview-session/finish');
+export const finishSession = () =>
+  api.patch('/v1/interview-sessions/current', {
+    status: 'Finished',
+  });
 
 export const getHistory = () =>
-  api.get<HistoryItem[]>('/v1/interview-sessions/history').then((r) => r.data);
+  api.get<HistoryItem[]>('/v1/interview-sessions').then((r) => r.data);
 
 export const getSessionReport = (
   sessionId: string,
@@ -208,6 +217,6 @@ export const retrySessionAiEvaluation = (
   sessionId: string,
   options?: RequestOptions,
 ) =>
-  api.post(`/v1/interview-sessions/${sessionId}/ai-retry`, undefined, {
+  api.post(`/v1/interview-sessions/${sessionId}/ai-evaluations`, undefined, {
     skipErrorToast: options?.skipErrorToast,
   });

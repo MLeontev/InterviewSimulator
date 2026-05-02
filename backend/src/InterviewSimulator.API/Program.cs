@@ -4,6 +4,7 @@ using CodeExecution.Infrastructure.Implementation.DataAccess;
 using CodeExecution.Infrastructure.Workers;
 using CodeExecution.Presentation.Consumers;
 using CodeExecution.UseCases;
+using Framework.Domain;
 using Framework.Infrastructure.Outbox;
 using Interview.Infrastructure.Implementation.AiEvaluation.GigaChat;
 using Interview.Infrastructure.Implementation.DataAccess;
@@ -13,6 +14,7 @@ using Interview.UseCases;
 using InterviewSimulator.API.Extensions;
 using InterviewSimulator.API.Middleware;
 using MassTransit;
+using Microsoft.AspNetCore.Mvc;
 using QuestionBank.Infrastructure.Implementation.DataAccess;
 using QuestionBank.Infrastructure.Implementation.DataAccess.Seeding;
 using QuestionBank.ModuleContract.Implementation;
@@ -39,6 +41,21 @@ builder.Services.AddOpenApi();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+builder.Services.Configure<ApiBehaviorOptions>(options =>
+{
+    options.InvalidModelStateResponseFactory = context =>
+    {
+        var errors = context.ModelState
+            .Where(e => e.Value?.Errors.Count > 0)
+            .ToDictionary(
+                e => e.Key,
+                e => e.Value!.Errors.Select(x => x.ErrorMessage).ToArray());
+        
+        var error = Error.Validation(errors);
+        return new BadRequestObjectResult(error);
+    };
+});
 
 builder.Services.AddAuth(builder.Configuration);
 
@@ -109,7 +126,4 @@ app.MapControllers();
 
 app.Run();
 
-namespace InterviewSimulator.API
-{
-    public partial class Program;
-}
+public partial class Program;

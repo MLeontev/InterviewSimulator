@@ -1,4 +1,5 @@
 using Framework.Controllers;
+using Framework.Domain;
 using Interview.Presentation.Requests;
 using Interview.UseCases.InterviewQuestions.Commands;
 using Interview.UseCases.InterviewQuestions.Queries;
@@ -13,18 +14,9 @@ namespace Interview.Presentation.Controllers;
 [ApiController]
 [Authorize]
 [RequireCandidate]
-[Route("api/v1/interview-session")]
-public class InterviewSessionController(ISender sender) : ControllerBase
+[Route("api/v1/interview-sessions/current")]
+public class CurrentInterviewSessionController(ISender sender) : ControllerBase
 {
-    [HttpPost]
-    public async Task<IActionResult> CreateSession([FromBody] CreateSessionRequest request, CancellationToken cancellationToken)
-    {
-        var command = new CreateInterviewSessionCommand(HttpContext.GetCandidateId(), request.InterviewPresetId);
-        var result = await sender.Send(command, cancellationToken);
-
-        return result.IsFailure ? result.ToProblem() : Created();
-    }
-    
     [HttpGet]
     public async Task<IActionResult> GetCurrentSession(CancellationToken cancellationToken)
     {
@@ -42,18 +34,26 @@ public class InterviewSessionController(ISender sender) : ControllerBase
         
         return result.IsFailure ? result.ToProblem() : Ok(result.Value);
     }
-    
-    [HttpPost("question/start")]
-    public async Task<IActionResult> StartQuestion(CancellationToken cancellationToken)
-    {
-        var command = new StartCurrentInterviewQuestionCommand(HttpContext.GetCandidateId());
-        var result = await sender.Send(command, cancellationToken);
 
+    [HttpPatch("question")]
+    public async Task<IActionResult> PatchCurrentInterviewQuestion([FromBody] PatchCurrentInterviewQuestionRequest request, CancellationToken cancellationToken)
+    {
+        var candidateId = HttpContext.GetCandidateId();
+
+        var result = request.Status switch
+        {
+            InterviewQuestionStatusPatch.InProgress => await sender.Send(
+                new StartCurrentInterviewQuestionCommand(candidateId), cancellationToken),
+            InterviewQuestionStatusPatch.Skipped => await sender.Send(
+                new SkipQuestionCommand(candidateId), cancellationToken),
+            _ => Result.Failure(Error.Business("INVALID_QUESTION_STATUS", "Неподдерживаемый статус"))
+        };
+        
         return result.IsFailure ? result.ToProblem() : NoContent();
     }
     
-    [HttpPost("question/submit-draft-code")]
-    public async Task<IActionResult> SubmitDraftCodeAnswer([FromBody] SubmitDraftCodeRequest request, CancellationToken cancellationToken)
+    [HttpPost("question/draft-code-submissions")]
+    public async Task<IActionResult> CreateDraftCodeSubmission([FromBody] SubmitDraftCodeRequest request, CancellationToken cancellationToken)
     {
         var command = new SubmitDraftCodeAnswerCommand(HttpContext.GetCandidateId(), request.Code);
         var result = await sender.Send(command, cancellationToken);
@@ -61,8 +61,8 @@ public class InterviewSessionController(ISender sender) : ControllerBase
         return result.IsFailure ? result.ToProblem() : Accepted();
     }
     
-    [HttpPost("question/submit-code")]
-    public async Task<IActionResult> SubmitCodeAnswer(CancellationToken cancellationToken)
+    [HttpPost("question/code-submissions")]
+    public async Task<IActionResult> CreateCodeSubmission(CancellationToken cancellationToken)
     {
         var command = new SubmitCodeAnswerCommand(HttpContext.GetCandidateId());
         var result = await sender.Send(command, cancellationToken);
@@ -70,8 +70,8 @@ public class InterviewSessionController(ISender sender) : ControllerBase
         return result.IsFailure ? result.ToProblem() : Accepted();
     }
     
-    [HttpPost("question/submit-theory")]
-    public async Task<IActionResult> SubmitTheoryAnswer([FromBody] SubmitTheoryRequest request, CancellationToken cancellationToken)
+    [HttpPost("question/theory-answers")]
+    public async Task<IActionResult> CreateTheoryAnswer([FromBody] SubmitTheoryRequest request, CancellationToken cancellationToken)
     {
         var command = new SubmitTheoryAnswerCommand(HttpContext.GetCandidateId(), request.Answer);
         var result = await sender.Send(command, cancellationToken);
@@ -79,17 +79,8 @@ public class InterviewSessionController(ISender sender) : ControllerBase
         return result.IsFailure ? result.ToProblem() : Accepted();
     }
     
-    [HttpPost("question/skip")]
-    public async Task<IActionResult> SkipQuestion(CancellationToken cancellationToken)
-    {
-        var command = new SkipQuestionCommand(HttpContext.GetCandidateId());
-        var result = await sender.Send(command, cancellationToken);
-        
-        return result.IsFailure ? result.ToProblem() : Accepted();
-    }
-    
-    [HttpPost("finish")]
-    public async Task<IActionResult> FinishSession(CancellationToken cancellationToken = default)
+    [HttpPatch]
+    public async Task<IActionResult> PatchCurrentInterviewSession([FromBody] PatchCurrentInterviewSessionRequest request, CancellationToken cancellationToken)
     {
         var command = new FinishInterviewSessionCommand(HttpContext.GetCandidateId());
         var result = await sender.Send(command, cancellationToken);

@@ -125,7 +125,7 @@ public sealed class IntegrationTestWebAppFactory : WebApplicationFactory<Program
     {
         using var client = CreateApiClient();
         using var response = await client.PostAsJsonAsync(
-            "/api/v1/users/register",
+            "/api/v1/users",
             new RegisterUserRequest(email, password),
             cancellationToken);
 

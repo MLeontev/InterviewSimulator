@@ -38,7 +38,7 @@ public abstract class InterviewIntegrationTestBase : BaseIntegrationTest
     protected async Task<Guid> CreateSessionAsync(AuthorizedUserContext userContext)
     {
         using var response = await userContext.Client.PostAsJsonAsync(
-            "/api/v1/interview-session",
+            "/api/v1/interview-sessions",
             new CreateSessionRequest(TestData.PythonMiddlePresetId));
 
         response.StatusCode.Should().Be(HttpStatusCode.Created);

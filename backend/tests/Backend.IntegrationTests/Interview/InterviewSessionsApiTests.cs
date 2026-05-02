@@ -115,7 +115,7 @@ public sealed class InterviewSessionsApiTests : InterviewIntegrationTestBase
         await MarkSessionAiEvaluationFailedAsync(sessionId, retryCount: 2);
 
         using var response = await userContext.Client.PostAsync(
-            $"/api/v1/interview-sessions/{sessionId}/ai-retry",
+            $"/api/v1/interview-sessions/{sessionId}/ai-evaluations",
             content: null);
 
         response.StatusCode.Should().Be(HttpStatusCode.Accepted);
@@ -144,7 +144,7 @@ public sealed class InterviewSessionsApiTests : InterviewIntegrationTestBase
         var sessionId = await CreateSessionAsync(userContext);
 
         using var response = await userContext.Client.PostAsync(
-            $"/api/v1/interview-sessions/{sessionId}/ai-retry",
+            $"/api/v1/interview-sessions/{sessionId}/ai-evaluations",
             content: null);
 
         response.StatusCode.Should().Be(HttpStatusCode.UnprocessableEntity);

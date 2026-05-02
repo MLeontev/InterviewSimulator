@@ -1,4 +1,5 @@
 using Framework.Controllers;
+using Interview.Presentation.Requests;
 using Interview.UseCases.InterviewSessions.Commands;
 using Interview.UseCases.InterviewSessions.Queries;
 using MediatR;
@@ -13,8 +14,17 @@ namespace Interview.Presentation.Controllers;
 [Route("api/v1/interview-sessions")]
 public class InterviewSessionsController(ISender sender) : ControllerBase
 {
-    [HttpGet("history")]
-    public async Task<IActionResult> GetHistory(CancellationToken cancellationToken)
+    [HttpPost]
+    public async Task<IActionResult> CreateSession([FromBody] CreateSessionRequest request, CancellationToken cancellationToken)
+    {
+        var command = new CreateInterviewSessionCommand(HttpContext.GetCandidateId(), request.InterviewPresetId);
+        var result = await sender.Send(command, cancellationToken);
+
+        return result.IsFailure ? result.ToProblem() : Created();
+    }
+    
+    [HttpGet]
+    public async Task<IActionResult> GetSessions(CancellationToken cancellationToken)
     {
         var query = new GetInterviewSessionHistoryQuery(HttpContext.GetCandidateId());
         var result = await sender.Send(query, cancellationToken);
@@ -31,8 +41,8 @@ public class InterviewSessionsController(ISender sender) : ControllerBase
         return result.IsFailure ? result.ToProblem() : Ok(result.Value);
     }
 
-    [HttpPost("{sessionId:guid}/ai-retry")]
-    public async Task<IActionResult> RetryAiEvaluation(Guid sessionId, CancellationToken cancellationToken)
+    [HttpPost("{sessionId:guid}/ai-evaluations")]
+    public async Task<IActionResult> CreateAiEvaluation(Guid sessionId, CancellationToken cancellationToken)
     {
         var command = new RetrySessionAiEvaluationCommand(HttpContext.GetCandidateId(), sessionId);
         var result = await sender.Send(command, cancellationToken);

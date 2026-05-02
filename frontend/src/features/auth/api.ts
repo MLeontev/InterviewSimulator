@@ -21,7 +21,7 @@ export const getMe = () =>
 
 export const registerUser = (request: RegisterUserRequest) =>
   api
-    .post<RegisterUserResponse>('/v1/users/register', request, {
+    .post<RegisterUserResponse>('/v1/users', request, {
       skipErrorToast: true,
     })
     .then((r) => r.data);

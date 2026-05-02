@@ -52,7 +52,7 @@ public sealed class InterviewSessionApiTests : InterviewIntegrationTestBase
         await CreateSessionAsync(userContext);
 
         using var response = await userContext.Client.PostAsJsonAsync(
-            "/api/v1/interview-session",
+            "/api/v1/interview-sessions",
             new CreateSessionRequest(TestData.PythonMiddlePresetId));
 
         response.StatusCode.Should().Be(HttpStatusCode.Conflict);
@@ -71,19 +71,19 @@ public sealed class InterviewSessionApiTests : InterviewIntegrationTestBase
 
         var sessionId = await CreateSessionAsync(userContext);
 
-        using (var startResponse = await userContext.Client.PostAsync("/api/v1/interview-session/question/start", content: null))
+        using (var startResponse = await StartQuestionAsync(userContext.Client))
         {
             startResponse.StatusCode.Should().Be(HttpStatusCode.NoContent);
         }
 
         using (var submitResponse = await userContext.Client.PostAsJsonAsync(
-                   "/api/v1/interview-session/question/submit-theory",
+                   "/api/v1/interview-sessions/current/question/theory-answers",
                    new SubmitTheoryRequest("  my theory answer  ")))
         {
             submitResponse.StatusCode.Should().Be(HttpStatusCode.Accepted);
         }
 
-        using var response = await userContext.Client.GetAsync("/api/v1/interview-session");
+        using var response = await userContext.Client.GetAsync("/api/v1/interview-sessions/current");
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
 
@@ -104,7 +104,7 @@ public sealed class InterviewSessionApiTests : InterviewIntegrationTestBase
         var sessionId = await CreateSessionAsync(userContext);
         var codingQuestion = await MakeCodingQuestionCurrentAsync(sessionId);
 
-        using var response = await userContext.Client.GetAsync("/api/v1/interview-session/question");
+        using var response = await userContext.Client.GetAsync("/api/v1/interview-sessions/current/question");
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
 
@@ -134,7 +134,7 @@ public sealed class InterviewSessionApiTests : InterviewIntegrationTestBase
 
         var sessionId = await CreateSessionAsync(userContext);
 
-        using var response = await userContext.Client.PostAsync("/api/v1/interview-session/question/start", content: null);
+        using var response = await StartQuestionAsync(userContext.Client);
 
         response.StatusCode.Should().Be(HttpStatusCode.NoContent);
 
@@ -153,13 +153,13 @@ public sealed class InterviewSessionApiTests : InterviewIntegrationTestBase
         var sessionId = await CreateSessionAsync(userContext);
         await LeaveOnlyFirstQuestionActiveAsync(sessionId);
 
-        using (var startResponse = await userContext.Client.PostAsync("/api/v1/interview-session/question/start", content: null))
+        using (var startResponse = await StartQuestionAsync(userContext.Client))
         {
             startResponse.StatusCode.Should().Be(HttpStatusCode.NoContent);
         }
 
         using var response = await userContext.Client.PostAsJsonAsync(
-            "/api/v1/interview-session/question/submit-theory",
+            "/api/v1/interview-sessions/current/question/theory-answers",
             new SubmitTheoryRequest("  final theory answer  "));
 
         response.StatusCode.Should().Be(HttpStatusCode.Accepted);
@@ -181,13 +181,13 @@ public sealed class InterviewSessionApiTests : InterviewIntegrationTestBase
 
         await CreateSessionAsync(userContext);
 
-        using (var startResponse = await userContext.Client.PostAsync("/api/v1/interview-session/question/start", content: null))
+        using (var startResponse = await StartQuestionAsync(userContext.Client))
         {
             startResponse.StatusCode.Should().Be(HttpStatusCode.NoContent);
         }
 
         using var response = await userContext.Client.PostAsJsonAsync(
-            "/api/v1/interview-session/question/submit-theory",
+            "/api/v1/interview-sessions/current/question/theory-answers",
             new SubmitTheoryRequest("   "));
 
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
@@ -208,7 +208,7 @@ public sealed class InterviewSessionApiTests : InterviewIntegrationTestBase
         var sessionId = await CreateSessionAsync(userContext);
         await MakeCodingQuestionCurrentAsync(sessionId);
 
-        using (var startResponse = await userContext.Client.PostAsync("/api/v1/interview-session/question/start", content: null))
+        using (var startResponse = await StartQuestionAsync(userContext.Client))
         {
             startResponse.StatusCode.Should().Be(HttpStatusCode.NoContent);
         }
@@ -216,7 +216,7 @@ public sealed class InterviewSessionApiTests : InterviewIntegrationTestBase
         const string code = "print('hello')";
 
         using var response = await userContext.Client.PostAsJsonAsync(
-            "/api/v1/interview-session/question/submit-draft-code",
+            "/api/v1/interview-sessions/current/question/draft-code-submissions",
             new SubmitDraftCodeRequest(code));
 
         response.StatusCode.Should().Be(HttpStatusCode.Accepted);
@@ -251,13 +251,13 @@ public sealed class InterviewSessionApiTests : InterviewIntegrationTestBase
         var sessionId = await CreateSessionAsync(userContext);
         await MakeCodingQuestionCurrentAsync(sessionId);
 
-        using (var startResponse = await userContext.Client.PostAsync("/api/v1/interview-session/question/start", content: null))
+        using (var startResponse = await StartQuestionAsync(userContext.Client))
         {
             startResponse.StatusCode.Should().Be(HttpStatusCode.NoContent);
         }
 
         using var response = await userContext.Client.PostAsJsonAsync(
-            "/api/v1/interview-session/question/submit-draft-code",
+            "/api/v1/interview-sessions/current/question/draft-code-submissions",
             new SubmitDraftCodeRequest("   "));
 
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
@@ -279,7 +279,9 @@ public sealed class InterviewSessionApiTests : InterviewIntegrationTestBase
         await MakeCodingQuestionCurrentAsync(sessionId);
         var (questionId, _) = await PrepareCodingQuestionEvaluatedAsync(sessionId);
 
-        using var response = await userContext.Client.PostAsync("/api/v1/interview-session/question/submit-code", content: null);
+        using var response = await userContext.Client.PostAsync(
+            "/api/v1/interview-sessions/current/question/code-submissions",
+            content: null);
 
         response.StatusCode.Should().Be(HttpStatusCode.Accepted);
 
@@ -297,16 +299,16 @@ public sealed class InterviewSessionApiTests : InterviewIntegrationTestBase
 
         var sessionId = await CreateSessionAsync(userContext);
 
-        using var response = await userContext.Client.PostAsync("/api/v1/interview-session/question/skip", content: null);
+        using var response = await SkipQuestionAsync(userContext.Client);
 
-        response.StatusCode.Should().Be(HttpStatusCode.Accepted);
+        response.StatusCode.Should().Be(HttpStatusCode.NoContent);
 
         var session = await GetSessionAsync(sessionId);
         var firstQuestion = session!.Questions.OrderBy(x => x.OrderIndex).First();
 
         firstQuestion.Status.Should().Be(InterviewQuestionStatus.Skipped);
 
-        using var currentQuestionResponse = await userContext.Client.GetAsync("/api/v1/interview-session/question");
+        using var currentQuestionResponse = await userContext.Client.GetAsync("/api/v1/interview-sessions/current/question");
         var currentQuestion = await currentQuestionResponse.Content.ReadFromJsonAsync<CurrentInterviewQuestionResponse>(ApiJsonOptions);
 
         currentQuestion.Should().NotBeNull();
@@ -320,12 +322,12 @@ public sealed class InterviewSessionApiTests : InterviewIntegrationTestBase
 
         var sessionId = await CreateSessionAsync(userContext);
 
-        using (var startResponse = await userContext.Client.PostAsync("/api/v1/interview-session/question/start", content: null))
+        using (var startResponse = await StartQuestionAsync(userContext.Client))
         {
             startResponse.StatusCode.Should().Be(HttpStatusCode.NoContent);
         }
 
-        using var response = await userContext.Client.PostAsync("/api/v1/interview-session/finish", content: null);
+        using var response = await FinishSessionAsync(userContext.Client);
 
         response.StatusCode.Should().Be(HttpStatusCode.NoContent);
 
@@ -343,28 +345,28 @@ public sealed class InterviewSessionApiTests : InterviewIntegrationTestBase
         using var userContext = await CreateAuthorizedCandidateAsync();
 
         var olderSessionId = await CreateSessionAsync(userContext);
-        using (var olderStartResponse = await userContext.Client.PostAsync("/api/v1/interview-session/question/start", content: null))
+        using (var olderStartResponse = await StartQuestionAsync(userContext.Client))
         {
             olderStartResponse.StatusCode.Should().Be(HttpStatusCode.NoContent);
         }
-        using (var olderFinishResponse = await userContext.Client.PostAsync("/api/v1/interview-session/finish", content: null))
+        using (var olderFinishResponse = await FinishSessionAsync(userContext.Client))
         {
             olderFinishResponse.StatusCode.Should().Be(HttpStatusCode.NoContent);
         }
         await SetSessionFinishedAtAsync(olderSessionId, new DateTime(2026, 04, 15, 8, 0, 0, DateTimeKind.Utc));
 
         var newerSessionId = await CreateSessionAsync(userContext);
-        using (var newerStartResponse = await userContext.Client.PostAsync("/api/v1/interview-session/question/start", content: null))
+        using (var newerStartResponse = await StartQuestionAsync(userContext.Client))
         {
             newerStartResponse.StatusCode.Should().Be(HttpStatusCode.NoContent);
         }
-        using (var newerFinishResponse = await userContext.Client.PostAsync("/api/v1/interview-session/finish", content: null))
+        using (var newerFinishResponse = await FinishSessionAsync(userContext.Client))
         {
             newerFinishResponse.StatusCode.Should().Be(HttpStatusCode.NoContent);
         }
         await SetSessionFinishedAtAsync(newerSessionId, new DateTime(2026, 04, 15, 9, 0, 0, DateTimeKind.Utc));
 
-        using var response = await userContext.Client.GetAsync("/api/v1/interview-sessions/history");
+        using var response = await userContext.Client.GetAsync("/api/v1/interview-sessions");
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
 
@@ -380,6 +382,23 @@ public sealed class InterviewSessionApiTests : InterviewIntegrationTestBase
     private sealed record SubmitTheoryRequest(string Answer);
 
     private sealed record SubmitDraftCodeRequest(string Code);
+
+    private sealed record PatchStatusRequest(string Status);
+
+    private static Task<HttpResponseMessage> StartQuestionAsync(HttpClient client) =>
+        client.PatchAsJsonAsync(
+            "/api/v1/interview-sessions/current/question",
+            new PatchStatusRequest("InProgress"));
+
+    private static Task<HttpResponseMessage> SkipQuestionAsync(HttpClient client) =>
+        client.PatchAsJsonAsync(
+            "/api/v1/interview-sessions/current/question",
+            new PatchStatusRequest("Skipped"));
+
+    private static Task<HttpResponseMessage> FinishSessionAsync(HttpClient client) =>
+        client.PatchAsJsonAsync(
+            "/api/v1/interview-sessions/current",
+            new PatchStatusRequest("Finished"));
 
     private sealed record ErrorResponse(string Code, string Description);
 
