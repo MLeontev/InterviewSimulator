@@ -13,6 +13,7 @@ using Interview.Presentation.Consumers;
 using Interview.UseCases;
 using InterviewSimulator.API.Extensions;
 using InterviewSimulator.API.Middleware;
+using InterviewSimulator.API.Swagger;
 using MassTransit;
 using Microsoft.AspNetCore.Mvc;
 using QuestionBank.Infrastructure.Implementation.DataAccess;
@@ -40,7 +41,7 @@ builder.Services.AddControllers()
 builder.Services.AddOpenApi();
 
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddAppSwagger(builder.Configuration);
 
 builder.Services.Configure<ApiBehaviorOptions>(options =>
 {
@@ -104,8 +105,7 @@ var app = builder.Build();
 
 app.UseExceptionHandler();
 
-app.UseSwagger();
-app.UseSwaggerUI();
+app.UseAppSwagger();
 
 app.MapOpenApi();
 
