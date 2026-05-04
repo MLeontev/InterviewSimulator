@@ -1,3 +1,15 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace Interview.Presentation.Requests;
 
-public sealed record SubmitDraftCodeRequest(string Code);
+/// <summary>
+/// Запрос на отправку черновика программного кода на тестовую проверку
+/// </summary>
+public record SubmitDraftCodeRequest
+{
+    /// <summary>
+    /// Исходный код решения
+    /// </summary>
+    [Required]
+    public string Code { get; init; } = string.Empty;
+}

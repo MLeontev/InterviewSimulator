@@ -9,6 +9,9 @@ public class Technology
     public string Description { get; set; } = string.Empty;
 }
 
+/// <summary>
+/// Категория технологии
+/// </summary>
 public enum TechnologyCategory
 {
     ProgrammingLanguage,

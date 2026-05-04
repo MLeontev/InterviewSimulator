@@ -14,7 +14,12 @@ internal class GetCurrentUserQueryHandler(IDbContext dbContext) : IRequestHandle
         var user = await dbContext.Users
             .AsNoTracking()
             .Where(x => x.IdentityId == request.IdentityId)
-            .Select(x => new CurrentUser(x.Id, x.Email, x.IdentityId))
+            .Select(x => new CurrentUser
+            {
+                Id = x.Id,
+                Email = x.Email,
+                IdentityId = x.IdentityId
+            })
             .FirstOrDefaultAsync(cancellationToken);
 
         if (user is null)
@@ -25,7 +30,23 @@ internal class GetCurrentUserQueryHandler(IDbContext dbContext) : IRequestHandle
     }
 }
 
-public record CurrentUser(
-    Guid Id,
-    string Email,
-    string IdentityId);
+/// <summary>
+/// Данные текущего пользователя
+/// </summary>
+public record CurrentUser
+{
+    /// <summary>
+    /// Идентификатор пользователя в базе приложения
+    /// </summary>
+    public Guid Id { get; init; }
+
+    /// <summary>
+    /// Адрес электронной почты пользователя
+    /// </summary>
+    public string Email { get; init; } = string.Empty;
+
+    /// <summary>
+    /// Идентификатор пользователя в сервисе аутентификации
+    /// </summary>
+    public string IdentityId { get; init; } = string.Empty;
+}

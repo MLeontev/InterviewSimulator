@@ -19,6 +19,8 @@ internal static class SwaggerExtensions
 
         services.AddSwaggerGen(options =>
         {
+            options.SupportNonNullableReferenceTypes();
+
             options.SwaggerDoc("v1", new OpenApiInfo
             {
                 Title = "Interview Simulator API",
@@ -40,10 +42,28 @@ internal static class SwaggerExtensions
                 }
             });
 
+            IncludeXmlComments(options, "Interview.Presentation.xml", includeControllerXmlComments: true);
+            IncludeXmlComments(options, "Interview.UseCases.xml");
+            IncludeXmlComments(options, "QuestionBank.Presentation.xml", includeControllerXmlComments: true);
+            IncludeXmlComments(options, "QuestionBank.UseCases.xml");
+            IncludeXmlComments(options, "Users.Presentation.xml", includeControllerXmlComments: true);
+            IncludeXmlComments(options, "Users.UseCases.xml");
+            IncludeXmlComments(options, "Framework.Domain.xml");
+
             options.OperationFilter<AuthorizeOperationFilter>();
         });
 
         return services;
+    }
+
+    private static void IncludeXmlComments(
+        Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenOptions options,
+        string fileName,
+        bool includeControllerXmlComments = false)
+    {
+        var filePath = Path.Combine(AppContext.BaseDirectory, fileName);
+        if (File.Exists(filePath))
+            options.IncludeXmlComments(filePath, includeControllerXmlComments);
     }
 
     public static WebApplication UseAppSwagger(this WebApplication app)

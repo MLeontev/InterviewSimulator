@@ -2,11 +2,21 @@ using System.Text.Json.Serialization;
 
 namespace Framework.Domain;
 
+/// <summary>
+/// Стандартная ошибка API
+/// </summary>
 public record Error
 {
     public static readonly Error None = new(string.Empty, string.Empty, ErrorType.None);
     
+    /// <summary>
+    /// Машиночитаемый код ошибки
+    /// </summary>
     public string Code { get; }
+
+    /// <summary>
+    /// Человекочитаемое описание причины ошибки
+    /// </summary>
     public string Description { get; }
     
     [JsonIgnore]

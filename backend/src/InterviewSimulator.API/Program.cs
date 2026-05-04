@@ -45,6 +45,8 @@ builder.Services.AddAppSwagger(builder.Configuration);
 
 builder.Services.Configure<ApiBehaviorOptions>(options =>
 {
+    options.SuppressMapClientErrors = true;
+
     options.InvalidModelStateResponseFactory = context =>
     {
         var errors = context.ModelState

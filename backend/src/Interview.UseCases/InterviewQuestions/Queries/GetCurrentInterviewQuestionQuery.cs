@@ -66,31 +66,119 @@ internal class GetCurrentInterviewQuestionQueryHandler(
     }
 }
 
+/// <summary>
+/// Текущее задание активной сессии собеседования
+/// </summary>
 public record CurrentInterviewQuestion
 {
+    /// <summary>
+    /// Идентификатор задания в рамках сессии
+    /// </summary>
     public Guid QuestionId { get; init; }
+
+    /// <summary>
+    /// Порядковый номер задания в сессии
+    /// </summary>
     public int OrderIndex { get; init; }
+
+    /// <summary>
+    /// Тип задания
+    /// </summary>
     public QuestionType Type { get; init; }
+
+    /// <summary>
+    /// Название задания
+    /// </summary>
     public string Title { get; init; } = string.Empty;
+
+    /// <summary>
+    /// Формулировка задания
+    /// </summary>
     public string Text { get; init; } = string.Empty;
+
+    /// <summary>
+    /// Код языка программирования для задачи на написание кода
+    /// </summary>
     public string? ProgrammingLanguageCode { get; init; }
+
+    /// <summary>
+    /// Состояние выполнения задания
+    /// </summary>
     public QuestionStatus Status { get; init; }
+
+    /// <summary>
+    /// Текущий ответ кандидата или последний отправленный код
+    /// </summary>
     public string? Answer { get; init; }
+
+    /// <summary>
+    /// Ограничение времени выполнения кода в миллисекундах
+    /// </summary>
     public int? TimeLimitMs { get; init; }
+
+    /// <summary>
+    /// Ограничение памяти выполнения кода в мегабайтах
+    /// </summary>
     public int? MemoryLimitMb { get; init; }
+
+    /// <summary>
+    /// Общий вердикт последней проверки кода
+    /// </summary>
     public Verdict OverallVerdict { get; init; }
+
+    /// <summary>
+    /// Сообщение об ошибке проверки кода
+    /// </summary>
     public string? ErrorMessage { get; init; }
+
+    /// <summary>
+    /// Открытые тест-кейсы задачи
+    /// </summary>
     public IReadOnlyList<TestCaseDto> TestCases { get; init; } = [];
 }
 
+/// <summary>
+/// Открытый тест-кейс задачи на написание кода
+/// </summary>
 public record TestCaseDto
 {
+    /// <summary>
+    /// Порядковый номер тест-кейса
+    /// </summary>
     public int OrderIndex { get; init; }
+
+    /// <summary>
+    /// Входные данные тест-кейса
+    /// </summary>
     public string Input { get; init; } = string.Empty;
+
+    /// <summary>
+    /// Ожидаемый вывод программы
+    /// </summary>
     public string ExpectedOutput { get; init; } = string.Empty;
+
+    /// <summary>
+    /// Фактический вывод программы после последней проверки
+    /// </summary>
     public string? ActualOutput { get; init; }
+
+    /// <summary>
+    /// Вердикт выполнения тест-кейса
+    /// </summary>
     public Verdict Verdict { get; init; }
+
+    /// <summary>
+    /// Время выполнения тест-кейса в миллисекундах
+    /// </summary>
     public double? ExecutionTimeMs { get; init; }
+
+    /// <summary>
+    /// Использованная память в мегабайтах
+    /// </summary>
     public double? MemoryUsedMb { get; init; }
+
+    /// <summary>
+    /// Сообщение об ошибке выполнения тест-кейса
+    /// </summary>
     public string? ErrorMessage { get; init; }
 }

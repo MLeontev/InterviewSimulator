@@ -1,5 +1,8 @@
 namespace Interview.Domain.Enums;
 
+/// <summary>
+/// Вердикт автоматической проверки программного кода
+/// </summary>
 public enum Verdict
 {
     None,

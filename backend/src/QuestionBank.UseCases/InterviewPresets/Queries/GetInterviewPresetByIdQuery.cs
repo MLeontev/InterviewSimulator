@@ -6,17 +6,57 @@ using QuestionBank.Infrastructure.Interfaces.DataAccess;
 
 namespace QuestionBank.UseCases.InterviewPresets.Queries;
 
-public record InterviewPresetDto(
-    Guid Id,
-    string Name,
-    string Grade,
-    string Specialization,
-    IReadOnlyList<TechnologyDto> Technologies);
+/// <summary>
+/// Подробная информация о пресете собеседования
+/// </summary>
+public record InterviewPresetDto
+{
+    /// <summary>
+    /// Идентификатор пресета собеседования
+    /// </summary>
+    public Guid Id { get; init; }
 
-public record TechnologyDto(
-    Guid Id,
-    string Name,
-    TechnologyCategory Category);
+    /// <summary>
+    /// Название пресета собеседования
+    /// </summary>
+    public string Name { get; init; } = string.Empty;
+
+    /// <summary>
+    /// Уровень подготовки, для которого предназначен пресет
+    /// </summary>
+    public string Grade { get; init; } = string.Empty;
+
+    /// <summary>
+    /// Специализация, для которой предназначен пресет
+    /// </summary>
+    public string Specialization { get; init; } = string.Empty;
+
+    /// <summary>
+    /// Технологии, входящие в пресет
+    /// </summary>
+    public IReadOnlyList<TechnologyDto> Technologies { get; init; } = [];
+}
+
+/// <summary>
+/// Технология из состава пресета собеседования
+/// </summary>
+public record TechnologyDto
+{
+    /// <summary>
+    /// Идентификатор технологии
+    /// </summary>
+    public Guid Id { get; init; }
+
+    /// <summary>
+    /// Название технологии
+    /// </summary>
+    public string Name { get; init; } = string.Empty;
+
+    /// <summary>
+    /// Категория технологии
+    /// </summary>
+    public TechnologyCategory Category { get; init; }
+}
 
 public record GetInterviewPresetByIdQuery(Guid PresetId) : IRequest<Result<InterviewPresetDto>>;
 
@@ -31,10 +71,21 @@ internal class GetInterviewPresetByIdQueryHandler(IDbContext dbContext) : IReque
             .Include(x => x.Specialization)
             .Include(x => x.Technologies)
             .ThenInclude(t => t.Technology)
-            .Select(x => new InterviewPresetDto(x.Id, x.Name, x.Grade.Name, x.Specialization.Name,
-                x.Technologies
-                    .Select(t => new TechnologyDto(t.Technology.Id, t.Technology.Name, t.Technology.Category))
-                    .ToList()))
+            .Select(x => new InterviewPresetDto
+            {
+                Id = x.Id,
+                Name = x.Name,
+                Grade = x.Grade.Name,
+                Specialization = x.Specialization.Name,
+                Technologies = x.Technologies
+                    .Select(t => new TechnologyDto
+                    {
+                        Id = t.Technology.Id,
+                        Name = t.Technology.Name,
+                        Category = t.Technology.Category
+                    })
+                    .ToList()
+            })
             .FirstOrDefaultAsync(cancellationToken);
 
         if (preset is null)

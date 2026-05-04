@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using FluentValidation;
 using Framework.Domain;
 using MediatR;
@@ -6,7 +7,23 @@ using Users.Infrastructure.Interfaces.Identity;
 
 namespace Users.UseCases.Users.Commands;
 
-public record RegisterUserCommand(string Email, string Password) : IRequest<Result<RegisterUserDto>>;
+/// <summary>
+/// Запрос на регистрацию пользователя
+/// </summary>
+public record RegisterUserCommand : IRequest<Result<RegisterUserDto>>
+{
+    /// <summary>
+    /// Адрес электронной почты пользователя
+    /// </summary>
+    [Required]
+    public string Email { get; init; } = string.Empty;
+
+    /// <summary>
+    /// Пароль пользователя
+    /// </summary>
+    [Required]
+    public string Password { get; init; } = string.Empty;
+}
 
 internal class RegisterUserCommandValidator : AbstractValidator<RegisterUserCommand>
 {
@@ -42,8 +59,26 @@ internal class RegisterUserCommandHandler(
         dbContext.Users.Add(user);
         await dbContext.SaveChangesAsync(cancellationToken);
         
-        return new RegisterUserDto(user.Id, user.IdentityId);
+        return new RegisterUserDto
+        {
+            UserId = user.Id,
+            IdentityId = user.IdentityId
+        };
     }
 }
 
-public record RegisterUserDto(Guid UserId, string IdentityId);
+/// <summary>
+/// Результат регистрации пользователя
+/// </summary>
+public record RegisterUserDto
+{
+    /// <summary>
+    /// Идентификатор пользователя в базе приложения
+    /// </summary>
+    public Guid UserId { get; init; }
+
+    /// <summary>
+    /// Идентификатор пользователя в сервисе аутентификации
+    /// </summary>
+    public string IdentityId { get; init; } = string.Empty;
+}

@@ -41,19 +41,58 @@ internal class GetInterviewSessionHistoryQueryHandler(IDbContext dbContext)
     }
 }
 
+/// <summary>
+/// Элемент истории завершенных сессий собеседований
+/// </summary>
 public record InterviewSessionHistoryItem
 {
+    /// <summary>
+    /// Идентификатор сессии собеседования
+    /// </summary>
     public Guid SessionId { get; init; }
+
+    /// <summary>
+    /// Идентификатор пресета собеседования
+    /// </summary>
     public Guid InterviewPresetId { get; init; }
+
+    /// <summary>
+    /// Название пресета собеседования
+    /// </summary>
     public string InterviewPresetName { get; init; } = string.Empty;
 
+    /// <summary>
+    /// Состояние сессии собеседования
+    /// </summary>
     public InterviewStatus Status { get; init; }
+
+    /// <summary>
+    /// Итоговый вердикт по сессии собеседования
+    /// </summary>
     public SessionVerdict SessionVerdict { get; init; }
 
+    /// <summary>
+    /// Дата и время начала сессии
+    /// </summary>
     public DateTime StartedAt { get; init; }
+
+    /// <summary>
+    /// Плановая дата и время завершения сессии
+    /// </summary>
     public DateTime PlannedEndAt { get; init; }
+
+    /// <summary>
+    /// Фактическая дата и время завершения сессии
+    /// </summary>
     public DateTime? FinishedAt { get; init; }
 
+    /// <summary>
+    /// Общее количество заданий в сессии
+    /// </summary>
     public int TotalQuestions { get; init; }
+
+    /// <summary>
+    /// Количество заданий, выполнение которых было начато, завершено или пропущено
+    /// </summary>
     public int CompletedQuestions { get; init; }
 }

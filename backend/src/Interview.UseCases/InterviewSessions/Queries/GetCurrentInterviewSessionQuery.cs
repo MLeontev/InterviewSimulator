@@ -36,12 +36,38 @@ internal class GetCurrentInterviewSessionQueryHandler(IDbContext dbContext) : IR
     }
 }
 
+/// <summary>
+/// Текущая активная сессия собеседования
+/// </summary>
 public record CurrentInterviewSession
 {
+    /// <summary>
+    /// Идентификатор сессии собеседования
+    /// </summary>
     public Guid SessionId { get; init; }
+
+    /// <summary>
+    /// Состояние сессии собеседования
+    /// </summary>
     public InterviewStatus Status { get; init; }
+
+    /// <summary>
+    /// Дата и время начала сессии
+    /// </summary>
     public DateTime StartedAt { get; init; }
+
+    /// <summary>
+    /// Плановая дата и время завершения сессии
+    /// </summary>
     public DateTime PlannedEndAt { get; init; }
+
+    /// <summary>
+    /// Общее количество заданий в сессии
+    /// </summary>
     public int TotalQuestions { get; init; }
+
+    /// <summary>
+    /// Количество заданий, по которым кандидат уже отправил ответ или решение
+    /// </summary>
     public int AnsweredQuestions { get; init; }
 }

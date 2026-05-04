@@ -1,14 +1,17 @@
 namespace Interview.Domain.Enums;
 
+/// <summary>
+/// Состояние выполнения задания в сессии собеседования
+/// </summary>
 public enum QuestionStatus
 {
-    NotStarted,         // Задача ещё не начата
-    InProgress,         // Пользователь начал выполнение
-    Skipped,            // Пропущена
-    EvaluatingCode,     // Проверка выполнения черновика кода
-    EvaluatedCode,      // Результат тестов готов
-    Submitted,          // Отправлен финальный ответ
-    EvaluatingAi,       // AI оценивает финальную попытку
-    EvaluatedAi,        // AI завершил оценку
-    AiEvaluationFailed  // AI-оценка не удалась после всех ретраев
+    NotStarted,
+    InProgress,
+    Skipped,
+    EvaluatingCode,
+    EvaluatedCode,
+    Submitted,
+    EvaluatingAi,
+    EvaluatedAi,
+    AiEvaluationFailed
 }

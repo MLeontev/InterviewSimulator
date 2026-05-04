@@ -22,6 +22,9 @@ public class Question
     public List<TestCase> TestCases { get; set; } = [];
 }
 
+/// <summary>
+/// Тип задания в банке вопросов
+/// </summary>
 public enum QuestionType
 {
     Theory,
