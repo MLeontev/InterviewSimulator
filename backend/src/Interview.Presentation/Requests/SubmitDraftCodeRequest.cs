@@ -10,6 +10,5 @@ public record SubmitDraftCodeRequest
     /// <summary>
     /// Исходный код решения
     /// </summary>
-    [Required]
     public string Code { get; init; } = string.Empty;
 }

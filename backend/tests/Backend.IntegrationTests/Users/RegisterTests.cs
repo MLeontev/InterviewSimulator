@@ -23,7 +23,7 @@ public sealed class RegisterTests : BaseIntegrationTest
         using var client = CreateApiClient();
         using var response = await client.PostAsJsonAsync("/api/v1/users", new RegisterRequest(email, password));
 
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response.StatusCode.Should().Be(HttpStatusCode.Created);
 
         var payload = await response.Content.ReadFromJsonAsync<RegisterResponse>();
 

@@ -15,13 +15,11 @@ public record RegisterUserCommand : IRequest<Result<RegisterUserDto>>
     /// <summary>
     /// Адрес электронной почты пользователя
     /// </summary>
-    [Required]
     public string Email { get; init; } = string.Empty;
 
     /// <summary>
     /// Пароль пользователя
     /// </summary>
-    [Required]
     public string Password { get; init; } = string.Empty;
 }
 

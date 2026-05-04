@@ -10,6 +10,5 @@ public record SubmitTheoryRequest
     /// <summary>
     /// Текстовый ответ кандидата
     /// </summary>
-    [Required]
     public string Answer { get; init; } = string.Empty;
 }
