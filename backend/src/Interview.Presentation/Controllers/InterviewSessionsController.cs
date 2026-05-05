@@ -64,10 +64,12 @@ public class InterviewSessionsController(ISender sender) : ControllerBase
     /// <response code="200">История сессий</response>
     /// <response code="401">Пользователь не авторизован</response>
     /// <response code="403">Доступ к ресурсу запрещен</response>
+    /// <response code="404">Пользователь не найден в базе приложения</response>
     [HttpGet]
     [ProducesResponseType(typeof(IReadOnlyList<InterviewSessionHistoryItem>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(typeof(Error), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetSessions(CancellationToken cancellationToken)
     {
         var query = new GetInterviewSessionHistoryQuery(HttpContext.GetCandidateId());

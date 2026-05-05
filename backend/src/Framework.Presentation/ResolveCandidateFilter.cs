@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using Framework.Domain;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Users.ModuleContract;
@@ -20,11 +21,8 @@ public class ResolveCandidateFilter(IUsersApi usersApi) : IAsyncActionFilter
         var candidateId = await usersApi.GetUserIdByIdentityIdAsync(identityId, context.HttpContext.RequestAborted);
         if (candidateId is null)
         {
-            context.Result = new NotFoundObjectResult(new
-            {
-                code = "USER_NOT_FOUND",
-                message = "Пользователь не найден. Сначала зарегистрируйтесь."
-            });
+            context.Result = new NotFoundObjectResult(
+                Error.NotFound("USER_NOT_FOUND", "Пользователь не найден. Сначала зарегистрируйтесь."));
             return;
         }
         
