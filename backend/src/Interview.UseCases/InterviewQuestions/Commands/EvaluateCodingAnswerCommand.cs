@@ -17,6 +17,8 @@ internal class EvaluateCodingAnswerCommandHandler(
     IAiEvaluationService aiEvaluationService,
     IOptions<InterviewAiRetryOptions> options) : IRequestHandler<EvaluateCodingAnswerCommand, Result>
 {
+    private const int MaxLlmTextLength = 500;
+    
     private readonly InterviewAiRetryOptions _retry = options.Value;
     
     public async Task<Result> Handle(EvaluateCodingAnswerCommand request, CancellationToken cancellationToken)
@@ -50,11 +52,11 @@ internal class EvaluateCodingAnswerCommandHandler(
                     PassedCount: passedCount,
                     TotalTests: question.TestCases.Count,
                     FirstFailedTest: failedTest is not null ? new CodingFailedTestCase(
-                        failedTest.Input,
-                        failedTest.ExpectedOutput,
-                        failedTest.ActualOutput,
+                        TruncateForLlm(failedTest.Input),
+                        TruncateForLlm(failedTest.ExpectedOutput),
+                        TruncateForLlm(failedTest.ActualOutput),
                         failedTest.Verdict.ToString(),
-                        failedTest.ErrorMessage) : null),
+                        TruncateForLlm(failedTest.ErrorMessage)) : null),
                 cancellationToken);
 
             var applyResult = question.ApplyAiEvaluationSuccess(
@@ -103,5 +105,14 @@ internal class EvaluateCodingAnswerCommandHandler(
             await dbContext.SaveChangesAsync(cancellationToken);
             return Result.Failure(Error.External("AI_EVALUATION_FAILED", "Не удалось выполнить AI-оценку"));
         }
+    }
+    
+    private static string TruncateForLlm(string? text)
+    {
+        if (string.IsNullOrWhiteSpace(text)) return string.Empty;
+        
+        if (text.Length <= MaxLlmTextLength) return text;
+        
+        return $"{text[..MaxLlmTextLength]}... [Текст обрезан. Исходный размер: {text.Length} символов]";
     }
 }

@@ -16,6 +16,7 @@ export function TheoryQuestion({
   onSkip,
 }: Props) {
   const [answer, setAnswer] = useState(() => question.answer ?? '');
+  const maxLength = 4000;
 
   return (
     <div className='py-10'>
@@ -28,6 +29,7 @@ export function TheoryQuestion({
 
       <textarea
         value={answer}
+        maxLength={maxLength}
         onChange={(e) => setAnswer(e.target.value)}
         placeholder='Введите ваш ответ...'
         className='w-full min-h-56 border border-gray-300 rounded-xl px-5 py-4 placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-indigo-200 focus:border-indigo-300'

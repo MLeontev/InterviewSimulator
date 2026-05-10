@@ -13,7 +13,8 @@ internal class SubmitTheoryAnswerCommandValidator : AbstractValidator<SubmitTheo
     public SubmitTheoryAnswerCommandValidator()
     {
         RuleFor(x => x.Answer)
-            .NotEmpty().WithMessage("Ответ не может быть пустым");
+            .NotEmpty().WithMessage("Ответ не может быть пустым")
+            .MaximumLength(4000).WithMessage("Ответ превышает допустимую длину в 4000 символов");
     }
 }
 

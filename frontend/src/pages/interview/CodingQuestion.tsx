@@ -17,6 +17,8 @@ interface Props {
   onSkip: () => void;
 }
 
+const MAX_CODE_LENGTH = 20000;
+
 function verdictLabel(verdict: Verdict) {
   switch (verdict) {
     case Verdict.OK:
@@ -84,6 +86,14 @@ export function CodingQuestion({
   //   const hasAnyRunResult = () =>
   //     question.testCases.some((tc) => tc.verdict !== Verdict.None);
 
+  const handleRunDraftClick = () => {
+    if (normalizedCode.length > MAX_CODE_LENGTH) {
+      toast.error(`Код слишком длинный. Максимум ${MAX_CODE_LENGTH} символов.`);
+      return;
+    }
+    void onSubmitDraftCode(normalizedCode);
+  };
+  
   const handleSubmitFinalClick = () => {
     if (isSubmitting) return;
 
@@ -213,7 +223,7 @@ export function CodingQuestion({
 
         <Button
           disabled={!canRunDraft}
-          onClick={() => void onSubmitDraftCode(code.trim())}
+          onClick={handleRunDraftClick}
         >
           {question.status === QuestionStatus.EvaluatingCode
             ? 'Проверка...'

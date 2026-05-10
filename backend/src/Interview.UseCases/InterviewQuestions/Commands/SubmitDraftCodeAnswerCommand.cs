@@ -15,7 +15,8 @@ internal class SubmitDraftCodeAnswerCommandValidator : AbstractValidator<SubmitD
     public SubmitDraftCodeAnswerCommandValidator()
     {
         RuleFor(x => x.Code)
-            .NotEmpty().WithMessage("Код не может быть пустым");
+            .NotEmpty().WithMessage("Код не может быть пустым")
+            .MaximumLength(20000).WithMessage("Код слишком длинный (максимум 20 000 символов)");
     }
 }
 
