@@ -42,6 +42,7 @@ public static class DependencyInjection
         services.AddScoped<ISeed, PythonTheoryQuestionsSeed>();
         services.AddScoped<ISeed, CSharpTheoryQuestionsSeed>();
         services.AddScoped<ISeed, CppTheoryQuestionsSeed>();
+        
         services.AddScoped<ISeed, CodingQuestionsSeed>();
         services.AddScoped<ISeed, JuniorCodingQuestionsSeed>();
 

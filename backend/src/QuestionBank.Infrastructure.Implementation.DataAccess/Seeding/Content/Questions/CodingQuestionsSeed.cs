@@ -63,7 +63,13 @@ public class CodingQuestionsSeed : QuestionSeedBase
                         """,
                     ExpectedOutput: "[0,1]",
                     IsHidden: true,
-                    OrderIndex: 3)
+                    OrderIndex: 3),
+                
+                new TestCaseDefinition(
+                    Input: $"[{string.Join(",", Enumerable.Range(1, 20000))}]\n39999",
+                    ExpectedOutput: "[19998,19999]",
+                    IsHidden: true,
+                    OrderIndex: 4)
             ]
         ),
 
