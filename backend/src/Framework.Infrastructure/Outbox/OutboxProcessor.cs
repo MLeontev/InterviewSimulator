@@ -28,7 +28,7 @@ public class OutboxProcessor<TContext>(
             }
 
             await Task.Delay(
-                TimeSpan.FromSeconds(_options.PollingIntervalSeconds), 
+                TimeSpan.FromMilliseconds(_options.PollingIntervalMs), 
                 stoppingToken);
         }
     }

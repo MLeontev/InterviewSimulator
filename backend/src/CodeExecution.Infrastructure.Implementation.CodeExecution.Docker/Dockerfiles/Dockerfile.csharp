@@ -4,3 +4,8 @@ RUN apt-get update && \
     apt-get install -y time && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
+
+RUN dotnet new console --framework net8.0 -o /template && \
+    cd /template && \
+    dotnet restore && \
+    dotnet build -c Release
