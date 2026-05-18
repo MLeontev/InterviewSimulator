@@ -12,7 +12,7 @@ internal class CodeExecutionWorker(
     IServiceProvider serviceProvider,
     ILogger<CodeExecutionWorker> logger) : BackgroundService
 {
-    private const int DelayMs = 500;
+    private const int DelayMs = 1000;
     
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
