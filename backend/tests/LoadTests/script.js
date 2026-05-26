@@ -6,6 +6,32 @@ const KEYCLOAK_URL = 'https://auth.siminterview.ru';
 const REALM = 'InterviewSimulator';
 const CLIENT_ID = 'interview-public-client';
 
+// 50 VU
+// export const options = {
+//   stages: [
+//     { duration: '30s', target: 50 },
+//     { duration: '2m', target: 50 },
+//     { duration: '30s', target: 0 },
+//   ],
+//   thresholds: {
+//     http_req_duration: ['p(95)<500'],
+//   },
+// };
+
+// 100 VU
+// export const options = {
+//   stages: [
+//     { duration: '30s', target: 50 },
+//     { duration: '1m', target: 100 },
+//     { duration: '1m', target: 100 },
+//     { duration: '30s', target: 0 },
+//   ],
+//   thresholds: {
+//     http_req_duration: ['p(95)<500'],
+//   },
+// };
+
+// 150 VU
 export const options = {
   stages: [
     { duration: '30s', target: 50 },
@@ -18,13 +44,25 @@ export const options = {
   },
 };
 
+// 200 VU
+// export const options = {
+//   stages: [
+//     { duration: '30s', target: 200 },
+//     { duration: '2m', target: 200 },
+//     { duration: '30s', target: 0 },
+//   ],
+//   thresholds: {
+//     http_req_duration: ['p(95)<500'],
+//   },
+// };
+
 export function setup() {
   const res = http.post(
     `${KEYCLOAK_URL}/realms/${REALM}/protocol/openid-connect/token`,
     {
       grant_type: 'password',
       client_id: CLIENT_ID,
-      username: 'load@test.com',
+      username: 'load@test1.com',
       password: 'loadpassword',
     },
   );
