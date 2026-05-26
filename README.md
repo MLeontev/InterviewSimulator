@@ -101,15 +101,16 @@ InterviewSimulator - это онлайн-платформа для симуля�
 
 ### 1. Юнит-тесты домена
 ```bash
-dotnet test --filter "FullyQualifiedName!~IntegrationTests"
+dotnet test backend/tests/Interview.Domain.Tests
+dotnet test backend/tests/CodeExecution.Domain.Tests
 ```
 
 ### 2. Интеграционные тесты
 ```bash
-dotnet test backend/tests/Backend.IntegrationTests --filter "FullyQualifiedName!~DockerCodeExecutor"
+dotnet test backend/tests/Backend.IntegrationTests --filter "Category!=Docker"
 ```
 
 ### 3. Тесты Docker-песочницы
 ```bash
-dotnet test backend/tests/Backend.IntegrationTests --filter "FullyQualifiedName~DockerCodeExecutor"
+dotnet test backend/tests/Backend.IntegrationTests --filter "Category=Docker"
 ```
