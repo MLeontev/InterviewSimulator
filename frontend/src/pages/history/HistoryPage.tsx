@@ -112,14 +112,15 @@ export function HistoryPage() {
   }, [loadData]);
 
   return (
-    <div className='max-w-5xl mx-auto py-12'>
-      <div className='flex items-center justify-between mb-8'>
-        <h1 className='text-2xl font-semibold text-gray-900'>
+    <div className='max-w-5xl mx-auto py-6 sm:py-10 px-4 sm:px-0'>
+      <div className='flex flex-col sm:flex-row gap-4 items-center sm:items-center justify-between mb-8 text-center'>
+        <h1 className='text-2xl font-semibold text-gray-900 w-full sm:w-auto'>
           Мои собеседования
         </h1>
         {!currentSession && (
           <Button
             variant='primary'
+            className='w-full sm:w-auto'
             onClick={() => navigate(currentSession ? '/interview' : '/presets')}
           >
             Начать новое собеседование
@@ -129,7 +130,7 @@ export function HistoryPage() {
 
       {!isLoadingCurrentSession && currentSession && (
         <section className='border border-indigo-200 bg-indigo-50 rounded-xl p-4 mb-8'>
-          <div className='flex items-center justify-between'>
+          <div className='flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between'>
             <div>
               <div className='text-lg font-semibold text-gray-900 mb-1'>
                 Есть активная сессия
@@ -145,7 +146,11 @@ export function HistoryPage() {
                 Осталось времени: {formatTimeLeft(currentSession.plannedEndAt)}
               </div>
             </div>
-            <Button variant='primary' onClick={() => navigate('/interview')}>
+            <Button
+              variant='primary'
+              className='w-full sm:w-auto'
+              onClick={() => navigate('/interview')}
+            >
               Продолжить
             </Button>
           </div>
@@ -167,7 +172,7 @@ export function HistoryPage() {
         </div>
       ) : (
         <div>
-          <div className='grid grid-cols-4 text-sm text-gray-400 px-4 mb-2'>
+          <div className='hidden sm:grid grid-cols-4 text-sm text-gray-400 px-4 mb-2'>
             <span>Дата и время</span>
             <span>Пресет</span>
             <span>Статус</span>
@@ -178,20 +183,36 @@ export function HistoryPage() {
             {items.map((item) => (
               <div
                 key={item.sessionId}
-                className='grid grid-cols-4 items-center border border-gray-200 rounded-xl px-4 py-4'
+                className='flex flex-col sm:grid sm:grid-cols-4 gap-2 sm:gap-0 sm:items-center border border-gray-200 rounded-xl px-4 py-4 shadow-sm sm:shadow-none'
               >
-                <span className='text-sm text-gray-700'>
-                  {formatDate(item.finishedAt ?? item.startedAt)}
-                </span>
-                <span className='text-sm text-gray-700'>
-                  {item.interviewPresetName}
-                </span>
-                <span className='text-sm text-gray-700'>
-                  {statusLabel[item.status]}
-                </span>
-                <div className='flex justify-end'>
+                <div className='flex flex-col sm:contents'>
+                  <span className='text-xs text-gray-400 sm:hidden'>
+                    Дата и время:
+                  </span>
+                  <span className='text-sm text-gray-700'>
+                    {formatDate(item.finishedAt ?? item.startedAt)}
+                  </span>
+                </div>
+                <div className='flex flex-col sm:contents'>
+                  <span className='text-xs text-gray-400 sm:hidden'>
+                    Пресет:
+                  </span>
+                  <span className='text-sm text-gray-700'>
+                    {item.interviewPresetName}
+                  </span>
+                </div>
+                <div className='flex flex-col sm:contents'>
+                  <span className='text-xs text-gray-400 sm:hidden'>
+                    Статус:
+                  </span>
+                  <span className='text-sm text-gray-700'>
+                    {statusLabel[item.status]}
+                  </span>
+                </div>
+                <div className='w-full sm:w-auto flex justify-end mt-1 sm:mt-0'>
                   <Button
                     variant='outline'
+                    className='w-full sm:w-auto justify-center'
                     onClick={() =>
                       navigate(`/interview/result/${item.sessionId}`)
                     }

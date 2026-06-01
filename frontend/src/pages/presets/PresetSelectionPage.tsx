@@ -88,7 +88,7 @@ export function PresetSelectionPage() {
   };
 
   return (
-    <div className='max-w-2xl mx-auto py-12 px-8'>
+    <div className='max-w-2xl mx-auto py-6 sm:py-10 px-4 sm:px-8'>
       <h1 className='text-2xl font-semibold mb-2'>
         Выбор пресета собеседования
       </h1>
@@ -129,6 +129,17 @@ export function PresetSelectionPage() {
             ))}
           </div>
         )}
+      </div>
+
+      <div className='md:hidden p-3 bg-amber-50 border border-amber-200 rounded-xl text-amber-800 text-xs sm:text-sm mb-4 flex gap-3'>
+        <div>
+          <span className='font-semibold block mb-0.5'>
+            Запуск с мобильного устройства
+          </span>
+          Собеседование требует полноценной клавиатуры и экрана компьютера. Вы
+          можете запустить сессию сейчас, но отвечать на вопросы нужно будет на
+          компьютере или ноутбуке
+        </div>
       </div>
 
       <Button

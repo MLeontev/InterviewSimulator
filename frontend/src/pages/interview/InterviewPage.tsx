@@ -2,6 +2,7 @@ import { useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { QuestionStatus, QuestionType } from '../../features/interview/api';
 import { useInterview } from '../../features/interview/hooks/useInterview';
+import { MobileSafeguard } from '../../shared/components/layout/MobileSafeguard';
 import { Button } from '../../shared/components/ui/Button';
 import { CodingQuestion } from './CodingQuestion';
 import { InterviewHeader } from './InterviewHeader';
@@ -97,35 +98,39 @@ export function InterviewPage() {
   }
 
   return (
-    <div className='min-h-screen bg-white flex flex-col'>
-      <InterviewHeader
-        currentIndex={question.orderIndex}
-        totalQuestions={session.totalQuestions}
-        plannedEndAt={session.plannedEndAt}
-        onFinish={handleFinishClick}
-        onExpired={handleTimerExpired}
-      />
+    <>
+      <MobileSafeguard />
 
-      <div className='w-full max-w-4xl mx-auto'>
-        {question!.type === QuestionType.Theory ? (
-          <TheoryQuestion
-            key={question.questionId}
-            question={question!}
-            isSubmitting={isSubmitting}
-            onSubmit={handleSubmitTheory}
-            onSkip={handleSkip}
-          />
-        ) : (
-          <CodingQuestion
-            key={question.questionId}
-            question={question}
-            isSubmitting={isSubmitting}
-            onSubmitDraftCode={handleSubmitDraftCode}
-            onSubmitFinalCode={handleSubmitCode}
-            onSkip={handleSkip}
-          />
-        )}
+      <div className='hidden md:flex min-h-screen bg-white flex-col'>
+        <InterviewHeader
+          currentIndex={question.orderIndex}
+          totalQuestions={session.totalQuestions}
+          plannedEndAt={session.plannedEndAt}
+          onFinish={handleFinishClick}
+          onExpired={handleTimerExpired}
+        />
+
+        <div className='w-full max-w-4xl mx-auto'>
+          {question!.type === QuestionType.Theory ? (
+            <TheoryQuestion
+              key={question.questionId}
+              question={question!}
+              isSubmitting={isSubmitting}
+              onSubmit={handleSubmitTheory}
+              onSkip={handleSkip}
+            />
+          ) : (
+            <CodingQuestion
+              key={question.questionId}
+              question={question}
+              isSubmitting={isSubmitting}
+              onSubmitDraftCode={handleSubmitDraftCode}
+              onSubmitFinalCode={handleSubmitCode}
+              onSkip={handleSkip}
+            />
+          )}
+        </div>
       </div>
-    </div>
+    </>
   );
 }

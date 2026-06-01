@@ -30,7 +30,7 @@ export function QuestionCard({ question }: Props) {
 
   return (
     <section className='border border-gray-200 rounded-xl p-4 bg-white'>
-      <div className='flex items-center justify-between mb-3'>
+      <div className='flex flex-col sm:flex-row gap-3 sm:gap-0 items-start sm:items-center justify-between mb-3'>
         <h3 className='text-lg font-semibold'>Задание {question.orderIndex}</h3>
 
         <div className='flex items-center gap-2'>

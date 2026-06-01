@@ -140,7 +140,7 @@ export function InterviewResultPage() {
 
   if (isLoading) {
     return (
-      <div className='max-w-5xl mx-auto py-12 flex justify-center'>
+      <div className='max-w-5xl mx-auto px-4 sm:px-0 py-6 sm:py-10 flex justify-center'>
         <div className='text-gray-400 text-sm'>Загрузка отчета...</div>
       </div>
     );
@@ -148,7 +148,7 @@ export function InterviewResultPage() {
 
   if (errorText) {
     return (
-      <div className='flex flex-col items-center justify-center gap-4 py-12'>
+      <div className='flex flex-col items-center justify-center gap-4 py-6 sm:py-10'>
         <div className='text-gray-400 text-sm text-center'>{errorText}</div>
         <Button variant='outline' onClick={() => navigate('/history')}>
           К списку сессий
@@ -160,8 +160,8 @@ export function InterviewResultPage() {
   const verdict = sessionVerdictView(report?.sessionVerdict ?? null);
 
   return (
-    <div className='max-w-5xl mx-auto py-10'>
-      <div className='flex items-center justify-between mb-6'>
+    <div className='max-w-5xl mx-auto px-4 sm:px-0 py-6 sm:py-10'>
+      <div className='flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between mb-6'>
         <h1 className='text-2xl font-semibold text-gray-900'>
           Отчет по сессии собеседования
         </h1>
@@ -196,18 +196,18 @@ export function InterviewResultPage() {
               {report.interviewPresetName}
             </h2>
 
-            <div className='flex gap-3 mb-3 text-sm text-gray-800'>
-              <div className='flex-1 bg-white/70 rounded-lg px-3 py-2 text-center'>
+            <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 mb-3 text-sm text-gray-800'>
+              <div className='bg-white/70 rounded-lg px-3 py-2 flex items-center justify-start md:justify-center'>
                 Старт: {formatDate(report.startedAt)}
               </div>
-              <div className='flex-1 bg-white/70 rounded-lg px-3 py-2 text-center'>
+              <div className='bg-white/70 rounded-lg px-3 py-2 flex items-center justify-start md:justify-center'>
                 Завершение: {formatDate(report.finishedAt)}
               </div>
-              <div className='flex-1 bg-white/70 rounded-lg px-3 py-2 text-center'>
+              <div className='bg-white/70 rounded-lg px-3 py-2 flex items-center justify-start md:justify-center'>
                 Длительность:{' '}
                 {formatDuration(report.startedAt, report.finishedAt)}
               </div>
-              <div className='flex-1 bg-white/70 rounded-lg px-3 py-2 text-center'>
+              <div className='bg-white/70 rounded-lg px-3 py-2 flex items-center justify-start md:justify-center'>
                 Выполнено заданий: {report.answeredQuestions}/
                 {report.totalQuestions}
               </div>
@@ -220,12 +220,14 @@ export function InterviewResultPage() {
                 Итог: {verdict.text}
               </span>
               {report.averageQuestionAiScore != null && (
-                <Tag>Средний балл: {report.averageQuestionAiScore}/10</Tag>
+                <Tag className='px-0'>
+                  Средний балл: {report.averageQuestionAiScore}/10
+                </Tag>
               )}
             </div>
           </section>
 
-          <div className='flex gap-4 mb-4'>
+          <div className='flex flex-col md:flex-row gap-4 mb-4'>
             <section className='flex-1 border border-green-200 rounded-xl bg-green-50 p-4'>
               <h3 className='text-xl font-semibold mb-2'>Сильные темы</h3>
               {report.sessionStrengths.length === 0 ? (

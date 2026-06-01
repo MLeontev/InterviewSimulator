@@ -53,16 +53,24 @@ export function LandingPage() {
 
   return (
     <div className='min-h-screen bg-white flex flex-col'>
-      <nav className='border-b border-gray-200'>
-        <div className='flex items-center justify-between max-w-5xl mx-auto py-4'>
-          <span className='text-indigo-600 font-semibold'>
+      <nav className='border-b border-gray-200 px-4'>
+        <div className='flex flex-col sm:flex-row items-center justify-between max-w-5xl mx-auto py-4 gap-3 sm:gap-0'>
+          <span className='text-indigo-600 font-semibold text-center'>
             Тренажер собеседований
           </span>
-          <div className='flex gap-2'>
-            <Button variant='outline' onClick={login}>
+          <div className='flex gap-2 w-full sm:w-auto justify-center'>
+            <Button
+              variant='outline'
+              onClick={login}
+              className='flex-1 sm:flex-none'
+            >
               Войти
             </Button>
-            <Button variant='primary' onClick={() => navigate('/register')}>
+            <Button
+              variant='primary'
+              onClick={() => navigate('/register')}
+              className='flex-1 sm:flex-none'
+            >
               Зарегистрироваться
             </Button>
           </div>
@@ -70,29 +78,29 @@ export function LandingPage() {
       </nav>
 
       <main className='flex-1'>
-        <section className='bg-indigo-50 py-16 px-16'>
+        <section className='bg-indigo-50 py-12 sm:py-16 px-4 sm:px-16'>
           <div className='text-center mb-12'>
-            <h1 className='text-4xl font-bold text-gray-900 max-w-4xl mx-auto leading-tight mb-4'>
+            <h1 className='text-2xl sm:text-4xl font-bold text-gray-900 max-w-4xl mx-auto leading-tight mb-4'>
               Подготовься к техническому собеседованию
             </h1>
-            <p className='text-indigo-600 text-lg max-w-xl mx-auto mb-8 leading-relaxed'>
+            <p className='text-indigo-600 sm:text-lg max-w-xl mx-auto mb-8 leading-relaxed'>
               Проходи пробные интервью с теоретическими вопросами и
               алгоритмическими задачами. Получай обратную связь от ИИ
             </p>
             <Button
               variant='primary'
-              className='px-8 py-3 text-base rounded-xl'
+              className='px-8 py-3 text-base rounded-xl w-full sm:w-auto'
               onClick={() => navigate('/register')}
             >
               Начать подготовку
             </Button>
           </div>
 
-          <div className='flex gap-4 max-w-5xl mx-auto'>
+          <div className='flex flex-col md:flex-row gap-4 max-w-5xl mx-auto'>
             {features.map((f) => (
               <div
                 key={f.title}
-                className='flex-1 bg-white border border-gray-200 rounded-xl p-6'
+                className='bg-white border border-gray-200 rounded-xl p-6'
               >
                 <div className='text-indigo-600 font-semibold text-sm mb-2'>
                   {f.title}
@@ -107,8 +115,8 @@ export function LandingPage() {
 
         <div className='border-t border-gray-200' />
 
-        <section className='py-16 px-16'>
-          <div className='flex justify-center gap-12 max-w-4xl mx-auto text-center'>
+        <section className='py-12 sm:py-16 px-4 sm:px-16'>
+          <div className='flex flex-col md:flex-row justify-center gap-8 md:gap-12 max-w-4xl mx-auto text-center'>
             {steps.map((s) => (
               <div key={s.num} className='flex-1'>
                 <div className='w-12 h-12 rounded-full bg-indigo-600 text-white flex items-center justify-center text-lg font-bold mx-auto mb-4'>
