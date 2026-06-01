@@ -5,7 +5,7 @@ export function MobileSafeguard() {
   const navigate = useNavigate();
 
   return (
-    <div className='flex flex-col items-center justify-center min-h-screen p-6 text-center md:hidden bg-slate-50'>
+    <div className='flex flex-col items-center justify-center min-h-dvh p-6 text-center md:hidden bg-slate-50'>
       <div className='max-w-md bg-white rounded-2xl border border-indigo-100 shadow-xl p-8 flex flex-col items-center'>
         <h2 className='text-2xl font-bold text-gray-900 mb-3 tracking-tight'>
           Нужен большой экран
