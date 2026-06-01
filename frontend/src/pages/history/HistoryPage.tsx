@@ -112,7 +112,7 @@ export function HistoryPage() {
   }, [loadData]);
 
   return (
-    <div className='max-w-5xl mx-auto py-6 sm:py-10 px-4 sm:px-0'>
+    <div className='max-w-5xl mx-auto py-6 sm:py-10 px-4 sm:px-4'>
       <div className='flex flex-col sm:flex-row gap-4 items-center sm:items-center justify-between mb-8 text-center'>
         <h1 className='text-2xl font-semibold text-gray-900 w-full sm:w-auto'>
           Мои собеседования

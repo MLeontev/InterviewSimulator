@@ -160,7 +160,7 @@ export function InterviewResultPage() {
   const verdict = sessionVerdictView(report?.sessionVerdict ?? null);
 
   return (
-    <div className='max-w-5xl mx-auto px-4 sm:px-0 py-6 sm:py-10'>
+    <div className='max-w-5xl mx-auto px-4 sm:px-4 py-6 sm:py-10'>
       <div className='flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between mb-6'>
         <h1 className='text-2xl font-semibold text-gray-900'>
           Отчет по сессии собеседования

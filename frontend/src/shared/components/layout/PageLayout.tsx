@@ -9,8 +9,8 @@ export function PageLayout() {
 
   return (
     <div className='min-h-screen bg-white flex flex-col'>
-      <nav className='border-b border-slate-100 px-4 sm:px-0'>
-        <div className='flex items-center justify-between max-w-5xl mx-auto py-3.5'>
+      <nav className='border-b border-slate-100'>
+        <div className='flex items-center justify-between max-w-5xl mx-auto py-3.5 px-4'>
           <span
             className='text-indigo-600 font-semibold text-lg cursor-pointer hover:text-indigo-700 transition-colors'
             onClick={() => navigate('/history')}
