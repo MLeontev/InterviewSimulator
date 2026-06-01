@@ -196,7 +196,7 @@ export function InterviewResultPage() {
               {report.interviewPresetName}
             </h2>
 
-            <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 mb-3 text-sm text-gray-800'>
+            <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2 mb-3 text-sm text-gray-800'>
               <div className='bg-white/70 rounded-lg px-3 py-2 flex items-center justify-start md:justify-center'>
                 Старт: {formatDate(report.startedAt)}
               </div>
