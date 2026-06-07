@@ -147,7 +147,10 @@ public class InterviewQuestion
                 "Теоретический ответ можно отправить только для начатого задания"));
         }
 
-        Answer = answer.Trim();
+        var sanitized = answer
+            .Replace("<candidate_answer>", string.Empty, System.StringComparison.OrdinalIgnoreCase)
+            .Replace("</candidate_answer>", string.Empty, System.StringComparison.OrdinalIgnoreCase);
+        Answer = sanitized.Trim();
         SubmittedAt = nowUtc;
         EvaluatedAt = null;
         AiFeedbackJson = null;

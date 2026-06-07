@@ -46,8 +46,11 @@ internal class CodeExecutor(IExecutorLanguageProvider languageProvider, IDockerR
         var timedRunCommand =
             $"/usr/bin/time -f 'TIME_ELAPSED:%e\\nMEMORY_USAGE:%M' -o /code/{TimeOutputFile} {runCommandRaw}";
 
+        var useUlimit = !language.Equals("csharp", StringComparison.OrdinalIgnoreCase);
+        var ulimitPrefix = useUlimit ? "ulimit -f 20480 && " : string.Empty;
+
         var runCommand =
-            $"{timedRunCommand} < /code/{InputFile} > /code/{StdOutFile} 2> /code/{StdErrFile}";
+            $"{ulimitPrefix}{timedRunCommand} < /code/{InputFile} > /code/{StdOutFile} 2> /code/{StdErrFile}";
 
         var request = new ExecuteCodeRequest
         {

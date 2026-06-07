@@ -38,6 +38,9 @@ internal sealed class DockerRunner : IDockerRunner, IDisposable
             await EnsureImageAsync(image, cancellationToken);
 
             var cpuCoresLimit = Math.Clamp(maxCpuCores, 1, Environment.ProcessorCount);
+            var nanoCpus = Environment.ProcessorCount == 1
+                ? 800_000_000L
+                : cpuCoresLimit * 1_000_000_000L;
 
             var createParams = new CreateContainerParameters
             {
@@ -50,7 +53,7 @@ internal sealed class DockerRunner : IDockerRunner, IDisposable
                     NetworkMode = "none",
                     PidsLimit = 64,
                     Memory = maxMemoryMb * 1024L * 1024L,
-                    NanoCPUs = cpuCoresLimit * 1_000_000_000L,
+                    NanoCPUs = nanoCpus,
                     Binds = [$"{hostWorkDir}:/code"]
                 }
             };
