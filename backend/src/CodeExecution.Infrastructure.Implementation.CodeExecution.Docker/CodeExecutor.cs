@@ -49,7 +49,7 @@ internal class CodeExecutor(IExecutorLanguageProvider languageProvider, IDockerR
         string runCommand;
         if (language.Equals("csharp", StringComparison.OrdinalIgnoreCase))
         {
-            runCommand = $"bash -c \"{timedRunCommand} < /code/{InputFile} > >(head -c 10M > /code/{StdOutFile}) 2> >(head -c 10M > /code/{StdErrFile}); exit_code=\\$?; wait; exit \\$exit_code\"";
+            runCommand = $"sh -c \"exec 3>&1; exit_code=\\$(exec 4>&1; {{ {timedRunCommand} < /code/{InputFile} 2> /code/{StdErrFile}; echo \\$? >&4; }} | head -c 10M >&3); exit \\$exit_code\" > /code/{StdOutFile}";
         }
         else
         {
