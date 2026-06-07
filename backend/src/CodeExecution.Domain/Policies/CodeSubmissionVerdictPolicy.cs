@@ -23,7 +23,8 @@ public static class CodeSubmissionVerdictPolicy
                 || exitCode == -1)
                 return Verdict.TLE;
 
-            if (maxMemoryMb.HasValue && memoryUsageMb > maxMemoryMb.Value)
+            if ((maxMemoryMb.HasValue && memoryUsageMb > maxMemoryMb.Value)
+                || exitCode == 137)
                 return Verdict.MLE;
 
             if (exitCode != 0)
